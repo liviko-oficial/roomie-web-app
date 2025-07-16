@@ -1,3 +1,5 @@
+import ThemeToggle from "@/modules/theme/components/ThemeToggle";
+
 export default function Home() {
   return (
     <div>
@@ -16,6 +18,10 @@ export default function Home() {
           </div>
         </div>
       </main>
+      <ThemeToggle
+        className="fixed bottom-5 right-5 bg-primary-300/20 px-2 py-3 rounded-3xl"
+        body="Toggle Theme"
+      />
     </div>
   );
 }
