@@ -1,21 +1,17 @@
+import { Aside } from "@/modules/home/components/AsideHero";
 import React from "react";
 
-const Hero = () => {
-  return (
-    <main className="flex flex-col items-center justify-center gap-y-2">
-      <h1 className="md:text-4xl text-center text-3xl mb-5 md:mb-10">
-        Happy Rommie
-      </h1>
-      <div className="flex justify-start md:flex-row flex-col gap-2 text-white">
-        <button className="bg-primary-400 px-3 py-1  md:py-2 md:px-6 rounded-3xl md:text-xl text-lg">
-          Primary Color
-        </button>
-        <button className="bg-accent-400 px-3 py-1  md:py-2 md:px-6 rounded-3xl md:text-xl text-lg">
-          Accent Color
-        </button>
-      </div>
-    </main>
-  );
+type Props = {
+  className?: string;
 };
+
+function Hero({}: Props) {
+  return (
+    <header className="grid-cols-[1.5fr_1fr] lg:grid-cols-[1.5fr_2fr] h-[25dvh] lg:h-full px-2 grid grid-rows-1 items-center overflow-x-hidden">
+      <main className="row-1 col-[1] lg:col-[2] bg-primary-400 flex justify-center items-center flex-col gap-y-2 px-1 md:px-[1rem] h-full lg:h-[50vh] lg:mx-2 relative"></main>
+      <Aside />
+    </header>
+  );
+}
 
 export default Hero;
