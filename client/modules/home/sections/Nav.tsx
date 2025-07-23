@@ -4,7 +4,7 @@ const Logo = () => (
 );
 const Nav = () => {
   return (
-    <nav className="flex px-4 py-2 justify-center lg:justify-start sticky top-0">
+    <nav className="flex px-4 py-2 justify-center lg:justify-start sticky top-0 ">
       <Logo />
     </nav>
   );
