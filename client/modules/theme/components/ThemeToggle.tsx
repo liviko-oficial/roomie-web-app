@@ -13,7 +13,7 @@ function ThemeToggle({
   const theme = useThemeStore((state) => state.theme);
   return (
     <button
-      className={cn("bg-primary-300/20 px-2 py-3 rounded-3xl", className)}
+      className={cn("bg-primary-300/20 px-2 py-3 rounded-3xl z-50", className)}
       onClick={() => handleTheme()}
       {...rest}
     >
