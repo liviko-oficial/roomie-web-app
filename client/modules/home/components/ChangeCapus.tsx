@@ -1,9 +1,15 @@
+"use client";
 import React from "react";
+import { useStoreArray } from "@/modules/campus_selector/hooks/store";
+import ChangeCampusDesktop from "@/modules/campus_selector/components/ChangeCampusDesktop";
+import ChangeCampusPhone from "@/modules/campus_selector/components/ChangeCampusPhone";
 
 export default function ChangeCapus({}) {
+  const options = useStoreArray();
   return (
-    <button className="text-[10px] md:text-base rounded-sm self-start px-2 max-w-[300px] bg-primary-400/20 p-2 capitalize">
-      cambiar campus
-    </button>
+    <>
+      <ChangeCampusPhone options={options} />
+      <ChangeCampusDesktop options={options} />
+    </>
   );
 }

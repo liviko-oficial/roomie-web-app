@@ -1,3 +1,4 @@
+import ChangeCapus from "@/modules/home/components/ChangeCapus";
 import React from "react";
 
 const Controls = () => {
@@ -9,9 +10,7 @@ const Controls = () => {
       >
         Buscar
       </a>
-      <button className="p-1  lg:px-2 text-[8px] md:text-base rounded-sm self-start lg:self-end max-w-[300px] bg-primary-400/20 capitalize">
-        cambiar campus
-      </button>
+      <ChangeCapus />
     </div>
   );
 };

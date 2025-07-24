@@ -1,0 +1,24 @@
+@reference "tailwindcss";
+
+.img {
+  @apply h-full w-fit object-cover object-[-100_center] inline-block opacity-0;
+}
+.img[data-state="changing"] {
+  opacity: 0;
+}
+@keyframes fade-in {
+  from {
+    transform: translateX(20px) translateY(5px);
+    opacity: 0;
+  }
+  50% {
+    transform: translateX(0) translateY(0);
+  }
+  to {
+    opacity: 1;
+  }
+}
+.img[data-state="idle"] {
+  opacity: 0;
+  animation: fade-in 1s forwards ease;
+}
