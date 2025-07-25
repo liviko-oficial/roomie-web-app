@@ -34,4 +34,4 @@ export const RentalPropertySchema = new Schema<
   { autoCreate: false }
 );
 export default (colection: string) =>
-  model(colection, RentalPropertySchema, colection);
+  model("RentalProperty", RentalPropertySchema, colection);
