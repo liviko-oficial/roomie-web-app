@@ -1,15 +1,15 @@
 import { model, Schema } from "mongoose";
 import type { RentalProperty } from "../rentalProperty.validation";
 
-const RentalPropertySchema = new Schema<
+export const RentalPropertySchema = new Schema<
   RentalProperty & { propertyOwner: Schema.Types.ObjectId }
 >(
   {
-    propertyOwner: {
-      type: Schema.Types.ObjectId,
-      required: true,
-      select: false,
-    },
+    // propertyOwner: {
+    //   type: Schema.Types.ObjectId,
+    //   required: true,
+    //   select: false,
+    // },
     name: { type: String, required: true },
     imgPrincipal: { type: String, required: true },
     description: { type: String, required: true },
@@ -33,4 +33,5 @@ const RentalPropertySchema = new Schema<
   },
   { autoCreate: false }
 );
-export default (colection: string) => model(colection, RentalPropertySchema);
+export default (colection: string) =>
+  model(colection, RentalPropertySchema, colection);
