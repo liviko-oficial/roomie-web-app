@@ -9,7 +9,7 @@ const font_main = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: "Rommie Web App",
+  title: "Liviko",
   description:
     "Page created to be a solution for rommies that live whithin the tec area, by tec for tec",
 };

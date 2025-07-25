@@ -13,26 +13,28 @@
 @theme inline {
   --color-background: var(--background);
   --color-text: var(--text);
-  --color-primary-50: hsl(200, 100%, 90%);
-  --color-primary-100: hsl(200, 100%, 80%);
-  --color-primary-200: hsl(200, 100%, 70%);
-  --color-primary-300: hsl(200, 100%, 60%);
-  --color-primary-400: hsl(200, 100%, 50%);
-  --color-primary-500: hsl(200, 100%, 40%);
-  --color-primary-600: hsl(200, 100%, 30%);
-  --color-primary-700: hsl(200, 100%, 20%);
-  --color-primary-800: hsl(200, 100%, 10%);
-  --color-primary-900: hsl(200, 100%, 5%);
-  --color-accent-50: hsl(223, 100%, 90%);
-  --color-accent-100: hsl(223, 100%, 80%);
-  --color-accent-200: hsl(223, 100%, 70%);
-  --color-accent-300: hsl(223, 100%, 60%);
-  --color-accent-400: hsl(223, 100%, 50%);
-  --color-accent-500: hsl(223, 100%, 40%);
-  --color-accent-600: hsl(223, 100%, 30%);
-  --color-accent-700: hsl(223, 100%, 20%);
-  --color-accent-800: hsl(223, 100%, 10%);
-  --color-accent-900: hsl(223, 100%, 5%);
+  --color-primary-50: #fffaeb;
+  --color-primary-100: #fef0c7;
+  --color-primary-200: #fdd76c;
+  --color-primary-300: #fdc84c;
+  --color-primary-400: #fcb223;
+  --color-primary-500: #f68f0a;
+  --color-primary-600: #da6a05;
+  --color-primary-700: #b54808;
+  --color-primary-800: #92380e;
+  --color-primary-900: #782e0f;
+  --color-primary-950: #451603;
+  --color-accent-50: #eaf9ff;
+  --color-accent-100: #d0f2ff;
+  --color-accent-200: #aceaff;
+  --color-accent-300: #73dfff;
+  --color-accent-400: #31caff;
+  --color-accent-500: #02a7ff;
+  --color-accent-600: #0081ff;
+  --color-accent-700: #0067ff;
+  --color-accent-800: #0055db;
+  --color-accent-900: #004dab;
+  --color-accent-950: #042a5c;
 }
 /* @media (prefers-color-scheme: dark) {
   :root {
