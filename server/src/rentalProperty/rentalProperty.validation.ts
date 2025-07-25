@@ -14,7 +14,7 @@ export const RentalProperty = z.object({
   isPetFriendly: z.boolean(),
   capacity: z.int().min(1).max(20),
   isFurnished: z.boolean(),
-  parkingNum: z.int().max(10).min(0),
+  parkingNum: z.int().max(10).min(0).optional().default(0),
   amenities: z.string().array().default([]).optional(),
   contractTime: z.int32(),
   type: z.enum(["cuarto", "apartamento", "casa", "loft"]),

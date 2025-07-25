@@ -5,7 +5,7 @@
   "main": "index.ts",
   "scripts": {
     "test": "vitest",
-    "dev:server": "tsx watch ./index.ts"
+    "dev:server": "tsx --env-file-if-exists=.env.local watch ./index.ts"
   },
   "keywords": [],
   "author": "",
