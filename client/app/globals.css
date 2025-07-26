@@ -36,13 +36,7 @@
   --color-accent-900: #004dab;
   --color-accent-950: #042a5c;
 }
-/* @media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-} */
-
+@custom-variant dark (&:where(.dark, .dark *));
 body {
   background: var(--background);
   color: var(--text);
