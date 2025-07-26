@@ -12,6 +12,7 @@ export const RentalPropertySchema = new Schema<
     // },
     name: { type: String, required: true },
     imgPrincipal: { type: String, required: true },
+    imgs: { type: [String], require: false },
     description: { type: String, required: true },
     summary: { type: String, required: true },
     rateting: { type: Number, required: false, default: 5 },

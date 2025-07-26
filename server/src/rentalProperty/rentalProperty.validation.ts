@@ -2,6 +2,7 @@ import z from "zod";
 export const RentalProperty = z.object({
   name: z.string("Error in type of value").min(5, "A name must be provided"),
   imgPrincipal: z.url("image url must be prodived"),
+  imgs: z.string().array().optional().default([]),
   summary: z
     .string("Error in type of summary")
     .max(100, "Maximun lenght of 100 caraters exided"),
