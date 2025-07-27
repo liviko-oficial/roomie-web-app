@@ -21,7 +21,7 @@ const Navbar = () => {
             alt="Liviko Logo"
             width={120}
             height={120}
-            className="object-contain"
+            className="object-contain aspect-video"
           />
         </Link>
 
@@ -60,17 +60,17 @@ const Navbar = () => {
           aria-label="Toggle menu"
         >
           <span
-            className={`w-6 h-0.5 bg-black transition-all duration-300 ${
+            className={`w-6 h-0.5 bg-black transition-all duration-300 ease-out ${
               isMenuOpen ? "rotate-45 translate-y-1.5" : ""
             }`}
           ></span>
           <span
-            className={`w-6 h-0.5 bg-black transition-all duration-300 ${
+            className={`w-6 h-0.5 bg-black transition-all duration-75 ${
               isMenuOpen ? "opacity-0" : ""
             }`}
           ></span>
           <span
-            className={`w-6 h-0.5 bg-black transition-all duration-300 ${
+            className={`w-6 h-0.5 bg-black transition-all duration-300 ease-out ${
               isMenuOpen ? "-rotate-45 -translate-y-1.5" : ""
             }`}
           ></span>
@@ -79,7 +79,7 @@ const Navbar = () => {
 
       {/* Menu para */}
       <div
-        className={`md:hidden bg-white border-t border-gray-200 transition-all duration-300 ${
+        className={`md:hidden bg-white border-t border-gray-200 transition-all duration-500 ease-in-out ${
           isMenuOpen
             ? "max-h-screen opacity-100"
             : "max-h-0 opacity-0 overflow-hidden"

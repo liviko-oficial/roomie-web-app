@@ -1,5 +1,6 @@
 import React from "react";
 import Image from "next/image";
+import Liviko from "@/assets/liviko-logo";
 
 const Footer = () => {
   return (
@@ -7,13 +8,19 @@ const Footer = () => {
       <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8">
         {/* Logo y descripción */}
         <div className="flex flex-col items-center md:items-start text-center md:text-left">
-            <Image
-              src="/liviko-logo.png"
-              alt="Liviko Logo"
-              width={120}
-              height={120}
-              className="object-contain"
-            />
+          {/* <Image
+            src="/liviko-logo.svg"
+            alt="Liviko Logo"
+            width={120}
+            height={120}
+            className="object-contain fill-accent-100"
+          /> */}
+          <Liviko
+            alt="Liviko Logo"
+            width={120}
+            height={120}
+            className="object-contain text-brand-accent"
+          />
           <p className="text-white text-sm leading-relaxed mb-4">
             Conectamos estudiantes foráneos del Tec de Monterrey con las mejores
             opciones de vivienda y roomies compatibles.
@@ -103,7 +110,7 @@ const Footer = () => {
               <span className="mr-2 text-brand-accent">
                 <i className="fas fa-envelope"></i>
               </span>
-              <span>happyroomiemx@gmail.com</span>
+              <span>liviko.oficial@gmail.com</span>
             </li>
             <li className="flex items-center justify-center md:justify-start">
               <span className="mr-2 text-brand-accent">
@@ -126,8 +133,7 @@ const Footer = () => {
 
       {/* Ultima linea */}
       <div className="mt-10 pt-6 border-t border-gray-700 text-center text-gray-300 text-xs">
-        © {new Date().getFullYear()} Happy Roomie. Todos los derechos
-        reservados.
+        © {new Date().getFullYear()} Liviko. Todos los derechos reservados.
       </div>
     </footer>
   );
