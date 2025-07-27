@@ -171,3 +171,11 @@ body {
 .text-brand-dark {
   color: #0a2a5c;
 }
+
+.bg-brand-dark {
+  background-color: #0a2a5c;
+}
+
+.text-brand-dark-custom {
+  color: #2d456a;
+}
