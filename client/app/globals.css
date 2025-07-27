@@ -10,6 +10,7 @@
   --background: hsl(0, 0%, 90%);
   --text: hsl(0, 0%, 0%);
 }
+
 @theme inline {
   --color-background: var(--background);
   --color-text: var(--text);
@@ -36,6 +37,7 @@
   --color-accent-900: #004dab;
   --color-accent-950: #042a5c;
 }
+
 /* @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;
@@ -152,4 +154,16 @@ body {
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
+}
+
+.bg-brand-accent {
+  background-color: #FFD860;
+}
+
+.border-brand-accent {
+  border-color: #FFD860;
+}
+
+.text-brand-accent {
+  color: #FFD860;
 }
