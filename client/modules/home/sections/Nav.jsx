@@ -1,5 +1,5 @@
 import Logo from "@/assets/Logo";
-import React from "react";
+
 const Nav = () => {
   return (
     <nav className="flex px-4 py-2 justify-center lg:justify-start sticky top-0">
@@ -9,5 +9,4 @@ const Nav = () => {
     </nav>
   );
 };
-
 export default Nav;
