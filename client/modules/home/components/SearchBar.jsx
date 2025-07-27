@@ -35,7 +35,7 @@ const SearchBar = () => {
           <div className="space-y-2">
             <label
               htmlFor="location"
-              className="block text-sm font-semibold text-gray-800"
+              className="block text-sm font-semibold text-brand-dark"
             >
               Ubicación
             </label>
@@ -45,7 +45,7 @@ const SearchBar = () => {
                 name="location"
                 value={searchParams.location}
                 onChange={handleChange}
-                className="w-full px-3 py-2 text-gray-700 bg-gray-50 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent appearance-none cursor-pointer hover:bg-gray-100 transition-colors"
+                className="w-full px-3 py-2 text-brand-dark bg-gray-50 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent appearance-none cursor-pointer hover:bg-gray-100 transition-colors"
               >
                 <option value="">Selecciona campus</option>
                 <option value="monterrey">Campus Monterrey</option>
@@ -76,7 +76,7 @@ const SearchBar = () => {
           <div className="space-y-2">
             <label
               htmlFor="propertyType"
-              className="block text-sm font-semibold text-gray-800"
+              className="block text-sm font-semibold text-brand-dark"
             >
               Tipo de propiedad
             </label>
@@ -86,7 +86,7 @@ const SearchBar = () => {
                 name="propertyType"
                 value={searchParams.propertyType}
                 onChange={handleChange}
-                className="w-full px-3 py-2 text-gray-700 bg-gray-50 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent appearance-none cursor-pointer hover:bg-gray-100 transition-colors"
+                className="w-full px-3 py-2 text-brand-dark bg-gray-50 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent appearance-none cursor-pointer hover:bg-gray-100 transition-colors"
               >
                 <option value="">Cualquier tipo</option>
                 <option value="room">Habitación</option>
@@ -116,7 +116,7 @@ const SearchBar = () => {
           <div className="space-y-2">
             <label
               htmlFor="priceRange"
-              className="block text-sm font-semibold text-gray-800"
+              className="block text-sm font-semibold text-brand-dark"
             >
               Rango de precio
             </label>
@@ -126,7 +126,7 @@ const SearchBar = () => {
                 name="priceRange"
                 value={searchParams.priceRange}
                 onChange={handleChange}
-                className="w-full px-3 py-2 text-gray-700 bg-gray-50 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent appearance-none cursor-pointer hover:bg-gray-100 transition-colors"
+                className="w-full px-3 py-2 text-brand-dark bg-gray-50 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent appearance-none cursor-pointer hover:bg-gray-100 transition-colors"
               >
                 <option value="">Cualquier precio</option>
                 <option value="0-3000">$0 - $3,000</option>
@@ -158,7 +158,7 @@ const SearchBar = () => {
             <button
               type="button"
               onClick={handleSubmit}
-              className="w-full px-4 py-2 text-black font-bold text-base rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl"
+              className="w-full px-4 py-2 text-brand-dark font-bold text-base rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl"
               style={{
                 backgroundColor: "#fdd76c",
                 borderColor: "#fdd76c",
@@ -219,7 +219,7 @@ const SearchBar = () => {
                     </svg>
                   )}
                 </div>
-                <span className="ml-2 text-gray-700 font-medium text-sm">
+                <span className="ml-2 text-brand-dark font-medium text-sm">
                   Busco también roomies compatibles
                 </span>
               </label>

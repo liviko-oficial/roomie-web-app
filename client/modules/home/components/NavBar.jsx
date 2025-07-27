@@ -47,7 +47,7 @@ const Navbar = () => {
 
           <Link
             href="/registro"
-            className="border-2 border-brand-accent text-black px-4 py-2 rounded-md font-bold hover:bg-yellow-100 transition"
+            className="border-2 border-brand-accent text-brand-dark px-4 py-2 rounded-md font-bold hover:bg-yellow-100 transition"
           >
             Registrarse
           </Link>
@@ -77,7 +77,7 @@ const Navbar = () => {
         </button>
       </div>
 
-      {/* Menu para movil*/}
+      {/* Menu para */}
       <div
         className={`md:hidden bg-white border-t border-gray-200 transition-all duration-300 ${
           isMenuOpen
@@ -105,7 +105,7 @@ const Navbar = () => {
 
           <Link
             href="/registro"
-            className="block w-full text-center border-2 border-brand-accent text-black px-4 py-2 rounded-md font-bold hover:bg-yellow-100 transition"
+            className="block w-full text-center border-2 border-brand-accent text-brand-dark px-4 py-2 rounded-md font-bold hover:bg-yellow-100 transition"
             onClick={() => setIsMenuOpen(false)}
           >
             Registrarse

@@ -6,10 +6,10 @@ const Hero = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
           <div className="text-center md:text-left">
-            <h1 className="text-4xl md:text-5xl font-bold text-black mb-4">
+            <h1 className="text-4xl md:text-5xl font-bold text-brand-dark mb-4">
               Busca tu espacio ideal cerca del Tec
             </h1>
-            <p className="text-lg md:text-xl text-black mb-8">
+            <p className="text-lg md:text-xl text-brand-dark mb-8">
               Conectamos estudiantes foráneos con las mejores opciones de
               vivienda y roomies compatibles cerca del campus.
             </p>
