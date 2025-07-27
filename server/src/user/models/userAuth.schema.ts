@@ -2,7 +2,7 @@ import { SUPORT_EMAILS } from "@/user/lib/const";
 import z from "zod";
 export const AuthSubmitionSchema = z.object({
   email: z.email().refine((email) => {
-    const termination = email.split("@")[2];
+    const termination = email.split("@")[1];
     return SUPORT_EMAILS.includes(termination);
   }, "Error email not supported"),
   password: z
