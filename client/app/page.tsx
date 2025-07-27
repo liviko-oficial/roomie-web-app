@@ -5,12 +5,14 @@ import Testimonials from "@/modules/home/sections/Testimonials";
 import CallToAction from "@/modules/home/sections/CallToAction";
 import Footer from "@/modules/home/sections/Footer"
 import NavBar from "@/modules/home/components/NavBar"
+import SearchBar from "@/modules/home/components/SearchBar"
 
 export default function Home() {
   return (
     <>
       <NavBar />
-      <Hero/>
+      <Hero />
+      <SearchBar />
       <FeaturedProperties />
       <HowItWorks />
       <Testimonials />
