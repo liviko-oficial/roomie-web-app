@@ -10,6 +10,7 @@
   --background: hsl(0, 0%, 90%);
   --text: hsl(0, 0%, 0%);
 }
+
 @theme inline {
   --color-background: var(--background);
   --color-text: var(--text);
@@ -146,4 +147,32 @@ body {
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
+}
+
+.bg-brand-accent {
+  background-color: #ffd662;
+}
+
+.border-brand-accent {
+  border-color: #ffd662;
+}
+
+.text-brand-accent {
+  color: #ffd662;
+}
+
+.text-brand-dark {
+  color: #0a2a5c;
+}
+
+.bg-brand-dark {
+  background-color: #0a2a5c;
+}
+
+.text-brand-dark-custom {
+  color: #2d456a;
+}
+
+.bg-dark-gray {
+  background-color: #1f2937;
 }
