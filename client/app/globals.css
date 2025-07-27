@@ -157,15 +157,15 @@ body {
 }
 
 .bg-brand-accent {
-  background-color: #FFD860;
+  background-color: #ffd662;
 }
 
 .border-brand-accent {
-  border-color: #FFD860;
+  border-color: #ffd662;
 }
 
 .text-brand-accent {
-  color: #FFD860;
+  color: #ffd662;
 }
 
 .text-brand-dark {
@@ -178,4 +178,8 @@ body {
 
 .text-brand-dark-custom {
   color: #2d456a;
+}
+
+.bg-dark-gray {
+  background-color: #1f2937;
 }

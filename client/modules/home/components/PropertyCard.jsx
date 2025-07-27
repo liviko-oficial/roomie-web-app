@@ -50,7 +50,7 @@ const PropertyCard = ({
         <img src={image} alt={title} className="w-full h-48 object-cover" />
 
         {isVerified && (
-          <div className="absolute top-2 left-2 bg-[#ffd662] text-brand-dark text-xs font-bold px-2 py-1 rounded-md">
+          <div className="absolute top-2 left-2 bg-brand-accent text-brand-dark text-xs font-bold px-2 py-1 rounded-md">
             Disponible
           </div>
         )}
@@ -118,7 +118,7 @@ const PropertyCard = ({
           <div className="flex space-x-2">
             <button
               onClick={() => onViewDetails(property)}
-              className="px-3 py-1 bg-[#ffd662] text-brand-dark rounded font-medium hover:bg-yellow-400 transition duration-300"
+              className="px-3 py-1 bg-brand-accent text-brand-dark rounded font-medium hover:bg-yellow-400 transition duration-300"
             >
               Ver detalles
             </button>

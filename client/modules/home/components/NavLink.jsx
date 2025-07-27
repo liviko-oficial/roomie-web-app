@@ -9,7 +9,7 @@ const NavLink = ({ href, children, active = false, onClick }) => {
         ${
           active
             ? "bg-brand-accent text-brand-dark"
-            : "text-brand-dark hover:bg-brand-accent"
+            : "text-brand-dark hover:bg-yellow-100 transition"
         }`}
     >
       {children}

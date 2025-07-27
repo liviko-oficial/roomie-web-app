@@ -155,30 +155,15 @@ const SearchBar = () => {
 
           {/* Botón de búsqueda */}
           <div className="flex items-end">
-            <button
-              type="button"
-              onClick={handleSubmit}
-              className="w-full px-4 py-2 text-brand-dark font-bold text-base rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl"
-              style={{
-                backgroundColor: "#fdd76c",
-                borderColor: "#fdd76c",
-              }}
-              onMouseEnter={(e) => {
-                e.target.style.backgroundColor = "#fccc4d";
-              }}
-              onMouseLeave={(e) => {
-                e.target.style.backgroundColor = "#fdd76c";
-              }}
-              onFocus={(e) => {
-                e.target.style.boxShadow =
-                  "0 0 0 2px #fdd76c, 0 0 0 4px rgba(253, 215, 108, 0.3)";
-              }}
-              onBlur={(e) => {
-                e.target.style.boxShadow = "";
-              }}
-            >
-              Buscar
-            </button>
+            <div className="w-full max-w-xs mx-auto">
+              <button
+                type="button"
+                onClick={handleSubmit}
+                className="w-full px-6 py-3 bg-brand-accent text-brand-dark font-bold rounded-xl shadow-lg hover:scale-105 hover:shadow-xl transition-all duration-200"
+              >
+                Buscar
+              </button>
+            </div>
           </div>
         </div>
 
