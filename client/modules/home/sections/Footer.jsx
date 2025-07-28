@@ -1,20 +1,12 @@
 import React from "react";
-import Image from "next/image";
 import Liviko from "@/assets/liviko-logo";
-
+import YearText from "./YearText";
 const Footer = () => {
   return (
     <footer className="bg-dark-gray text-white py-10 px-4 font-['Poppins']">
       <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8">
         {/* Logo y descripción */}
         <div className="flex flex-col items-center md:items-start text-center md:text-left">
-          {/* <Image
-            src="/liviko-logo.svg"
-            alt="Liviko Logo"
-            width={120}
-            height={120}
-            className="object-contain fill-accent-100"
-          /> */}
           <Liviko
             alt="Liviko Logo"
             width={120}
@@ -133,7 +125,7 @@ const Footer = () => {
 
       {/* Ultima linea */}
       <div className="mt-10 pt-6 border-t border-gray-700 text-center text-gray-300 text-xs">
-        © {new Date().getFullYear()} Liviko. Todos los derechos reservados.
+        © <YearText /> Liviko. Todos los derechos reservados.
       </div>
     </footer>
   );

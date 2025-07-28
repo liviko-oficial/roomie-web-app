@@ -1,7 +1,10 @@
 "use client";
+import Image from "next/image";
 import React from "react";
-
-const CallToAction = ({ onNavigate }) => {
+type Props = {
+  onNavigate?: () => void;
+};
+const CallToAction = ({ onNavigate }: Props) => {
   return (
     <section className="py-16 bg-brand-accent">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -44,12 +47,12 @@ const CallToAction = ({ onNavigate }) => {
                 className="px-6 py-3 bg-brand-accent text-brand-dark rounded-md font-bold transition duration-300 hover:bg-[#f4c63b] hover:shadow-xl hover:scale-105"
                 onClick={() => {
                   console.log("TODO: agregar lógica de navegación aquí");
-                  onNavigate?.(
-                    "propertyOwnerRegistration",
-                    null,
-                    null,
-                    "propertyOwner"
-                  );
+                  // onNavigate?.(
+                  //   "propertyOwnerRegistration",
+                  //   null,
+                  //   null,
+                  //   "propertyOwner"
+                  // );
                 }}
               >
                 Publicar mi propiedad
@@ -57,7 +60,7 @@ const CallToAction = ({ onNavigate }) => {
             </div>
 
             <div className="hidden md:block">
-              <img
+              <Image
                 src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-4.0.3&auto=format&fit=crop&w=1473&q=80"
                 alt="Publica tu propiedad"
                 className="h-full w-full object-cover"

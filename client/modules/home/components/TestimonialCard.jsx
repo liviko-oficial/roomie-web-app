@@ -24,14 +24,14 @@ const TestimonialCard = ({ testimonial }) => {
               </svg>
             ))}
           </div>
-          <p className="text-lg text-brand-dark italic mb-6">
+          <p className="text-lg text-brand-dark italic mb-6 min-h-[10lh]">
             "{testimonial.text}"
           </p>
           <div>
             <h4 className="text-xl font-bold text-brand-dark">
               {testimonial.name}
             </h4>
-            <p className="text-brand-dark">
+            <p className="text-brand-dark min-h-[2lh]">
               {testimonial.campus} - {testimonial.career}
             </p>
           </div>
