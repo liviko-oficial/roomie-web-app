@@ -6,7 +6,7 @@
 
     // Ignore module structure
     "module": "Preserve",
-
+    "jsx": "react-jsx",
     // Allow JSON modules to be imported
     "resolveJsonModule": true,
 
