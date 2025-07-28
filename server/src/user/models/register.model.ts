@@ -1,6 +1,6 @@
 import { AuthSubmitionSchema } from "@/user/models/userAuth.schema";
 import { UserDB, UserPartialDB } from "@/user/models/userMissing.schema";
-import email_link from "@/user/models/email_verification";
+import email_link from "@/user/models/emailVerification";
 import { make_hash } from "@/user/lib/utils";
 type Params = {
   email: string;

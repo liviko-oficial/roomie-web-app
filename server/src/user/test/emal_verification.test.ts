@@ -1,4 +1,4 @@
-import verificatior, { VerificationEmail } from "../models/email_verification";
+import verificatior, { VerificationEmail } from "../models/emailVerification";
 import { describe, expect, it } from "vitest";
 
 describe("verification-email", () => {
