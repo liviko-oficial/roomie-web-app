@@ -16,6 +16,7 @@
     "@react-email/components": "0.3.2",
     "@types/bcrypt": "^6.0.0",
     "bcrypt": "^6.0.0",
+    "cookie-parser": "^1.4.7",
     "express": "^5.1.0",
     "mongoose": "^8.16.4",
     "react": "19.1.0",
