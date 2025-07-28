@@ -32,7 +32,7 @@ const UserPartialShema = new Schema<UserPartial>({
 export const UserPartialDB = model(
   "UserPartial",
   UserPartialShema,
-  "PartialUsers"
+  "UsersPartial"
 );
 const UserShemaMongo = new Schema<UserPartial>({
   email: { type: String, required: true },

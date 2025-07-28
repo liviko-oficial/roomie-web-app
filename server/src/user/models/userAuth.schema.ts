@@ -32,6 +32,6 @@ export const AuthSubmitionSchema = z.object({
 export type AuthSubmitionSchema = z.infer<typeof AuthSubmitionSchema>;
 export const AuthSchema = z.object({
   email: z.string().email(),
-  password: z.string().min(72),
+  password: z.string().min(10),
 });
 export type AuthSchema = z.infer<typeof AuthSchema>;

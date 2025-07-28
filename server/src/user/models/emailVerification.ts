@@ -25,15 +25,20 @@ export class VerificationEmail {
     }
     return this._instance;
   }
-  verify({ token, email }): { error?: string } | User {
-    if (!this.users.has(email)) return { error: "Token not found" };
+  verify({
+    token,
+    email,
+  }): { success: false; error: string } | { success: true; user: User } {
+    if (!this.users.has(email))
+      return { success: false, error: "Token not found" };
     const user = this.users.get(email);
     if (user.exipiresAt < new Date()) {
-      return { error: "Token expired" };
+      return { success: false, error: "Token expired" };
     }
-    if (user.token !== token) return { error: "Token not found" };
+    if (user.token !== token)
+      return { success: false, error: "Token not found" };
     this.users.delete(email);
-    return user;
+    return { success: true, user };
   }
   private set_email({ email, password }) {
     const now = new Date();

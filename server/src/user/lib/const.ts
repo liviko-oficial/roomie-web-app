@@ -7,4 +7,4 @@ export const SUPORT_EMAILS: string[] = [
 export const PERMITIONS = {
   PARTIAL: "partial",
   USER: "user",
-};
+} as const;

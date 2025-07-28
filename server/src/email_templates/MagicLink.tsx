@@ -14,8 +14,9 @@ import * as React from "react";
 
 type Props = {
   code?: string;
+  url: string;
 };
-export const MyEmail = ({ code = "000000" }: Props) => {
+export const MyEmail = ({ code = "000000", url }: Props) => {
   return (
     <Html>
       <Head>
@@ -74,7 +75,7 @@ export const MyEmail = ({ code = "000000" }: Props) => {
           </Section>
           <Section style={{ width: "100%" }}>
             <Link
-              href={`#?code=${code}`}
+              href={url}
               style={{
                 display: "block",
                 fontWeight: "600",
