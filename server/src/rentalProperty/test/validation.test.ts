@@ -9,12 +9,9 @@ describe("Test All pass", () => {
 });
 describe("Errors:", () => {
   it("missing services", () => {
-    const result = RentalProperty.safeParse({
-      ...testApartment,
-      services: undefined,
-    });
+    const { services, ...propety } = testApartment;
+    const result = RentalProperty.safeParse(propety);
     expect(result.success).toBe(true);
-    expect(result.data.services).not.toHaveLength(1);
-    expect(result.data.services).not.toBeTypeOf("undefined");
+    expect(Array.isArray(result.data.services)).toBe(true);
   });
 });
