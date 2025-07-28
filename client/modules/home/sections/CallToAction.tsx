@@ -42,7 +42,6 @@ const CallToAction = ({ onNavigate }: Props) => {
                   </li>
                 ))}
               </ul>
-
               <button
                 className="px-6 py-3 bg-brand-accent text-brand-dark rounded-md font-bold transition duration-300 hover:bg-[#f4c63b] hover:shadow-xl hover:scale-105"
                 onClick={() => {
@@ -63,6 +62,8 @@ const CallToAction = ({ onNavigate }: Props) => {
               <Image
                 src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-4.0.3&auto=format&fit=crop&w=1473&q=80"
                 alt="Publica tu propiedad"
+                width={1400}
+                height={1000}
                 className="h-full w-full object-cover"
               />
             </div>
