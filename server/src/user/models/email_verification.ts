@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
-
-type Users = Map<string, { token: string; exipiresAt: Date }>;
+type User = { token: string; exipiresAt: Date; password: string };
+type Users = Map<string, User>;
 const MINUTES = 15;
 function cron_service(users: Users) {
   const now = new Date();
@@ -25,7 +25,7 @@ export class VerificationEmail {
     }
     return this._instance;
   }
-  verify({ token, email }): { error?: string } {
+  verify({ token, email }): { error?: string } | User {
     if (!this.users.has(email)) return { error: "Token not found" };
     const user = this.users.get(email);
     if (user.exipiresAt < new Date()) {
@@ -33,20 +33,20 @@ export class VerificationEmail {
     }
     if (user.token !== token) return { error: "Token not found" };
     this.users.delete(email);
-    return {};
+    return user;
   }
-  private set_email(email: string) {
+  private set_email({ email, password }) {
     const now = new Date();
     if (this.users.has(email) && this.users.get(email).exipiresAt > now) {
       return this.users.get(email).token;
     }
     const token = randomUUID();
     const exipiresAt = new Date(now.getTime() + 60 * 60 * 1000);
-    this.users.set(email, { token, exipiresAt });
+    this.users.set(email, { token, exipiresAt, password });
     return token;
   }
-  get_link_id({ email }) {
-    const token = this.set_email(email);
+  get_link_token({ email, password }): string {
+    const token = this.set_email({ email, password });
     return token;
   }
 }
