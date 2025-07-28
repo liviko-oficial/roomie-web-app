@@ -29,7 +29,11 @@ const UserPartialShema = new Schema<UserPartial>({
   preferences: { type: Map, of: { type: Schema.Types.Mixed }, required: false },
   isDelete: { type: Boolean, required: false, default: false },
 });
-export const UserPartialDB = model("User", UserPartialShema, "UserPartial");
+export const UserPartialDB = model(
+  "UserPartial",
+  UserPartialShema,
+  "PartialUsers"
+);
 const UserShemaMongo = new Schema<UserPartial>({
   email: { type: String, required: true },
   password: { type: String, required: true, select: false },
@@ -37,4 +41,4 @@ const UserShemaMongo = new Schema<UserPartial>({
   preferences: { type: Map, of: { type: Schema.Types.Mixed }, required: false },
   isDelete: { type: Boolean, required: false, default: false },
 });
-export const UserDB = model("User", UserShemaMongo, "users");
+export const UserDB = model("User", UserShemaMongo, "Users");

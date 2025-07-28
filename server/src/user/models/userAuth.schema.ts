@@ -1,10 +1,13 @@
 import { SUPORT_EMAILS } from "@/user/lib/const";
 import z from "zod";
 export const AuthSubmitionSchema = z.object({
-  email: z.email().refine((email) => {
-    const termination = email.split("@")[1];
-    return SUPORT_EMAILS.includes(termination);
-  }, "Error email not supported"),
+  email: z
+    .string()
+    .email()
+    .refine((email) => {
+      const termination = email.split("@")[1];
+      return SUPORT_EMAILS.includes(termination);
+    }, "Error email not supported"),
   password: z
     .string()
     .min(8, "Password must be at leat of 8 caracters")
@@ -28,7 +31,7 @@ export const AuthSubmitionSchema = z.object({
 });
 export type AuthSubmitionSchema = z.infer<typeof AuthSubmitionSchema>;
 export const AuthSchema = z.object({
-  email: z.email(),
+  email: z.string().email(),
   password: z.string().min(72),
 });
 export type AuthSchema = z.infer<typeof AuthSchema>;

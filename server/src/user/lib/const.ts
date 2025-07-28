@@ -3,3 +3,8 @@ export const SUPORT_EMAILS: string[] = [
   "exatec.tec.mx",
   "itesm.mx",
 ] as const;
+
+export const PERMITIONS = {
+  PARTIAL: "partial",
+  USER: "user",
+};
