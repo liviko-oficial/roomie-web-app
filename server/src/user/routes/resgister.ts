@@ -8,8 +8,8 @@ import {
   RequestWithUser,
 } from "@/user/routes/middleware/jwt";
 import { PERMITIONS } from "@/user/lib/const";
-import { Resend } from "resend";
-import { BASE_URL, RESEND_KEY } from "@/lib/const";
+import { BASE_URL } from "@/lib/const";
+import resend from "@/lib/resend_instance";
 type withToken = Request & { token: string };
 const app = Router();
 app.post(
@@ -26,7 +26,6 @@ app.post(
   },
   async (req: withToken, res) => {
     const token = req.token;
-    const resend = new Resend(RESEND_KEY);
     const { data, error } = await resend.emails.send({
       from: "Acme <onboarding@resend.dev>",
       // to: [req.body.email],
