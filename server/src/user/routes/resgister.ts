@@ -26,7 +26,8 @@ app.post(
   },
   async (req: withToken, res) => {
     const token = req.token;
-    const { data, error } = await resend.emails.send({
+    // ! Missing Domain to send real emails
+    const { error } = await resend.emails.send({
       from: "Acme <onboarding@resend.dev>",
       // to: [req.body.email],
       to: ["liviko.oficial@gmail.com"],
@@ -40,8 +41,8 @@ app.post(
     if (error) {
       return res.status(400).json({ error });
     }
-
-    res.status(200).json({ data });
+    // ! Only for dev porpuses
+    res.status(200).json({ token });
   }
 );
 app.get(

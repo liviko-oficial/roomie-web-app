@@ -19,7 +19,7 @@ export const require_auth = (
   next: NextFunction
 ) => {
   const cookies = req.cookies;
-  if (SESSION_COOKIE_KEY in cookies) {
+  if (!(SESSION_COOKIE_KEY in cookies)) {
     res.status(401).json({ error: "session cookie missing" });
     return;
   }
