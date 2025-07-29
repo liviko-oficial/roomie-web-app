@@ -8,3 +8,5 @@ export const PERMITIONS = {
   PARTIAL: "partial",
   USER: "user",
 } as const;
+
+export const SESSION_COOKIE_KEY: string = "session";

@@ -1,6 +1,6 @@
 import { User, UserPartial } from "@/user/models/userMissing.schema";
 import { CookieOptions, NextFunction, Request, Response } from "express";
-import { PERMITIONS } from "../../lib/const";
+import { PERMITIONS, SESSION_COOKIE_KEY } from "../../lib/const";
 import jwt from "jsonwebtoken";
 import { JWT_SECRET } from "@/lib/const";
 import { Types } from "mongoose";
@@ -25,6 +25,20 @@ export const add_session_cookie = (
 ) => {
   const user = req.user;
   const value = jwt.sign(user, JWT_SECRET);
-  res.cookie("session", value, COOKIE_OPTIONS);
+  res.cookie(SESSION_COOKIE_KEY, value, COOKIE_OPTIONS);
   next();
+};
+class JWTError extends Error {
+  constructor(mess: string, name: string) {
+    super(mess);
+    this.name = name;
+  }
+}
+export const decode_session_cookie = (cookie: string) => {
+  try {
+    const payload = jwt.verify(cookie, JWT_SECRET);
+    return payload as RequestWithUser["user"];
+  } catch (error) {
+    throw new JWTError(error, "verification-error");
+  }
 };
