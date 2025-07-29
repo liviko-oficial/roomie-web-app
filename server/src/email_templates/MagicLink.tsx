@@ -7,19 +7,24 @@ import {
   Img,
   Link,
   Preview,
+  Row,
   Section,
   Text,
 } from "@react-email/components";
 import * as React from "react";
-
+const IMGLINK = process.env.LOGO_IMG
+  ? process.env.LOGO_IMG_URL
+  : "/static/IconLogo.png";
 type Props = {
   code?: string;
   url: string;
 };
-export const MyEmail = ({ code = "000000", url }: Props) => {
+export const MagicLink = ({ code = "000000", url }: Props) => {
   return (
     <Html>
-      <Head>
+      <Head />
+      <Preview>Verifica tu cuenta dando click a este link</Preview>
+      <Body>
         <Font
           fontFamily="Poppins"
           fallbackFontFamily="sans-serif"
@@ -38,94 +43,104 @@ export const MyEmail = ({ code = "000000", url }: Props) => {
           }}
           fontWeight={600}
         />
-        <Preview>Verifica tu cuenta dando click a este link</Preview>
-      </Head>
-      <Body
-        style={{
-          overflow: "hidden",
-          padding: "0",
-          margin: "0",
-          backgroundColor: "#05265c",
-        }}
-      >
         <Container
           style={{
-            maxWidth: "50ch",
-            width: "90%",
-            backgroundColor: "white",
-            padding: "1rem",
-            marginBlock: "1rem",
-            borderRadius: "1rem",
+            overflow: "hidden",
+            padding: "0",
+            margin: "0",
+            backgroundColor: "#05265c",
+            height: "50vh",
           }}
         >
           <Section
             style={{
-              display: "flex",
-              justifyContent: "center",
+              maxWidth: "500px",
+              width: "90%",
+              height: "80%",
+              backgroundColor: "white",
+              padding: "12px",
+              marginBlock: "16px",
+              borderRadius: "16px",
+              verticalAlign: "center",
+              maxHeight: "500px",
             }}
           >
-            <Img
-              src="/static/IconLogo.png"
-              width="166px"
-              height="140px"
-              alt="Icon Logo"
-              loading="eager"
-              style={{ display: "block", height: "10vh", width: "auto" }}
-            />
-          </Section>
-          <Section style={{ width: "100%" }}>
-            <Link
-              href={url}
-              style={{
-                display: "block",
-                fontWeight: "600",
-                backgroundColor: "#ffd56170",
-                color: "black",
-                fontSize: "24px",
-                textAlign: "center",
-                borderRadius: "15px",
-                paddingBlock: "4px",
-                marginBlock: "10px",
-                width: "90%",
-                marginInline: "auto",
-                textTransform: "capitalize",
-              }}
-            >
-              da click aqui
-            </Link>
-          </Section>
-          <Section style={{ margin: "10px" }}>
-            <Text style={{ margin: "0", fontSize: "14px", lineHeight: "14px" }}>
-              Da click al enlace para poder verificar tu cuenta
-            </Text>
-          </Section>
-          <Section>
-            <Text
-              style={{
-                margin: "0 2px",
-                padding: "5px 10px",
-                width: "fit-content",
-                borderRadius: "10px",
-                backgroundColor: "#05265c20",
-              }}
-            >
-              {code}
-            </Text>
-            <Text
-              style={{
-                lineHeight: "14px",
-                fontSize: "8px",
-                margin: "10px 8px",
-                color: "#00000085",
-              }}
-            >
-              Puedes tambien usar este codigo si el link no sirve
-            </Text>
+            <Section>
+              <Img
+                src={
+                  "https://evjhh4b5gu.ufs.sh/f/BSSOH1qKJ5SQ3XO6NGbLonUeuzyg8SA1pwkOR9MXx5Qj3ams"
+                }
+                width="166px"
+                height="140px"
+                alt="Icon Logo"
+                loading="eager"
+                style={{
+                  display: "block",
+                  height: "10vh",
+                  width: "auto",
+                  margin: "10px auto",
+                }}
+              />
+            </Section>
+            <Row>
+              <Link
+                href={url}
+                style={{
+                  display: "block",
+                  fontWeight: "600",
+                  backgroundColor: "#ffd56170",
+                  color: "black",
+                  fontSize: "24px",
+                  textAlign: "center",
+                  borderRadius: "15px",
+                  paddingBlock: "4px",
+                  margin: "10px auto",
+                  width: "90%",
+                  marginInline: "auto",
+                  textTransform: "capitalize",
+                }}
+              >
+                da click aqui
+              </Link>
+            </Row>
+            <Row>
+              <Text
+                style={{
+                  margin: "10px",
+                  fontSize: "14px",
+                  lineHeight: "14px",
+                }}
+              >
+                Da click al enlace para poder verificar tu cuenta
+              </Text>
+            </Row>
+            <Row>
+              <Text
+                style={{
+                  margin: "0 2px",
+                  padding: "5px 10px",
+                  width: "fit-content",
+                  borderRadius: "10px",
+                  backgroundColor: "#05265c20",
+                }}
+              >
+                {code}
+              </Text>
+              <Text
+                style={{
+                  lineHeight: "14px",
+                  fontSize: "8px",
+                  margin: "10px 8px",
+                  color: "#00000085",
+                }}
+              >
+                Puedes tambien usar este codigo si el link no sirve
+              </Text>
+            </Row>
           </Section>
         </Container>
       </Body>
     </Html>
   );
 };
-
-export default MyEmail;
+export default MagicLink;

@@ -12,10 +12,11 @@
 
     // Allow JS files to be imported from TS and vice versa
     "allowJs": true,
-
     // Use correct ESM import behavior
     "esModuleInterop": true,
-
+    // Import TSX
+    "allowImportingTsExtensions": true,
+    "noEmit": true,
     // Disallow features that require cross-file awareness
     "isolatedModules": true,
     "baseUrl": ".",

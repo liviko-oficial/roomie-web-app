@@ -2,11 +2,14 @@ import { register_user } from "@/user/models/register.model";
 import { Request, Router } from "express";
 import emailValidator from "@/user/models/emailVerification";
 import { UserPartial, UserPartialDB } from "@/user/models/userMissing.schema";
+import { MagicLink } from "@/email_templates/MagicLink.tsx";
 import {
   add_session_cookie,
   RequestWithUser,
 } from "@/user/routes/middleware/jwt";
 import { PERMITIONS } from "@/user/lib/const";
+import { Resend } from "resend";
+import { BASE_URL, RESEND_KEY } from "@/lib/const";
 type withToken = Request & { token: string };
 const app = Router();
 app.post(
@@ -21,9 +24,25 @@ app.post(
       res.status(400).json({ error: error.message });
     }
   },
-  (req: withToken, res) => {
+  async (req: withToken, res) => {
     const token = req.token;
-    res.json({ token });
+    const resend = new Resend(RESEND_KEY);
+    const { data, error } = await resend.emails.send({
+      from: "Acme <onboarding@resend.dev>",
+      // to: [req.body.email],
+      to: ["liviko.oficial@gmail.com"],
+      subject: "Verification Link",
+      react: MagicLink({
+        url: `${BASE_URL}/api/register/verify?email=${req.body.email}&token=${token}`,
+        code: req.token,
+      }),
+    });
+
+    if (error) {
+      return res.status(400).json({ error });
+    }
+
+    res.status(200).json({ data });
   }
 );
 app.get(
