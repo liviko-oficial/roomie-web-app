@@ -19,3 +19,10 @@ export function delete_user(
   }[req.permitions];
   return db.findByIdAndDelete(req._id);
 }
+export function get_db(req: RequestWithUser["user"]) {
+  const db = {
+    [PERMITIONS["PARTIAL"]]: UserPartialDB,
+    [PERMITIONS["USER"]]: UserDB,
+  }[req.permitions];
+  return db;
+}

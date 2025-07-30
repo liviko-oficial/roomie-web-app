@@ -1,4 +1,5 @@
 import { delete_user, get_user } from "@/db/querry.user";
+import { RealUser } from "@/lib/types";
 import { PERMITIONS, SESSION_COOKIE_KEY } from "@/user/lib/const";
 import { delete_cookie, verify_password } from "@/user/lib/utils";
 import { UserResponse } from "@/user/models/user.client";
@@ -89,12 +90,53 @@ const manage_redirects: RequestHandler = (req, res) => {
   );
   res.status(200).redirect(path + string_params);
 };
+async function upgrade_user(
+  req: RequestWithUser,
+  res: Response,
+  next: NextFunction
+) {
+  if (req.user.permitions !== PERMITIONS["PARTIAL"])
+    res.status(200).json({ error: "Permitions not match endpoint" });
+  const user = await UserPartialDB.findById(req.user._id);
+  if (!user) {
+    console.error(
+      `Partial user not found in partial db: {id:${req.user._id}, email:${req.user.email}}`
+    );
+    res.status(500).json({ error: "No user found to upgrade" });
+  }
+  const new_user = RealUser.safeParse(user);
+  if (!new_user.success)
+    return res.status(400).json({ error: "Shema error of request" });
+  const { data } = new_user;
+  await UserPartialDB.findByIdAndDelete(user._id);
+  const user_db = new UserDB(data);
+  try {
+    await user_db.save();
+    res = delete_cookie(SESSION_COOKIE_KEY, res);
+    req.user = {
+      _id: user_db._id,
+      email: user_db.email,
+      permitions: PERMITIONS["USER"],
+    };
+    next();
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Something unexpected happend" });
+  }
+}
 app.post(
   "/login",
   verify_submtion_shema,
   verify_user_db,
   add_session_cookie,
   manage_redirects
+);
+app.get(
+  "/login/upgrade-partial",
+  require_auth,
+  upgrade_user,
+  add_session_cookie,
+  (_, res) => res.sendStatus(200)
 );
 app.get("/user", require_auth, async (req: RequestWithUser, res) => {
   try {
