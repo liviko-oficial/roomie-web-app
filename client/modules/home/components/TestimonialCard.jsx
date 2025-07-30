@@ -24,7 +24,7 @@ const TestimonialCard = ({ testimonial }) => {
               </svg>
             ))}
           </div>
-          <p className="text-lg text-brand-dark italic mb-6 min-h-[10lh]">
+          <p className="text-lg text-brand-dark italic mb-6 min-h-[10lh] md:min-h-[4lh]">
             "{testimonial.text}"
           </p>
           <div>
