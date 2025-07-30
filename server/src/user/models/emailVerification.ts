@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 type User = { token: string; exipiresAt: Date; password: string };
 type Users = Map<string, User>;
-const MINUTES = 15;
+const MINUTE = 60 * 1000;
 function cron_service(users: Users) {
   const now = new Date();
   for (const [key, user] of users) {
@@ -15,9 +15,9 @@ export class VerificationEmail {
   private users: Users;
   private constructor() {
     this.users = new Map();
-    setImmediate(() => {
+    setInterval(() => {
       cron_service(this.users);
-    }, MINUTES * 60);
+    }, 30 * MINUTE);
   }
   static get instance() {
     if (!this._instance) {
