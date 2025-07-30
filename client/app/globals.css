@@ -1,10 +1,47 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
-@custom-variant dark (&:is(.dark *));
+.dark {
+  --background: hsl(0, 0%, 5%);
+  --text: hsl(0, 0%, 95%);
+}
+
+.light {
+  --background: hsl(0, 0%, 90%);
+  --text: hsl(0, 0%, 0%);
+}
 
 @theme inline {
   --color-background: var(--background);
+  --color-text: var(--text);
+  --color-primary-50: #fffaeb;
+  --color-primary-100: #fef0c7;
+  --color-primary-200: #fdd76c;
+  --color-primary-300: #fdc84c;
+  --color-primary-400: #fcb223;
+  --color-primary-500: #f68f0a;
+  --color-primary-600: #da6a05;
+  --color-primary-700: #b54808;
+  --color-primary-800: #92380e;
+  --color-primary-900: #782e0f;
+  --color-primary-950: #451603;
+  --color-accent-50: #eaf9ff;
+  --color-accent-100: #d0f2ff;
+  --color-accent-200: #aceaff;
+  --color-accent-300: #73dfff;
+  --color-accent-400: #31caff;
+  --color-accent-500: #02a7ff;
+  --color-accent-600: #0081ff;
+  --color-accent-700: #0067ff;
+  --color-accent-800: #0055db;
+  --color-accent-900: #004dab;
+  --color-accent-950: #042a5c;
+}
+@custom-variant dark (&:where(.dark, .dark *));
+body {
+  background: var(--background);
+  color: var(--text);
+  font-family: var(--font-main);
   --color-foreground: var(--text);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
@@ -112,11 +149,30 @@
   --sidebar-ring: oklch(0.556 0 0);
 }
 
-@layer base {
-  * {
-    @apply border-border outline-ring/50;
-  }
-  body {
-    @apply bg-background text-foreground;
-  }
+.bg-brand-accent {
+  background-color: #ffd662;
+}
+
+.border-brand-accent {
+  border-color: #ffd662;
+}
+
+.text-brand-accent {
+  color: #ffd662;
+}
+
+.text-brand-dark {
+  color: #0a2a5c;
+}
+
+.bg-brand-dark {
+  background-color: #0a2a5c;
+}
+
+.text-brand-dark-custom {
+  color: #2d456a;
+}
+
+.bg-dark-gray {
+  background-color: #1f2937;
 }
