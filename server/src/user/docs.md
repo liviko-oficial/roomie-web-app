@@ -18,4 +18,8 @@ GET!: /login/upgrade-partial -> cambiar privilegios de usuario parcial a usuario
 
 GET!: /user -> info del usuario
 
-DELETE!:/user -> eliminar usuario
+DELETE!: /user -> eliminar usuario
+
+PUT!: /user -> changes in user db in any property
+
+PUT!: /user/preferences -> changes in preferences

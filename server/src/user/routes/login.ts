@@ -1,4 +1,4 @@
-import { delete_user, get_user } from "@/db/querry.user";
+import { delete_user, get_db, get_user } from "@/db/querry.user";
 import { RealUser } from "@/lib/types";
 import { PERMITIONS, SESSION_COOKIE_KEY } from "@/user/lib/const";
 import { delete_cookie, verify_password } from "@/user/lib/utils";
@@ -20,6 +20,7 @@ import {
   Router,
 } from "express";
 const app = Router();
+// Handlers and middlewares
 // Verify Shema
 type RequestWithUserSubmition = Request & { submition: SubmitionUser };
 function verify_submtion_shema(
@@ -124,6 +125,48 @@ async function upgrade_user(
     res.status(500).json({ error: "Something unexpected happend" });
   }
 }
+const change_preferences = async (req: RequestWithUser, res: Response) => {
+  const { preferences: submited_data } = req.body;
+  if (!submited_data)
+    return res.status(400).json({ error: "No prefereces to change found" });
+  const { _id } = req.user;
+  const db = get_db(req.user);
+  const user_db = await db.findById(_id);
+  const {
+    data: parese_preferences,
+    success,
+    error,
+  } = UserResponse.partial().shape.preferences.safeParse(submited_data);
+  if (!success) res.status(400).json({ error: error.issues[0].message });
+  user_db.preferences = { ...user_db.preferences, ...parese_preferences };
+  try {
+    const new_preferences = await user_db.save();
+    res.status(200).json({ preferences: new_preferences.preferences });
+  } catch (_) {
+    res.status(500).json({ error: "Error saving the data on Database" });
+  }
+};
+const change_user = async (req: RequestWithUser, res: Response) => {
+  if (!req.body)
+    return res.status(400).json({ error: "No prefereces to change found" });
+  const { _id } = req.user;
+  const db = get_db(req.user);
+  const user_db = await db.findById(_id);
+  const {
+    data: parese_changes,
+    success,
+    error,
+  } = RealUser.partial().shape.preferences.safeParse(req.body);
+  if (!success) res.status(400).json({ error: error.issues[0].message });
+  user_db.preferences = { ...user_db.preferences, ...parese_changes };
+  try {
+    const new_preferences = await user_db.save();
+    res.status(200).json({ ...UserResponse.parse(new_preferences) });
+  } catch (_) {
+    res.status(500).json({ error: "Error saving the data on Database" });
+  }
+};
+// Rutas
 app.post(
   "/login",
   verify_submtion_shema,
@@ -165,4 +208,6 @@ app.delete("/user", require_auth, async (req: RequestWithUser, res) => {
     res.sendStatus(500);
   }
 });
+app.put("/user/preferences", require_auth, change_preferences);
+app.put("/user", require_auth, change_user);
 export default app;
