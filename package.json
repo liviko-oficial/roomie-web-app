@@ -4,9 +4,34 @@
   "type": "module",
   "private": true,
   "devDependencies": {
-    "@types/bun": "latest"
+    "@types/bun": "latest",
+    "@types/express": "^5"
   },
   "peerDependencies": {
     "typescript": "^5"
-  }
+  },
+  "dependencies": {
+    "canvas": "^3.1.2",
+    "express": "^5.1.0",
+    "jimp": "^1.6.0",
+    "multer": "^2.0.2",
+    "sharp": "^0.34.3"
+  },
+  "version": "1.0.0",
+  "description": "To install dependencies:",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/liviko-oficial/rommie-web-app.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/liviko-oficial/rommie-web-app/issues"
+  },
+  "homepage": "https://github.com/liviko-oficial/rommie-web-app#readme"
 }
