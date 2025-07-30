@@ -2,20 +2,37 @@
   "name": "server",
   "type": "module",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "index.ts",
   "scripts": {
-    "test": "vitest"
+    "test": "vitest",
+    "dev:server": "tsx --env-file-if-exists=.env.local --watch ./index.ts",
+    "dev:email": "email dev -d src/email_templates -p 4500"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@react-email/components": "0.3.2",
+    "@types/bcrypt": "^6.0.0",
+    "@types/jsonwebtoken": "^9.0.10",
+    "bcrypt": "^6.0.0",
+    "cookie-parser": "^1.4.7",
     "express": "^5.1.0",
-    "mongoose": "^8.16.4"
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.16.4",
+    "react": "19.1.0",
+    "react-dom": "19.1.0",
+    "resend": "^4.7.0"
   },
   "devDependencies": {
+    "@react-email/preview-server": "^4.2.4",
     "@types/express": "^5.0.3",
+    "@types/node": "^24.1.0",
+    "react-email": "4.2.4",
+    "tsx": "^4.20.3",
+    "typescript": "^5.8.3",
+    "vite-tsconfig-paths": "^5.1.4",
     "vitest": "^3.2.4"
   }
 }
