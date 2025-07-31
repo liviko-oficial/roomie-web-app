@@ -19,7 +19,11 @@ export function delete_user(
   }[req.permitions];
   return db.findByIdAndDelete(req._id);
 }
-export function get_db(req: RequestWithUser["user"]) {
+export function get_db(
+  req:
+    | RequestWithUser["user"]
+    | { permitions: RequestWithUser["user"]["permitions"] }
+) {
   const db = {
     [PERMITIONS["PARTIAL"]]: UserPartialDB,
     [PERMITIONS["USER"]]: UserDB,

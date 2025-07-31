@@ -1,9 +1,14 @@
 import { User, UserPartial } from "@/user/models/userMissing.schema";
 import { CookieOptions, NextFunction, Request, Response } from "express";
-import { PERMITIONS, SESSION_COOKIE_KEY } from "../../lib/const";
+import {
+  PERMITIONS,
+  RECOVERY_COOKIE_KEY,
+  SESSION_COOKIE_KEY,
+} from "../../lib/const";
 import jwt from "jsonwebtoken";
 import { JWT_SECRET } from "@/lib/const";
 import { Types } from "mongoose";
+import { UserChange } from "@/user/routes/password_recovery";
 export type RequestWithUser = Request & {
   user: {
     _id: User["_id"] | Types.ObjectId;
@@ -34,10 +39,28 @@ class JWTError extends Error {
     this.name = name;
   }
 }
+export const add_password_recovery_cookie = (
+  req: RequestWithUser,
+  res: Response,
+  next: NextFunction
+) => {
+  const user = req.user;
+  const value = jwt.sign(user, JWT_SECRET);
+  res.cookie(RECOVERY_COOKIE_KEY, value, COOKIE_OPTIONS);
+  next();
+};
 export const decode_session_cookie = (cookie: string) => {
   try {
     const payload = jwt.verify(cookie, JWT_SECRET);
     return payload as RequestWithUser["user"];
+  } catch (error) {
+    throw new JWTError(error, "verification-error");
+  }
+};
+export const decode_password_request_cookie = (cookie: string) => {
+  try {
+    const payload = jwt.verify(cookie, JWT_SECRET);
+    return payload as UserChange["user"];
   } catch (error) {
     throw new JWTError(error, "verification-error");
   }
