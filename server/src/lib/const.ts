@@ -4,4 +4,5 @@ export const {
   JWT_SECRET,
   RESEND_KEY,
   BASE_URL,
+  FROM_URL,
 } = process.env;

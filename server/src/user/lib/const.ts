@@ -10,3 +10,4 @@ export const PERMITIONS = {
 } as const;
 
 export const SESSION_COOKIE_KEY: string = "session";
+export const RECOVERY_COOKIE_KEY: string = "password-recovery";
