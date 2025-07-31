@@ -62,7 +62,7 @@ async function verify_user_db(
       return {
         _id: user._id,
         email,
-        permitions: PERMITIONS["PARTIAL"],
+        permitions: PERMITIONS["USER"],
         password: user.password,
       };
     }
