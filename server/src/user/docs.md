@@ -23,3 +23,9 @@ DELETE!: /user -> eliminar usuario
 PUT!: /user -> changes in user db in any property
 
 PUT!: /user/preferences -> changes in preferences
+
+GET:/password-recovery?email -> change password email send
+
+GET:/password-recovery/verify?token&email -> asing cookie for password recover put
+
+PUT:/password-recovery -> change password if new one is provided
