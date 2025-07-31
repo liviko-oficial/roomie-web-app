@@ -13,7 +13,7 @@ import {
 } from "@/user/routes/middleware/jwt";
 import { AuthSubmitionSchema } from "@/user/models/userAuth.schema";
 import { get_db } from "@/db/querry.user";
-import { make_hash } from "@/user/lib/utils";
+import { make_hash, verify_password } from "@/user/lib/utils";
 
 const send_email = async (req: Request, res: Response) => {
   const { email } = req.query;
@@ -118,6 +118,13 @@ const change_password = async (req: Request, res: Response) => {
   });
   if (!isVerify) res.status(401).json({ error: "Something went wrong" });
   const db = get_db({ permitions: user.permitions });
+  const prev_pass = (await db.findById(user._id).select({ password: true }))
+    .password;
+  const isSame = await verify_password(new_password, prev_pass);
+  if (isSame)
+    return res
+      .status(200)
+      .json({ error: "Password can't be the same as before" });
   const hash_password = await make_hash(new_password);
   try {
     await db.findByIdAndUpdate(user._id, {
