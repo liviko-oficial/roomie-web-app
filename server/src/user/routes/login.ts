@@ -151,14 +151,14 @@ const change_user = async (req: RequestWithUser, res: Response) => {
     return res.status(400).json({ error: "No prefereces to change found" });
   const { _id } = req.user;
   const db = get_db(req.user);
-  const user_db = await db.findById(_id);
+  let user_db = await db.findById(_id);
   const {
     data: parese_changes,
     success,
     error,
-  } = RealUser.partial().shape.preferences.safeParse(req.body);
+  } = RealUser.partial().safeParse(req.body);
   if (!success) res.status(400).json({ error: error.issues[0].message });
-  user_db.preferences = { ...user_db.preferences, ...parese_changes };
+  Object.assign(user_db, parese_changes);
   try {
     const new_preferences = await user_db.save();
     res.status(200).json({ ...UserResponse.parse(new_preferences) });
