@@ -4,7 +4,7 @@ import resend from "@/lib/resend_instance";
 import { tokens_system } from "@/user/models/passwordRecovery";
 import { UserDB, UserPartialDB } from "@/user/models/userMissing.schema";
 import { NextFunction, Request, Response, Router } from "express";
-import EmailTemplate from "@/email_templates/PasswordRecovery.tsx";
+import EmailTemplate from "@/email_templates/PasswordRecovery";
 import { PERMITIONS, RECOVERY_COOKIE_KEY } from "@/user/lib/const";
 import {
   add_password_recovery_cookie,

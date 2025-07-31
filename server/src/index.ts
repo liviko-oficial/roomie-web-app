@@ -2,7 +2,7 @@ import express from "express";
 import db from "@/db/index";
 import cookieParser from "cookie-parser";
 import { PORT } from "@/lib/const";
-import api from "./src/api";
+import api from "./api";
 await db();
 const app = express();
 app.use(express.json());

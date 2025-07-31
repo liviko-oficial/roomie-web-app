@@ -6,7 +6,9 @@
   "scripts": {
     "test": "vitest",
     "dev:server": "tsx --env-file-if-exists=.env.local --watch ./index.ts",
-    "dev:email": "email dev -d src/email_templates -p 4500"
+    "dev:email": "email dev -d src/email_templates -p 4500",
+    "build": "tsup",
+    "start": "node --env-file=.evn dist/index.js"
   },
   "keywords": [],
   "author": "",
@@ -30,6 +32,7 @@
     "@types/express": "^5.0.3",
     "@types/node": "^24.1.0",
     "react-email": "4.2.4",
+    "tsup": "^8.5.0",
     "tsx": "^4.20.3",
     "typescript": "^5.8.3",
     "vite-tsconfig-paths": "^5.1.4",

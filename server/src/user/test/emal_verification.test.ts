@@ -5,7 +5,8 @@ describe("verification-email", () => {
   it("should-exist", () => {
     expect(verificatior).toBeInstanceOf(VerificationEmail);
     const email = "mock@tec.mx";
-    const token = verificatior.get_link_id({ email });
+    const password = "pasW0rd1238";
+    const token = verificatior.get_link_token({ email, password });
     expect(verificatior.verify({ email, token: "UN_TOKEN_NO_VALIDO" })).toEqual(
       { error: "Token not found" }
     );

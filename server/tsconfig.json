@@ -5,7 +5,7 @@
     "moduleDetection": "force",
 
     // Ignore module structure
-    "module": "Preserve",
+    "module": "preserve",
     "jsx": "react-jsx",
     // Allow JSON modules to be imported
     "resolveJsonModule": true,
@@ -14,14 +14,16 @@
     "allowJs": true,
     // Use correct ESM import behavior
     "esModuleInterop": true,
-    // Import TSX
-    "allowImportingTsExtensions": true,
-    "noEmit": true,
+    "noEmit": false,
     // Disallow features that require cross-file awareness
     "isolatedModules": true,
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"]
-    }
-  }
+    },
+    "types": ["node", "vite"],
+    "sourceMap": true,
+    "outDir": "dist"
+  },
+  "include": ["src/**/*"]
 }

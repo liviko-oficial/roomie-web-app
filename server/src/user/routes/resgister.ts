@@ -2,7 +2,7 @@ import { register_user } from "@/user/models/register.model";
 import { Request, Router } from "express";
 import emailValidator from "@/user/models/emailVerification";
 import { UserPartial, UserPartialDB } from "@/user/models/userMissing.schema";
-import { MagicLink } from "@/email_templates/MagicLink.tsx";
+import { MagicLink } from "@/email_templates/MagicLink";
 import {
   add_session_cookie,
   RequestWithUser,
