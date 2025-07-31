@@ -1,5 +1,5 @@
 import z from "zod";
-import { BASE_URL, FROM_URL } from "@/lib/const";
+import { BASE_URL, FROM_EMAIL } from "@/lib/const";
 import resend from "@/lib/resend_instance";
 import { tokens_system } from "@/user/models/passwordRecovery";
 import { UserDB, UserPartialDB } from "@/user/models/userMissing.schema";
@@ -11,7 +11,7 @@ import {
   decode_password_request_cookie,
   RequestWithUser,
 } from "@/user/routes/middleware/jwt";
-import { AuthSchema } from "@/user/models/userAuth.schema";
+import { AuthSubmitionSchema } from "@/user/models/userAuth.schema";
 import { get_db } from "@/db/querry.user";
 import { make_hash } from "@/user/lib/utils";
 
@@ -20,13 +20,16 @@ const send_email = async (req: Request, res: Response) => {
   if (!email) return res.status(400).json({ error: "No email provided" });
   let user = await UserDB.findOne({ email });
   !user && (user = await UserPartialDB.findOne({ email }));
-  if (!user) return res.sendStatus(200);
+  if (!user) {
+    console.error("user not found");
+    return res.sendStatus(200);
+  }
   const token = tokens_system.get_token({ email });
-  const url = `${BASE_URL}/password-recovery/verify?email=${email}&token=${token}`;
+  const url = `${BASE_URL}/api/password-recovery/verify?email=${email}&token=${token}`;
   try {
     await resend.emails.send({
       subject: "Cambio de contraseña",
-      from: FROM_URL,
+      from: FROM_EMAIL,
       // ! esto solo en desarrollo
       // ! cambiar por email
       to: ["liviko.oficial@gmail.com"],
@@ -104,7 +107,7 @@ const change_password = async (req: Request, res: Response) => {
   if (!submition_password)
     res.status(400).json({ error: "No password was provided" });
   const { success, data: new_password } =
-    AuthSchema.shape.password.safeParse(submition_password);
+    AuthSubmitionSchema.shape.password.safeParse(submition_password);
   if (!success) res.status(400).json({ error: "Password format error" });
   const cookie = req.cookies[RECOVERY_COOKIE_KEY];
   if (!cookie) res.status(400).json({ error: "No cookie provided" });
