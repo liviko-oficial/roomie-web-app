@@ -1,15 +1,4 @@
-# rommie-web-app
+# Liviko
 
-To install dependencies:
-
-```bash
-bun install
-```
-
-To run:
-
-```bash
-bun run index.ts
-```
-
-This project was created using `bun init` in bun v1.2.17. [Bun](https://bun.sh) is a fast all-in-one JavaScript runtime.
+This is the `Liviko Monorepo project`, see each README.md at `/server` (back end) or `/client` (front end) to 
+run each respectively.
