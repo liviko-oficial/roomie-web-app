@@ -24,5 +24,6 @@ El archivo procesa lo siguiente:
 Características de las imágenes
 -	Procesa imágenes con un tamaño de 50 MB (50 * 1024 * 1024 bytes)
 -	Solo recibe jpeg, jpg, png y webp. Cualquier otro tipo de archivo será rechazado.
+
 Solo es una Api que procesa imágenes, no lo envía a ningún lado.
 
