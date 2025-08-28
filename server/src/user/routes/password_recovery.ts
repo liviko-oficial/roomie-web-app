@@ -30,8 +30,8 @@ const send_email = async (req: Request, res: Response) => {
     await resend.emails.send({
       subject: "Cambio de contraseña",
       from: FROM_EMAIL,
-      // ! esto solo en desarrollo
-      // ! cambiar por email
+      // TODO: Implement dev env variable to switch between these options
+      //  [req.body.email] and ["liviko.oficial@gmail.com"]
       to: ["liviko.oficial@gmail.com"],
       react: EmailTemplate({ code: token, url }),
     });

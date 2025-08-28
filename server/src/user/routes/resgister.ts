@@ -26,10 +26,11 @@ app.post(
   },
   async (req: withToken, res) => {
     const token = req.token;
-    // ! Missing Domain to send real emails
+    // NOTE: Missing Domain to send real emails
     const { error } = await resend.emails.send({
       from: "Acme <onboarding@resend.dev>",
-      // to: [req.body.email],
+      // TODO: Implement dev env variable to switch between these options
+      //  [req.body.email] and ["liviko.oficial@gmail.com"]
       to: ["liviko.oficial@gmail.com"],
       subject: "Verification Link",
       react: MagicLink({
@@ -41,7 +42,7 @@ app.post(
     if (error) {
       return res.status(400).json({ error });
     }
-    // ! Only for dev porpuses
+    // NOTE: Only for dev purposes, change for production
     res.status(200).json({ token });
   }
 );
@@ -68,7 +69,7 @@ app.get(
       permitions: PERMITIONS["PARTIAL"],
     };
     next();
-    // TODO cron job para eliminar partial user cada x tiempo
+    // TODO: cron job para eliminar partial user cada x tiempo
   },
   add_session_cookie,
   (_, res) => res.sendStatus(200)

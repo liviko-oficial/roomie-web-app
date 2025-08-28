@@ -21,7 +21,7 @@ export const RealUser = z.object({
   preferences: z.object({
     campus: z.string().default(CAMPUS["GUADALAJARA"]),
   }),
-  // ID entraria aqui
+  // NOTE: ID entraria aqui
   isDeleted: z.boolean().default(false),
 });
-// ! Aqui agregar el esquema real obligatorio para crear usuario
+// TODO: Aqui agregar el esquema real obligatorio para crear usuario
