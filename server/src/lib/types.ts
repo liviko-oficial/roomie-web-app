@@ -1,5 +1,5 @@
 import { CAMPUS } from "@/rentalProperty/lib/const";
-import { SUPORT_EMAILS } from "@/user/lib/const";
+import { SUPPORT_EMAILS } from "@/user/lib/const";
 import { Types } from "mongoose";
 import z from "zod";
 
@@ -12,7 +12,7 @@ export const RealUser = z.object({
     .email()
     .refine((email) => {
       const termination = email.split("@")[1];
-      return SUPORT_EMAILS.includes(termination);
+      return SUPPORT_EMAILS.includes(termination);
     }, "Error email not supported"),
   password: z.string(),
   sex: z.enum(["hombre", "mujer"]),
