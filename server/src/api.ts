@@ -1,5 +1,6 @@
 import { Router } from "express";
 import user from "@/user/routes";
+import arrendador from "@/arrendador/routes";
 const app = Router();
 
 app.get("/", (_, res) => {
@@ -11,6 +12,7 @@ app.get("/health-check", (_, res) => {
 });
 
 app.use(user);
+app.use("/api", arrendador);
 app.use((_, res) => {
   res.status(404).send("<h1>API rounte not found</h1>");
 });
