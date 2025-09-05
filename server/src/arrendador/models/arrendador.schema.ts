@@ -2,7 +2,11 @@ import { ObjectIdZod } from "../../lib/types";
 import { model, Schema, Types } from "mongoose";
 import { z } from "zod";
 
-// Esquemas para validación con Zod
+/* ----------------------------------------------
+    Zod Schemas (Validación en tiempo de ejecución)
+------------------------------------------------ */
+
+// Perfil de arrendador
 export const ArrendadorProfileSchema = z.object({
   profilePicture: z.string().url().optional(),
   officialId: z.object({
@@ -21,12 +25,13 @@ export const ArrendadorProfileSchema = z.object({
   isVerified: z.boolean().default(false),
 });
 
+// Propiedad que puede registrar un arrendador
 export const PropertySchema = z.object({
   _id: ObjectIdZod.optional(),
   propertyType: z.enum(["Casa", "Departamento", "Loft"]),
   rentalType: z.enum([
     "Casa completa",
-    "Departamento completo", 
+    "Departamento completo",
     "Habitación dentro de una casa",
     "Habitación dentro de un departamento",
     "Loft"
@@ -35,12 +40,12 @@ export const PropertySchema = z.object({
   monthlyPrice: z.number().min(1),
   includesServices: z.boolean(),
   services: z.array(z.enum([
-    "Luz", 
-    "Agua", 
-    "Gas", 
-    "Internet", 
-    "Limpieza", 
-    "Mantenimiento", 
+    "Luz",
+    "Agua",
+    "Gas",
+    "Internet",
+    "Limpieza",
+    "Mantenimiento",
     "Agua potable",
     "Todos los servicios"
   ])).default([]),
@@ -60,6 +65,7 @@ export const PropertySchema = z.object({
   updatedAt: z.date().default(() => new Date()),
 });
 
+// Esquema principal de arrendador
 export const ArrendadorSchema = z.object({
   _id: ObjectIdZod.optional(),
   email: z.string().email(),
@@ -74,12 +80,18 @@ export const ArrendadorSchema = z.object({
   updatedAt: z.date().default(() => new Date()),
 });
 
-// Tipos TypeScript
+/* ----------------------------------------------
+    TypeScript Types (Inferidos desde Zod)
+------------------------------------------------ */
 export type ArrendadorProfile = z.infer<typeof ArrendadorProfileSchema>;
 export type Property = z.infer<typeof PropertySchema>;
 export type Arrendador = z.infer<typeof ArrendadorSchema>;
 
-// Esquemas de MongoDB
+/* ----------------------------------------------
+    MongoDB Schemas (Mongoose)
+------------------------------------------------ */
+
+// Subdocumento: perfil de arrendador
 const ArrendadorProfileMongoSchema = new Schema<ArrendadorProfile>({
   profilePicture: { type: String },
   officialId: {
@@ -104,6 +116,7 @@ const ArrendadorProfileMongoSchema = new Schema<ArrendadorProfile>({
   isVerified: { type: Boolean, default: false },
 });
 
+// Documento: propiedad
 const PropertyMongoSchema = new Schema<Property>({
   propertyType: {
     type: String,
@@ -114,7 +127,7 @@ const PropertyMongoSchema = new Schema<Property>({
     type: String,
     enum: [
       "Casa completa",
-      "Departamento completo", 
+      "Departamento completo",
       "Habitación dentro de una casa",
       "Habitación dentro de un departamento",
       "Loft"
@@ -131,12 +144,12 @@ const PropertyMongoSchema = new Schema<Property>({
   services: [{
     type: String,
     enum: [
-      "Luz", 
-      "Agua", 
-      "Gas", 
-      "Internet", 
-      "Limpieza", 
-      "Mantenimiento", 
+      "Luz",
+      "Agua",
+      "Gas",
+      "Internet",
+      "Limpieza",
+      "Mantenimiento",
       "Agua potable",
       "Todos los servicios"
     ]
@@ -157,6 +170,7 @@ const PropertyMongoSchema = new Schema<Property>({
   updatedAt: { type: Date, default: Date.now },
 });
 
+// Documento: arrendador
 const ArrendadorMongoSchema = new Schema<Arrendador>({
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true, select: false },
@@ -170,6 +184,8 @@ const ArrendadorMongoSchema = new Schema<Arrendador>({
   updatedAt: { type: Date, default: Date.now },
 });
 
-// Modelos de MongoDB
+/* ----------------------------------------------
+    MongoDB Models (Mongoose)
+------------------------------------------------ */
 export const ArrendadorDB = model("Arrendador", ArrendadorMongoSchema, "Arrendadores");
 export const PropertyDB = model("Property", PropertyMongoSchema, "Properties");

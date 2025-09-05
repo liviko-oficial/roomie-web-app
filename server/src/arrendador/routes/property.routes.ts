@@ -4,18 +4,33 @@ import { authenticateArrendador, checkOwnership } from "../middleware/auth.middl
 
 const router = Router();
 
-// Rutas públicas para ver propiedades
+/* ----------------------------------------------
+   Rutas públicas para ver propiedades
+   - No requieren autenticación
+------------------------------------------------ */
 router.get("/", PropertyController.getAllProperties);
 router.get("/:propertyId", PropertyController.getProperty);
 
-// Rutas protegidas (requieren autenticación de arrendador)
+/* ----------------------------------------------
+   Middleware de autenticación
+   - Todas las rutas definidas a continuación requieren autenticación de arrendador
+------------------------------------------------ */
 router.use(authenticateArrendador);
 
-// Rutas para manejo de propiedades por arrendador
+/* ----------------------------------------------
+   Rutas para manejo de propiedades por arrendador
+   - Requieren autenticación y verificación de propiedad (ownership)
+------------------------------------------------ */
+// Crear nueva propiedad
 router.post("/:arrendadorId", checkOwnership("arrendadorId"), PropertyController.createProperty);
+
+// Obtener propiedades de un arrendador específico
 router.get("/:arrendadorId/mis-propiedades", checkOwnership("arrendadorId"), PropertyController.getPropertiesByArrendador);
 
-// Rutas para editar/eliminar propiedades específicas
+/* ----------------------------------------------
+   Rutas para editar, eliminar o cambiar estado de propiedades
+   - Requieren autenticación y verificación de propiedad (ownership)
+------------------------------------------------ */
 router.put("/:arrendadorId/propiedad/:propertyId", checkOwnership("arrendadorId"), PropertyController.updateProperty);
 router.delete("/:arrendadorId/propiedad/:propertyId", checkOwnership("arrendadorId"), PropertyController.deleteProperty);
 router.patch("/:arrendadorId/propiedad/:propertyId/estado", checkOwnership("arrendadorId"), PropertyController.togglePropertyStatus);

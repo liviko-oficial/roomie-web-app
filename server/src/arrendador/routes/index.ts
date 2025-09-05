@@ -4,10 +4,16 @@ import propertyRoutes from "./property.routes";
 
 const router = Router();
 
-// Rutas de arrendadores
+/* ----------------------------------------------
+   Rutas de arrendadores
+   - Todas las rutas relacionadas con la gestión de arrendadores
+------------------------------------------------ */
 router.use("/arrendadores", arrendadorRoutes);
 
-// Rutas de propiedades
+/* ----------------------------------------------
+   Rutas de propiedades
+   - Todas las rutas relacionadas con la gestión de propiedades
+------------------------------------------------ */
 router.use("/propiedades", propertyRoutes);
 
 export default router;

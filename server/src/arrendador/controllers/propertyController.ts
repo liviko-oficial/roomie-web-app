@@ -1,17 +1,23 @@
 import { Request, Response } from "express";
 import { PropertyDB, ArrendadorDB } from "../models/arrendador.schema";
-import { 
+import {
   CreatePropertySchema,
   UpdatePropertySchema
 } from "../validation/arrendador.validation";
 
 export class PropertyController {
-  // Crear propiedad
+  /**
+   * Crear una nueva propiedad
+   * - Válida los datos de entrada
+   * - Verifica que el arrendador existe
+   * - Crea la propiedad en la base de datos
+   * - Agrega la propiedad al array de propiedades del arrendador
+   */
   static async createProperty(req: Request, res: Response) {
     try {
       const arrendadorId = req.params.arrendadorId;
       const validatedData = CreatePropertySchema.parse(req.body);
-      
+
       // Verificar que el arrendador existe
       const arrendador = await ArrendadorDB.findById(arrendadorId);
       if (!arrendador) {
@@ -21,11 +27,11 @@ export class PropertyController {
         });
       }
 
-      // Crear propiedad
+      // Crear y guardar propiedad
       const property = new PropertyDB(validatedData);
       await property.save();
 
-      // Agregar propiedad al array del arrendador
+      // Asociar propiedad al arrendador
       await ArrendadorDB.findByIdAndUpdate(arrendadorId, {
         $push: { properties: property._id },
         updatedAt: new Date()
@@ -37,6 +43,7 @@ export class PropertyController {
         data: property
       });
     } catch (error: any) {
+      // Manejo de errores de validación
       if (error.name === 'ZodError') {
         return res.status(400).json({
           success: false,
@@ -44,7 +51,8 @@ export class PropertyController {
           errors: error.errors
         });
       }
-      
+
+      // Error inesperado
       res.status(500).json({
         success: false,
         message: "Error interno del servidor",
@@ -53,7 +61,9 @@ export class PropertyController {
     }
   }
 
-  // Obtener todas las propiedades de un arrendador
+  /**
+   * Obtener todas las propiedades de un arrendador (con paginación)
+   */
   static async getPropertiesByArrendador(req: Request, res: Response) {
     try {
       const arrendadorId = req.params.arrendadorId;
@@ -70,17 +80,19 @@ export class PropertyController {
         });
       }
 
-      const properties = await PropertyDB.find({ 
+      // Obtener propiedades activas del arrendador
+      const properties = await PropertyDB.find({
         _id: { $in: arrendador.properties },
-        isActive: true 
+        isActive: true
       })
-      .skip(skip)
-      .limit(limit)
-      .sort({ createdAt: -1 });
+          .skip(skip)
+          .limit(limit)
+          .sort({ createdAt: -1 });
 
-      const total = await PropertyDB.countDocuments({ 
+      // Contar total de propiedades activas
+      const total = await PropertyDB.countDocuments({
         _id: { $in: arrendador.properties },
-        isActive: true 
+        isActive: true
       });
 
       res.json({
@@ -105,45 +117,38 @@ export class PropertyController {
     }
   }
 
-  // Obtener todas las propiedades
+  /**
+   * Obtener todas las propiedades (públicas)
+   * - Soporta filtros opcionales: tipo, precio, servicios, amueblado, etc.
+   * - Incluye paginación
+   */
   static async getAllProperties(req: Request, res: Response) {
     try {
       const page = parseInt(req.query.page as string) || 1;
       const limit = parseInt(req.query.limit as string) || 10;
       const skip = (page - 1) * limit;
 
-      // Filtros opcionales
+      // Construcción de filtros dinámicos
       const filters: any = { isActive: true };
-      
-      if (req.query.propertyType) {
-        filters.propertyType = req.query.propertyType;
-      }
-      if (req.query.rentalType) {
-        filters.rentalType = req.query.rentalType;
-      }
-      if (req.query.genderPreference) {
-        filters.genderPreference = req.query.genderPreference;
-      }
-      if (req.query.minPrice) {
-        filters.monthlyPrice = { $gte: parseInt(req.query.minPrice as string) };
-      }
+
+      if (req.query.propertyType) filters.propertyType = req.query.propertyType;
+      if (req.query.rentalType) filters.rentalType = req.query.rentalType;
+      if (req.query.genderPreference) filters.genderPreference = req.query.genderPreference;
+      if (req.query.minPrice) filters.monthlyPrice = { $gte: parseInt(req.query.minPrice as string) };
       if (req.query.maxPrice) {
-        filters.monthlyPrice = { 
+        filters.monthlyPrice = {
           ...filters.monthlyPrice,
-          $lte: parseInt(req.query.maxPrice as string) 
+          $lte: parseInt(req.query.maxPrice as string)
         };
       }
-      if (req.query.includesServices) {
-        filters.includesServices = req.query.includesServices === 'true';
-      }
-      if (req.query.isFurnished) {
-        filters.isFurnished = req.query.isFurnished === 'true';
-      }
+      if (req.query.includesServices) filters.includesServices = req.query.includesServices === 'true';
+      if (req.query.isFurnished) filters.isFurnished = req.query.isFurnished === 'true';
 
+      // Obtener propiedades con filtros aplicados
       const properties = await PropertyDB.find(filters)
-        .skip(skip)
-        .limit(limit)
-        .sort({ createdAt: -1 });
+          .skip(skip)
+          .limit(limit)
+          .sort({ createdAt: -1 });
 
       const total = await PropertyDB.countDocuments(filters);
 
@@ -169,11 +174,13 @@ export class PropertyController {
     }
   }
 
-  // Obtener propiedad específica
+  /**
+   * Obtener una propiedad específica por ID
+   */
   static async getProperty(req: Request, res: Response) {
     try {
       const propertyId = req.params.propertyId;
-      
+
       const property = await PropertyDB.findById(propertyId);
       if (!property) {
         return res.status(404).json({
@@ -195,18 +202,22 @@ export class PropertyController {
     }
   }
 
-  // Actualizar propiedad
+  /**
+   * Actualizar una propiedad
+   * - Valida los datos con Zod
+   * - Actualiza la propiedad en la BD
+   */
   static async updateProperty(req: Request, res: Response) {
     try {
       const propertyId = req.params.propertyId;
       const validatedData = UpdatePropertySchema.parse(req.body);
-      
+
       const property = await PropertyDB.findByIdAndUpdate(
-        propertyId,
-        { ...validatedData, updatedAt: new Date() },
-        { new: true, runValidators: true }
+          propertyId,
+          { ...validatedData, updatedAt: new Date() },
+          { new: true, runValidators: true }
       );
-      
+
       if (!property) {
         return res.status(404).json({
           success: false,
@@ -227,7 +238,7 @@ export class PropertyController {
           errors: error.errors
         });
       }
-      
+
       res.status(500).json({
         success: false,
         message: "Error interno del servidor",
@@ -236,21 +247,26 @@ export class PropertyController {
     }
   }
 
-  // Eliminar propiedad (soft delete)
+  /**
+   * Eliminar propiedad (soft delete)
+   * - Marca la propiedad como inactiva en lugar de borrarla
+   * - Opcionalmente la elimina del array del arrendador
+   */
   static async deleteProperty(req: Request, res: Response) {
     try {
       const propertyId = req.params.propertyId;
       const arrendadorId = req.params.arrendadorId;
-      
+
+      // Soft delete de la propiedad
       const property = await PropertyDB.findByIdAndUpdate(
-        propertyId,
-        { 
-          isActive: false,
-          updatedAt: new Date()
-        },
-        { new: true }
+          propertyId,
+          {
+            isActive: false,
+            updatedAt: new Date()
+          },
+          { new: true }
       );
-      
+
       if (!property) {
         return res.status(404).json({
           success: false,
@@ -258,7 +274,7 @@ export class PropertyController {
         });
       }
 
-      // Opcional: remover del array del arrendador
+      // Remover referencia del arrendador (opcional)
       if (arrendadorId) {
         await ArrendadorDB.findByIdAndUpdate(arrendadorId, {
           $pull: { properties: propertyId },
@@ -279,12 +295,15 @@ export class PropertyController {
     }
   }
 
-  // Cambiar estado activo de propiedad
+  /**
+   * Activar o desactivar propiedad
+   * - Cambia el estado `isActive` de una propiedad
+   */
   static async togglePropertyStatus(req: Request, res: Response) {
     try {
       const propertyId = req.params.propertyId;
       const { isActive } = req.body;
-      
+
       const property = await PropertyDB.findByIdAndUpdate(
         propertyId,
         { 
@@ -293,7 +312,7 @@ export class PropertyController {
         },
         { new: true }
       );
-      
+
       if (!property) {
         return res.status(404).json({
           success: false,
