@@ -6,10 +6,12 @@ import CallToAction from "@/modules/home/sections/CallToAction";
 import Footer from "@/modules/home/sections/Footer";
 import NavBar from "@/modules/home/sections/NavBar";
 import SearchBar from "@/modules/home/components/SearchBar";
+import { AppProviders } from "@/modules/context_files/AppProviders";
 
 export default function Home() {
   return (
     <>
+      <AppProviders>
       <NavBar />
       <Hero />
       <SearchBar />
@@ -18,6 +20,7 @@ export default function Home() {
       <Testimonials />
       <CallToAction />
       <Footer />
+      </AppProviders>
     </>
   );
 }

@@ -1,0 +1,24 @@
+import { createContext, useContext, useState } from "react";
+import LoginModal from "../Students/components/LoginModal";
+
+const LoginModalContext = createContext();
+
+export const LoginModalProvider = ({ children }) => {
+  const [isOpen, setIsOpen] = useState(false);
+
+  const openModal = () => setIsOpen(true);
+  const closeModal = () => setIsOpen(false);
+  
+  return (
+    <LoginModalContext.Provider value={{ openModal, closeModal }}>
+      {children}
+      <LoginModal
+        isOpen={isOpen}
+        onClose={closeModal}
+      />
+    </LoginModalContext.Provider>
+  );
+};
+
+// hook de conveniencia
+export const useLoginModal = () => useContext(LoginModalContext);

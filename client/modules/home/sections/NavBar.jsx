@@ -3,8 +3,12 @@ import Image from "next/image";
 import Link from "next/link";
 import NavLink from "../components/NavLink";
 import { useState } from "react";
+import { useRegistrationModal } from "@/modules/context_files/RegistrationModalContext";
+import { useLoginModal } from "@/modules/context_files/LoginModalContext";
 
 const Navbar = () => {
+  const { openModal: openRegistrationModal } = useRegistrationModal();
+  const { openModal: openLoginModal } = useLoginModal();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const toggleMenu = () => {
@@ -45,12 +49,12 @@ const Navbar = () => {
             </li>
           </ul>
 
-          <Link
-            href="/registro"
+          <button
+              onClick={openRegistrationModal}
             className="border-2 border-brand-accent text-brand-dark px-4 py-2 rounded-md font-bold hover:bg-yellow-100 transition"
           >
             Registrarse
-          </Link>
+          </button>
         </div>
 
         {/* Menu Movil */}
@@ -103,13 +107,12 @@ const Navbar = () => {
             </li>
           </ul>
 
-          <Link
-            href="/registro"
+          <button
+              onClick={openRegistrationModal}
             className="block w-full text-center border-2 border-brand-accent text-brand-dark px-4 py-2 rounded-md font-bold hover:bg-yellow-100 transition"
-            onClick={() => setIsMenuOpen(false)}
           >
             Registrarse
-          </Link>
+          </button>
         </div>
       </div>
     </nav>
