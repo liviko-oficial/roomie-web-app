@@ -13,7 +13,9 @@ export default function Home() {
       <AppProviders>
       <NavbarStudent />
       <HeroStudent />
+      <div id="WhyChooseUs">
       <WhyChooseUs/>
+      </div>
       <ExclusiveTec/>
       <Testimonials/>
       <div id="signup">

@@ -72,7 +72,13 @@ const NavbarStudent = ({ currentPage, onNavigate }) => {
           <div className="hidden md:flex items-center space-x-4">
             {/* Botón beneficios */}
             <button
-              onClick={handleBenefitsClick}
+              onClick={() => {
+                const el = document.getElementById("WhyChooseUs");
+                if (el) {
+                  const y = el.getBoundingClientRect().top + window.scrollY; // 100px de offset
+                  window.scrollTo({ top: y, behavior: "smooth" });
+                }
+              }}
               className="px-3 py-2 text-[#042a5c] hover:text-[#fdd76c] rounded-md font-medium font-['Poppins'] transition-colors duration-300"
             >
               Beneficios
