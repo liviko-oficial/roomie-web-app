@@ -11,8 +11,6 @@ import { AppProviders } from "@/modules/context_files/AppProviders";
 export default function Home() {
   return (
     <>
-      <AppProviders>
-      <NavBar />
       <Hero />
       <SearchBar />
       <FeaturedProperties />
@@ -20,7 +18,6 @@ export default function Home() {
       <Testimonials />
       <CallToAction />
       <Footer />
-      </AppProviders>
     </>
   );
 }

@@ -107,6 +107,7 @@ export const properties = [
       "Seguridad 24/7"
     ],
     includedServices: ["Luz", "Agua", "Internet", "Limpieza", "Gas"],
+    comuneAreas: ["sala", "comedor", "Area de lavado", "Cocina"],
     bathrooms: 2,
     rating: 4.3,
     isVerified: false,
