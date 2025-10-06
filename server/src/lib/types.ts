@@ -1,4 +1,4 @@
-import { CAMPUS } from "@/rentalProperty/lib/const";
+import { CAMPUS } from "@/rentalProperty/lib/constants";
 import { SUPORT_EMAILS } from "@/user/lib/const";
 import { Types } from "mongoose";
 import { z } from "zod";
