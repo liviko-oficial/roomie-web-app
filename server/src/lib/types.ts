@@ -1,7 +1,7 @@
 import { CAMPUS } from "@/rentalProperty/lib/const";
 import { SUPORT_EMAILS } from "@/user/lib/const";
 import { Types } from "mongoose";
-import z from "zod";
+import { z } from "zod";
 
 export const ObjectIdZod = z
   .string()
