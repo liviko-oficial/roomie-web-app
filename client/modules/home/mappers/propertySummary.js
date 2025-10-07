@@ -1,8 +1,11 @@
-// utils/mappers/propertySummary.js
+// este es el mapper, sirve como un tipo de filtro para hacer una lista con las propiedades que uno desea de un json que viene del back
+// esto para que si algún día una propiedad cambia en el back solamente se tiene que cambiar el nombre en este mapper y no en todos los componentes donde se usó
 export function propertySummary(raw) {
   if (!raw) return null;
   if (raw.type == "Casa") {
       return {
+        // aqui por ejemplo si la id cambia de nombre a "identificación" solamente basta con hacer lo siguiente:
+        // id: raw.identidad
         id: raw.id,
         title: raw.title ?? "Propiedad sin título",
         type: raw.type ?? "Desconocido",
@@ -19,7 +22,12 @@ export function propertySummary(raw) {
         owner: raw.owner ?? { name: "Propietario", contact: "", avatar: "" },
         includedServices: raw.includedServices ?? [],
         comuneAreas: raw.comuneAreas ?? [],
-        securityType: raw.securityType ?? null,
+        parkingSpaces: raw.parkingSpaces ?? null,
+        propertyRequirements: raw.propertyRequirements ?? null,
+        essentialRequirements: raw.essentialRequirements ?? [],  
+        securityDeposit: raw.securityDeposit ?? [],
+        contractDuration: raw.contractDuration ?? [],
+        securityType: raw.securityType ?? null
       };
   };
 
@@ -42,4 +50,8 @@ export function propertySummary(raw) {
     securityType: raw.securityType ?? null,
   };
 }
+
+// para usarlo se haría de la siguiente manera, siendo raw el json que viene del back:
+//import { propertySummary } from "@/modules/home/mappers/propertySummary";
+//const property = propertySummary(raw);
 

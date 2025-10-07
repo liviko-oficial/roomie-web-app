@@ -1,17 +1,15 @@
-"use client";
+// este componente fue hecho a base de el componente original de la pagina de detalles de una propiedad adaptado para 
+// que funcione con el ruteo de next y para que se le pueda poner información extra de ser necesario
 
+"use client";
 import { useRouter } from "next/navigation";
 import React, { useState } from 'react';
 import { properties } from '@/modules/home/mock/properties';
 import { propertySummary } from "@/modules/home/mappers/propertySummary";
 
-export default function BaseLayaout({id, children})  {
+export default function BaseLayaout({property, CaracteristicaExtra, SeccionesExtra})  {
   const router = useRouter();
-  if (!id) return <p>No hay propiedad seleccionada.</p>;
-  const raw = properties.find((p) => p.id === Number(id));
-   if (!raw) return <p>No se encontró el id.</p>;
-  const property = propertySummary(raw);
-  if (!property) return <p>No se encontró la propiedad.</p>;
+  
   const {
     title,
     type,
@@ -198,6 +196,10 @@ export default function BaseLayaout({id, children})  {
             <h3 className="text-sm font-medium text-gray-500">Pet friendly</h3>
             <p className="text-[#042A5C] font-medium">{petFriendly ? "Sí" : "No"}</p>
           </div>
+          {/* si hay caracteristicas extra que tiene la propiedad u otro tipo de entidad se pueden poner pasando el
+              atributo de CaracteristicasExtra de la forma en como se hace en page de esta misma carpeta */}
+          {CaracteristicaExtra}
+          
         </div>
 
         {/* Servicios incluidos detallados */}
@@ -256,6 +258,9 @@ export default function BaseLayaout({id, children})  {
             ))}
           </div>
         </div>)}
+        {/* al igual que con las CaracteristicasExtra se puede pasar el atributo SeccionesExtra a este componente para tener más secciones, 
+            el ejemplo de su uso está en el archivo page de esta misma carpeta*/}
+        {SeccionesExtra}
 
         {/* Información del propietario */}
         <div className="mt-8 border-t pt-6">

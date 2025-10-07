@@ -1,3 +1,5 @@
+// context del modal de inicio de sesión, la logica ya solo se hace aquí y se puede usar en cualquier componente sin tener que declarar nada
+
 import { createContext, useContext, useState } from "react";
 import LoginModal from "../Students/components/LoginModal";
 

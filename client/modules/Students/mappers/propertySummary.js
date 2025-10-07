@@ -1,4 +1,3 @@
-// utils/mappers/propertySummary.js
 export function propertySummary(raw) {
   if (!raw) return null;
 
@@ -21,4 +20,6 @@ export function propertySummary(raw) {
     securityType: raw.securityType ?? null,
   };
 }
+
+
 
