@@ -12,6 +12,7 @@ export * from './lib/constants';
 
 // Controladores
 export { PropertyController } from './controllers/property.controller';
+export { PropertyCustomerController } from './controllers/property.customer.controller';
 export { PropertyUpdateController } from './controllers/property.update.controller';
 export { PropertyDeleteController } from './controllers/property.delete.controller';
 
