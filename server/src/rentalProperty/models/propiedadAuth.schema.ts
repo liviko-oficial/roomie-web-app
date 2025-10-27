@@ -266,7 +266,80 @@ export const PropiedadCreacionSchema = z.object({
    🔹 Esquema de validación para actualización de propiedad
    - Versión más flexible para actualizaciones parciales
 ------------------------------------------------ */
-export const PropiedadActualizacionSchema = PropiedadCreacionSchema.partial();
+export const PropiedadActualizacionSchema = z.object({
+  titulo: z.string().min(10).max(100).optional(),
+  descripcion: z.string().min(50).max(1000).optional(),
+  resumen: z.string().min(20).max(200).optional(),
+  tipoPropiedad: z.enum(["Casa", "Departamento", "Cuarto", "Studio", "Loft", "Casa de huéspedes"]).optional(),
+  tipoRenta: z.enum(["Propiedad completa", "Cuarto privado", "Cuarto compartido", "Cama en dormitorio"]).optional(),
+  generoPreferido: z.enum(["Solo hombres", "Solo mujeres", "Mixto", "Sin preferencia"]).optional(),
+  capacidadMaxima: z.number().int().min(1).max(20).optional(),
+  edadMinima: z.number().int().min(17).optional(),
+  edadMaxima: z.number().int().min(18).optional(),
+  direccion: z.object({
+    calle: z.string().min(5).optional(),
+    numero: z.string().optional(),
+    colonia: z.string().min(2).optional(),
+    ciudad: z.string().min(2).optional(),
+    estado: z.string().min(2).optional(),
+    codigoPostal: z.string().regex(/^\d{5}$/).optional(),
+    pais: z.string().optional(),
+    referencias: z.string().optional(),
+  }).partial().optional(),
+  caracteristicas: z.object({
+    metrosCuadrados: z.number().min(1).max(1000).optional(),
+    numeroBanos: z.number().int().min(1).max(10).optional(),
+    numeroRecamaras: z.number().int().min(0).max(20).optional(),
+    piso: z.number().int().min(0).max(50).optional(),
+    amueblado: z.boolean().optional(),
+    muebles: z.array(z.string()).optional(),
+    mascotasPermitidas: z.boolean().optional(),
+    tiposMascotas: z.array(z.string()).optional(),
+  }).partial().optional(),
+  servicios: z.object({
+    serviciosIncluidos: z.boolean().optional(),
+    listaServicios: z.array(z.string()).optional(),
+    costoServicios: z.number().min(0).optional(),
+  }).partial().optional(),
+  politicas: z.object({
+    reglasConvivencia: z.array(z.string()).optional(),
+    horarioVisitas: z.string().optional(),
+    fiestas: z.boolean().optional(),
+    fumar: z.boolean().optional(),
+    alcohol: z.boolean().optional(),
+    parejasPermitidas: z.boolean().optional(),
+  }).partial().optional(),
+  ubicacion: z.object({
+    campus: z.enum(["Guadalajara", "Monterrey", "Ciudad de México", "Otro"]).optional(),
+    distanciaCampus: z.number().min(0).max(100).optional(),
+    unidadDistancia: z.enum(["metros", "kilómetros"]).optional(),
+    transporte: z.array(z.string()).optional(),
+    tiempoTraslado: z.number().min(1).max(300).optional(),
+  }).partial().optional(),
+  informacionFinanciera: z.object({
+    precioMensual: z.number().min(1).max(100000).optional(),
+    deposito: z.number().min(0).max(200000).optional(),
+    comisionAgencia: z.number().min(0).max(50000).optional(),
+    incrementoAnual: z.number().min(0).max(50).optional(),
+    descuentos: z.object({
+      estudiantil: z.number().min(0).max(100).optional(),
+      pronto: z.number().min(0).max(100).optional(),
+      largo: z.number().min(0).max(100).optional(),
+    }).partial().optional(),
+  }).partial().optional(),
+  disponibilidad: z.object({
+    fechaDisponible: z.date().optional(),
+    duracionMinimaContrato: z.number().int().min(1).max(24).optional(),
+    duracionMaximaContrato: z.number().int().min(1).max(48).optional(),
+    renovacionAutomatica: z.boolean().optional(),
+    disponible: z.boolean().optional(),
+  }).partial().optional(),
+  imagenes: z.object({
+    principal: z.string().url().optional(),
+    galeria: z.array(z.string().url()).optional(),
+    tour360: z.string().url().optional(),
+  }).partial().optional(),
+});
 
 /* ----------------------------------------------
    🔹 Esquema de validación para filtros de búsqueda

@@ -10,6 +10,17 @@ export * from './models';
 // Constantes y configuraciones
 export * from './lib/constants';
 
+// Controladores
+export { PropertyController } from './controllers/property.controller';
+export { PropertyUpdateController } from './controllers/property.update.controller';
+export { PropertyDeleteController } from './controllers/property.delete.controller';
+
+// Middleware
+export { verificarPropiedadPropiedad, validarEstadoPropiedad } from './middleware/property.middleware';
+
+// Rutas
+export { default as propertyRoutes } from './routes';
+
 // Re-exportaciones útiles para facilitar el desarrollo
 export {
   CAMPUS,

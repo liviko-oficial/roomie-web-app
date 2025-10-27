@@ -41,3 +41,12 @@ export type {
   PropiedadActualizacionSchema as PropiedadActualizacionType,
   PropiedadFiltrosSchema as PropiedadFiltrosType
 } from './propiedadAuth.schema';
+
+// Re-exportar tipos desde constants
+export type {
+  CampusType,
+  TipoPropiedadType,
+  TipoRentaType,
+  GeneroPreferidoType,
+  EstadoPropiedadType
+} from '../lib/constants';
