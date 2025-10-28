@@ -1,7 +1,7 @@
 // contexto del modal de registro para tener la logica solo aquí y poder usarlo en cualquier componente
 
 import { createContext, useContext, useState } from "react";
-import RegistrationModal from "../Students/components/RegistrationModal";
+import RegistrationModal from "../components/RegistrationModal";
 const RegistrationModalContext = createContext();
 
 export const RegistrationModalProvider = ({ children }) => {

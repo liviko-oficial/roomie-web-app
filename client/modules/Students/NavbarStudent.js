@@ -3,8 +3,8 @@
 import { useState } from "react";
 import Link from "next/link";
 import NavLinkStudent from "./components/NavLinkStudent"
-import { useRegistrationModal } from "../context_files/RegistrationModalContext";
-import { useLoginModal } from "../context_files/LoginModalContext";
+import { useRegistrationModal } from "../global_components/context_files/RegistrationModalContext";
+import { useLoginModal } from "../global_components/context_files/LoginModalContext";
 // NavbarStudent: Barra de navegación superior pensada para estudiantes
 const NavbarStudent = ({ currentPage, onNavigate }) => {
   const { openModal: openRegistrationModal } = useRegistrationModal();
@@ -18,7 +18,11 @@ const NavbarStudent = ({ currentPage, onNavigate }) => {
 
   // Abrir modal de registro y cerrar menú móvil
   const handleRegistrationClick = () => {
-
+    const el = document.getElementById("signup");
+    if (el) {
+      const y = el.getBoundingClientRect().top + window.scrollY - 120; // 100px de offset
+      window.scrollTo({ top: y, behavior: "smooth" });
+    }
     setIsMenuOpen(false)
   }
 
@@ -30,6 +34,11 @@ const NavbarStudent = ({ currentPage, onNavigate }) => {
 
   // Acción placeholder para “Beneficios”
   const handleBenefitsClick = () => {
+    const el = document.getElementById("WhyChooseUs");
+    if (el) {
+      const y = el.getBoundingClientRect().top + window.scrollY - 60; // 100px de offset
+      window.scrollTo({ top: y, behavior: "smooth" });
+    }
     console.log("Beneficios clicked")
     setIsMenuOpen(false)
   }
@@ -141,7 +150,7 @@ const NavbarStudent = ({ currentPage, onNavigate }) => {
 
             {/* Opción beneficios */}
             <button
-              onClick={handleBenefitsClick}
+               onClick={handleBenefitsClick}
               className="w-full text-left px-3 py-2 text-[#042a5c] hover:text-[#fdd76c] rounded-md font-medium font-['Poppins'] transition-colors duration-300"
             >
               Beneficios
@@ -149,7 +158,7 @@ const NavbarStudent = ({ currentPage, onNavigate }) => {
 
             {/* Opción registro */}
             <button
-              onClick={openRegistrationModal}
+              onClick={handleRegistrationClick}
               className="w-full text-left px-3 py-2 text-[#042a5c] hover:text-[#fdd76c] rounded-md font-medium mt-2 font-['Poppins'] transition-colors duration-300"
             >
               Registro

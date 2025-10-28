@@ -1,12 +1,12 @@
 "use client";
 import Image from "next/image";
 import Link from "next/link";
-import NavLink from "../components/NavLink";
+import NavLink from "@/modules/home/components/NavLink";
 import { useState } from "react";
 import { useRegistrationModal } from "@/modules/global_components/context_files/RegistrationModalContext";
 import { useLoginModal } from "@/modules/global_components/context_files/LoginModalContext";
 
-const Navbar = () => {
+const LandingHeader = () => {
   const { openModal: openRegistrationModal } = useRegistrationModal();
   const { openModal: openLoginModal } = useLoginModal();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -119,4 +119,4 @@ const Navbar = () => {
   );
 };
 
-export default Navbar;
+export default LandingHeader;
