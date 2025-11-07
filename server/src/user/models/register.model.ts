@@ -1,4 +1,4 @@
-import { AuthSubmitionSchema } from "@/user/models/userAuth.schema";
+import { AuthSubmissionSchema } from "@/user/models/userAuth.schema";
 import { UserDB, UserPartialDB } from "@/user/models/userMissing.schema";
 import email_link from "@/user/models/emailVerification";
 import { make_hash } from "@/user/lib/utils";
@@ -14,7 +14,7 @@ class RegistrationError extends Error {
 }
 
 export async function register_user(param: Params) {
-  const parse_email = AuthSubmitionSchema.safeParse(param);
+  const parse_email = AuthSubmissionSchema.safeParse(param);
   if (!parse_email.success) {
     throw new RegistrationError(
       parse_email.error.issues[0].message,

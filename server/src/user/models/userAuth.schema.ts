@@ -1,12 +1,12 @@
-import { SUPORT_EMAILS } from "@/user/lib/const";
+import { SUPPORT_EMAILS } from "@/user/lib/const";
 import z from "zod";
-export const AuthSubmitionSchema = z.object({
+export const AuthSubmissionSchema = z.object({
   email: z
     .string()
     .email()
     .refine((email) => {
       const termination = email.split("@")[1];
-      return SUPORT_EMAILS.includes(termination);
+      return SUPPORT_EMAILS.includes(termination);
     }, "Error email not supported"),
   password: z
     .string()
@@ -29,7 +29,7 @@ export const AuthSubmitionSchema = z.object({
       "Password must contain at least one special character."
     ),
 });
-export type AuthSubmitionSchema = z.infer<typeof AuthSubmitionSchema>;
+export type AuthSubmissionSchema = z.infer<typeof AuthSubmissionSchema>;
 export const AuthSchema = z.object({
   email: z.string().email(),
   password: z.string().min(10),

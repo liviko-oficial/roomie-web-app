@@ -1,10 +1,10 @@
-export const SUPORT_EMAILS: string[] = [
+export const SUPPORT_EMAILS: string[] = [
   "tec.mx",
   "exatec.tec.mx",
   "itesm.mx",
 ] as const;
 
-export const PERMITIONS = {
+export const PERMISSIONS = {
   PARTIAL: "partial",
   USER: "user",
 } as const;

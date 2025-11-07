@@ -7,7 +7,7 @@ import {
   add_session_cookie,
   RequestWithUser,
 } from "@/user/routes/middleware/jwt";
-import { PERMITIONS } from "@/user/lib/const";
+import { PERMISSIONS } from "@/user/lib/const";
 import { BASE_URL } from "@/lib/const";
 import resend from "@/lib/resend_instance";
 type withToken = Request & { token: string };
@@ -66,7 +66,7 @@ app.get(
     req.user = {
       _id: new_partial_user._id,
       email: new_partial_user.email,
-      permitions: PERMITIONS["PARTIAL"],
+      permissions: PERMISSIONS["PARTIAL"],
     };
     next();
     // TODO: cron job para eliminar partial user cada x tiempo
