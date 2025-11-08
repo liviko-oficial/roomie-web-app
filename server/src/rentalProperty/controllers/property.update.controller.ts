@@ -8,23 +8,80 @@ import { MENSAJES_ERROR } from "../lib/constants";
  */
 export class PropertyUpdateController {
   /**
-   * TODO: Implementar actualización completa de propiedad
-   *
-   * Funcionalidad a desarrollar:
-   * - Validar datos de entrada con PropiedadActualizacionSchema
-   * - Verificar que la propiedad existe
-   * - Verificar que el arrendador autenticado es el propietario
-   * - Actualizar campos permitidos en la base de datos
-   * - Actualizar fechaActualizacion automáticamente
-   * - Manejar validaciones especiales para campos anidados
-   * - Retornar la propiedad actualizada
+   * Actualizar una propiedad completa
+   * - Validación con PropiedadActualizacionSchema
+   * - Verifica propiedad y ownership (via middleware)
+   * - Actualiza campos permitidos
+   * - Auto-actualiza fechaActualizacion
    */
   static async updateProperty(req: Request, res: Response) {
-    // TODO: Implementar lógica de actualización
-    return res.status(501).json({
-      success: false,
-      message: "Funcionalidad de actualización pendiente de implementar"
-    });
+    try {
+      const { propertyId } = req.params;
+      const arrendadorId = req.arrendador?.id;
+
+      if (!arrendadorId) {
+        return res.status(401).json({
+          success: false,
+          message: "Autenticación requerida"
+        });
+      }
+
+      // Validar datos de entrada
+      const validacionResultado = PropiedadActualizacionSchema.safeParse(req.body);
+
+      if (!validacionResultado.success) {
+        return res.status(400).json({
+          success: false,
+          message: MENSAJES_ERROR.DATOS_INVALIDOS,
+          errors: validacionResultado.error.errors
+        });
+      }
+
+      const datosActualizacion = validacionResultado.data;
+
+      // Buscar la propiedad y verificar propiedad
+      const propiedad = await PropiedadRentaDB.findById(propertyId);
+
+      if (!propiedad) {
+        return res.status(404).json({
+          success: false,
+          message: MENSAJES_ERROR.PROPIEDAD_NO_ENCONTRADA
+        });
+      }
+
+      if (propiedad.propietarioId?.toString() !== arrendadorId) {
+        return res.status(403).json({
+          success: false,
+          message: MENSAJES_ERROR.ACCESO_DENEGADO
+        });
+      }
+
+      // Actualizar campos usando $set para nested objects
+      const updateData: any = {
+        ...datosActualizacion,
+        fechaActualizacion: new Date()
+      };
+
+      const propiedadActualizada = await PropiedadRentaDB.findByIdAndUpdate(
+        propertyId,
+        { $set: updateData },
+        { new: true, runValidators: true }
+      ).populate('propietarioId', 'email profile.fullName profile.phone');
+
+      return res.status(200).json({
+        success: true,
+        message: "Propiedad actualizada exitosamente",
+        data: propiedadActualizada
+      });
+
+    } catch (error: any) {
+      console.error("Error al actualizar propiedad:", error);
+      return res.status(500).json({
+        success: false,
+        message: "Error al actualizar la propiedad",
+        error: error.message
+      });
+    }
   }
 
   /**
