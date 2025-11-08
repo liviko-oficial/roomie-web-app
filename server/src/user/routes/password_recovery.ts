@@ -106,12 +106,12 @@ const query_db = async (
 const change_password = async (req: Request, res: Response) => {
   const { password: submission_password } = req.body;
   if (!submission_password)
-    res.status(400).json({ error: "No password was provided" });
+    res.status(400).json({ error_code: 1, error: "No password was provided" });
   const { success, data: new_password } =
     AuthSubmissionSchema.shape.password.safeParse(submission_password);
-  if (!success) res.status(400).json({ error: "Password format error" });
+  if (!success) res.status(400).json({ error_code: 2, error: "Password format error" });
   const cookie = req.cookies[RECOVERY_COOKIE_KEY];
-  if (!cookie) res.status(400).json({ error: "No cookie provided" });
+  if (!cookie) res.status(400).json({ error_code: 3, error: "No cookie provided" });
   const user = decode_password_request_cookie(cookie);
   const isVerify = tokens_system.verify({
     email: user.email,

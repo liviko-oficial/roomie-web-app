@@ -1,4 +1,8 @@
-# Liviko Back end
+# Liviko Backend
+
+## api docs
+
+The API documentation is at src/aip-docs
 
 ## Quick start
 
@@ -21,7 +25,7 @@
 1. Clone the repository and cd to the server (back end)
 
     ```shell
-    git clone 
+    git clone git@github.com:liviko-oficial/roomie-web-app.git
     cd rommie-web-app/server
     ```
 

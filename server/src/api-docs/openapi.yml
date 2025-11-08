@@ -1,0 +1,638 @@
+openapi: 3.1.0
+info:
+  title: API de Autenticación y Usuario
+  version: "1.0.0"
+  description: |
+    Especificación OpenAPI generada a partir de la tabla provista. Se preservan los
+    mensajes, restricciones y flujos descritos (usuarios parciales/completos, cookies
+    de sesión y de recuperación, verificación por token, etc.).
+
+    Notas:
+    - Donde se indica “debe pertenecer a un dominio permitido”, este documento no
+      impone un patrón específico; queda a implementación (véase `x-allowedDomains`).
+    - Para **usuarios parciales** y **completos**, se reflejan estados en `User.status`.
+servers:
+  - url: https://api.ejemplo.com
+    description: Servidor principal
+tags:
+  - name: Registro
+  - name: Login
+  - name: Usuario
+  - name: Recuperación de contraseña
+  - name: Salud
+  - name: Raíz
+components:
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: session
+      description: Cookie de sesión. Requerida donde se indica “Requiere autenticación”.
+    recoveryAuth:
+      type: apiKey
+      in: cookie
+      name: pw_recovery
+      description: Cookie de recuperación (emitida en `/password-recovery/verify`).
+  parameters:
+    emailQuery:
+      name: email
+      in: query
+      required: true
+      schema:
+        $ref: '#/components/schemas/Email'
+      description: Email válido; **debe pertenecer a un dominio permitido**.
+      x-allowedDomains: []  # completar en implementación
+    tokenQuery:
+      name: token
+      in: query
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: Token de verificación (UUID).
+  responses:
+    UnauthorizedCookieMissing:
+      description: Cookie de sesión faltante.
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorResponse' }
+          examples:
+            cookie_missing:
+              value: { code: "unauthorized", message: "Cookie de sesión faltante" }
+    NotFoundUser:
+      description: Usuario no encontrado.
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorResponse' }
+          examples:
+            user_not_found:
+              value: { code: "not_found", message: "Usuario no encontrado" }
+    ValidationError:
+      description: Error de validación / datos inválidos.
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorResponse' }
+    InternalError:
+      description: Error interno del servidor.
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorResponse' }
+    NotFoundHTML:
+      description: Ruta no encontrada (manejador 404 genérico).
+      content:
+        text/html:
+          schema:
+            type: string
+          examples:
+            not_found:
+              value: "<html><body>404 - Ruta no encontrada</body></html>"
+  schemas:
+    Email:
+      type: string
+      format: email
+      description: |
+        Email válido; **debe pertenecer a un dominio permitido** (la lista exacta queda a implementación).
+      examples: [ "persona@ejemplo.com" ]
+    Password:
+      type: string
+      description: |
+        Contraseña de 8–32 caracteres; **debe incluir** mayúscula, minúscula, número y carácter especial.
+      minLength: 8
+      maxLength: 32
+      pattern: '^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,32}$'
+      examples: [ "Abcdef1!" ]
+    RegisterRequest:
+      type: object
+      required: [ email, password ]
+      properties:
+        email: { $ref: '#/components/schemas/Email' }
+        password: { $ref: '#/components/schemas/Password' }
+    LoginRequest:
+      allOf:
+        - $ref: '#/components/schemas/RegisterRequest'
+    User:
+      type: object
+      description: Representación de usuario (parcial o completo).
+      properties:
+        id:
+          type: string
+          description: Identificador del usuario.
+        email:
+          $ref: '#/components/schemas/Email'
+        status:
+          type: string
+          enum: [ partial, complete ]
+          description: Estado del usuario en el flujo de registro.
+        preferences:
+          $ref: '#/components/schemas/Preferences'
+        createdAt:
+          type: string
+          format: date-time
+      additionalProperties: true
+    Preferences:
+      type: object
+      description: |
+        Preferencias del usuario. Estructura basada en `UserResponse.partial().shape.preferences`.
+        Campo flexible; las claves concretas pueden variar.
+      additionalProperties: true
+    UserUpdateRequest:
+      type: object
+      description: |
+        Objeto de actualización general del usuario. Propiedades válidas según `RealUser.partial()`.
+      additionalProperties: true
+    UserPreferencesUpdateRequest:
+      type: object
+      properties:
+        preferences:
+          $ref: '#/components/schemas/Preferences'
+      required: [ preferences ]
+    RegisterExtendedFormRequest:
+      type: object
+      required: [ hobbies, current_quarter, birth_date, id, gender, has_pets, smoker, cellphone ]
+      properties:
+        hobbies:
+          type: array
+          items: { type: string }
+          minItems: 1
+        deal_breakers:
+          type: array
+          items: { type: string }
+          description: Opcional.
+        current_quarter:
+          type: integer
+          minimum: 1
+          maximum: 12
+        birth_date:
+          type: string
+          format: date
+        id:
+          type: number
+          description: Identificador válido.
+        gender:
+          type: string
+          description: Valor permitido (lista exacta a definir por implementación).
+        has_pets:
+          type: boolean
+        smoker:
+          type: boolean
+        cellphone:
+          type: string
+          minLength: 8
+      examples:
+        - summary: ejemplo
+          value:
+            hobbies: [ "leer", "correr" ]
+            deal_breakers: [ "no_fumar" ]
+            current_quarter: 3
+            birth_date: "1995-07-21"
+            id: 12345
+            gender: "female"
+            has_pets: true
+            smoker: false
+            cellphone: "5512345678"
+    ErrorResponse:
+      type: object
+      properties:
+        code: { type: string }
+        message: { type: string }
+        details:
+          description: Información adicional opcional del error.
+          nullable: true
+      required: [ code, message ]
+paths:
+  /register:
+    post:
+      tags: [ Registro ]
+      summary: Registro de usuario (email + password)
+      description: Crea un **usuario parcial** tras verificación de token (véase `/register/verify`).
+      security: []  # sin autenticación
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/RegisterRequest' }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: { type: string, example: "OK" }
+        '400':
+          description: Datos inválidos o flujo incompleto.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+              examples:
+                password_missing: { value: { code: "bad_request", message: "No se proporcionó contraseña" } }
+                password_format:  { value: { code: "bad_request", message: "Contraseña con formato incorrecto" } }
+                cookie_missing:   { value: { code: "bad_request", message: "No se proporcionó cookie" } }
+        '401':
+          description: Token no verificado para el email proporcionado.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+              examples:
+                token_unverified:
+                  value: { code: "unauthorized", message: "El token no está verificado para el email proporcionado" }
+        '500':
+          $ref: '#/components/responses/InternalError'
+      x-error-reasons:
+        - No se proporcionó contraseña
+        - Contraseña con formato incorrecto
+        - No se proporcionó cookie
+        - Token no verificado para el email
+  /register/verify:
+    get:
+      tags: [ Registro ]
+      summary: Verifica token y registra usuario parcial
+      security: []  # sin autenticación
+      parameters:
+        - $ref: '#/components/parameters/emailQuery'
+        - $ref: '#/components/parameters/tokenQuery'
+      responses:
+        '200':
+          description: Verificación exitosa; usuario parcial creado (continúa flujo).
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: { type: string, example: "Verificación exitosa; usuario parcial creado" }
+        '400':
+          description: Token o email inválidos / esquema de usuario parcial inválido.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+              examples:
+                invalid_params: { value: { code: "bad_request", message: "Token o email inválidos" } }
+                invalid_partial_schema: { value: { code: "bad_request", message: "Esquema de usuario parcial inválido" } }
+  /login:
+    post:
+      tags: [ Login ]
+      summary: Login de usuario
+      description: Realiza el inicio de sesión del usuario.
+      security:
+        - cookieAuth: []   # según documento, requiere autenticación (cookie)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/LoginRequest' }
+      responses:
+        '200':
+          description: Login exitoso; redirección o confirmación.
+          headers:
+            Set-Cookie:
+              description: Puede establecer cookie de sesión.
+              schema: { type: string }
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: { type: string, example: "Login exitoso" }
+        '400':
+          description: Datos de envío inválidos / contraseña incorrecta.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+              examples:
+                invalid_payload: { value: { code: "bad_request", message: "Datos de envío inválidos" } }
+                wrong_password:  { value: { code: "bad_request", message: "Contraseña incorrecta" } }
+        '401':
+          $ref: '#/components/responses/UnauthorizedCookieMissing'
+        '404':
+          $ref: '#/components/responses/NotFoundUser'
+  /login/upgrade-partial:
+    get:
+      tags: [ Login ]
+      summary: Convierte usuario parcial en usuario completo
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: |
+            Resultado de upgrade. Puede continuar flujo o indicar que los permisos no coinciden.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    enum:
+                      - "Permisos no coinciden con el endpoint"
+                      - "Upgrade exitoso"
+              examples:
+                mismatch: { value: { message: "Permisos no coinciden con el endpoint" } }
+                upgraded: { value: { message: "Upgrade exitoso" } }
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedCookieMissing'
+        '500':
+          description: No se encontró usuario parcial / error inesperado al guardar.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+              examples:
+                not_found_partial: { value: { code: "internal_error", message: "No se encontró usuario parcial para actualizar" } }
+                save_error:        { value: { code: "internal_error", message: "Error inesperado al guardar" } }
+  /user:
+    get:
+      tags: [ Usuario ]
+      summary: Obtiene información de usuario
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: Información de usuario retornada (parcial o completa).
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/User' }
+        '401':
+          $ref: '#/components/responses/UnauthorizedCookieMissing'
+        '500':
+          description: Error al obtener usuario de la base de datos / error inesperado.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+              examples:
+                db_error:   { value: { code: "internal_error", message: "Error al obtener usuario de la base de datos" } }
+                unknown:    { value: { code: "internal_error", message: "Error inesperado" } }
+    delete:
+      tags: [ Usuario ]
+      summary: Elimina al usuario autenticado
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: Usuario eliminado; sesión cerrada.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: { type: string, example: "Usuario eliminado; sesión cerrada" }
+        '401':
+          $ref: '#/components/responses/UnauthorizedCookieMissing'
+        '500':
+          description: Error al eliminar usuario / error inesperado.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+              examples:
+                delete_error: { value: { code: "internal_error", message: "Error al eliminar usuario" } }
+                unknown:      { value: { code: "internal_error", message: "Error inesperado" } }
+    put:
+      tags: [ Usuario ]
+      summary: Cambia propiedades generales del usuario
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/UserUpdateRequest' }
+      responses:
+        '200':
+          description: Usuario actualizado.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/User' }
+        '400':
+          description: Body ausente / error de validación de cambios.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+              examples:
+                body_missing: { value: { code: "bad_request", message: "Body ausente" } }
+                validation:   { value: { code: "bad_request", message: "Error de validación de cambios" } }
+        '401':
+          $ref: '#/components/responses/UnauthorizedCookieMissing'
+        '500':
+          description: Error al guardar en base de datos.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+              examples:
+                db_save_error: { value: { code: "internal_error", message: "Error al guardar en base de datos" } }
+  /user/preferences:
+    put:
+      tags: [ Usuario ]
+      summary: Actualiza preferencias del usuario
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/UserPreferencesUpdateRequest' }
+      responses:
+        '200':
+          description: Preferencias actualizadas.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: { type: string, example: "Preferencias actualizadas" }
+                  preferences: { $ref: '#/components/schemas/Preferences' }
+        '400':
+          description: No hay preferencias para cambiar / error de validación de preferencias.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+              examples:
+                nothing_to_change: { value: { code: "bad_request", message: "No hay preferencias para cambiar" } }
+                validation:        { value: { code: "bad_request", message: "Error de validación de preferencias" } }
+        '401':
+          $ref: '#/components/responses/UnauthorizedCookieMissing'
+        '500':
+          description: Error al guardar en base de datos.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+  /user/register/form:
+    post:
+      tags: [ Usuario ]
+      summary: Carga formulario de registro extendido
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/RegisterExtendedFormRequest' }
+      responses:
+        '200':
+          description: Formulario de registro guardado.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: { type: string, example: "Formulario de registro guardado" }
+        '400':
+          description: Error en datos del formulario.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+        '401':
+          $ref: '#/components/responses/UnauthorizedCookieMissing'
+  /password-recovery:
+    get:
+      tags: [ Recuperación de contraseña ]
+      summary: Envía email para recuperar contraseña
+      security: []  # sin autenticación
+      parameters:
+        - $ref: '#/components/parameters/emailQuery'
+      responses:
+        '200':
+          description: |
+            (1) Email de recuperación enviado, (2) Usuario no encontrado (respuesta neutral).
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    enum:
+                      - "Email de recuperación enviado"
+                      - "Si el usuario existe, se envió el email de recuperación"
+              examples:
+                sent: { value: { message: "Email de recuperación enviado" } }
+                neutral: { value: { message: "Si el usuario existe, se envió el email de recuperación" } }
+        '400':
+          description: Falta email.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+              examples:
+                missing_email: { value: { code: "bad_request", message: "Falta email" } }
+        '500':
+          description: Error inesperado al enviar correo.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+              examples:
+                mail_error: { value: { code: "internal_error", message: "Error inesperado al enviar correo" } }
+    put:
+      tags: [ Recuperación de contraseña ]
+      summary: Cambia la contraseña
+      description: Requiere **password recovery cookie** (emitida por `/password-recovery/verify`).
+      security:
+        - recoveryAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [ password ]
+              properties:
+                password: { $ref: '#/components/schemas/Password' }
+      responses:
+        '200':
+          description: Contraseña cambiada con éxito.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: { type: string, example: "Contraseña cambiada con éxito" }
+        '400':
+          description: |
+            (1) No se proporcionó contraseña, (2) Formato de contraseña incorrecto,
+            (3) Falta cookie de recuperación.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+              examples:
+                password_missing: { value: { code: "bad_request", message: "No se proporcionó contraseña" } }
+                password_format:  { value: { code: "bad_request", message: "Formato de contraseña incorrecto" } }
+                recovery_cookie:  { value: { code: "bad_request", message: "Falta cookie de recuperación" } }
+  /password-recovery/verify:
+    get:
+      tags: [ Recuperación de contraseña ]
+      summary: Verifica token para habilitar cambio de password
+      description: Requiere **token válido**.
+      security: []  # sin autenticación adicional; validación vía query
+      parameters:
+        - $ref: '#/components/parameters/emailQuery'
+        - $ref: '#/components/parameters/tokenQuery'
+      responses:
+        '200':
+          description: |
+            (1) Usuario no encontrado (respuesta neutral),
+            (2) Verificación exitosa; continúa flujo (emite cookie de recuperación).
+          headers:
+            Set-Cookie:
+              description: Puede establecer cookie de recuperación.
+              schema: { type: string }
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    enum:
+                      - "Usuario no encontrado"
+                      - "Verificación exitosa"
+              examples:
+                neutral: { value: { message: "Usuario no encontrado" } }
+                ok:      { value: { message: "Verificación exitosa" } }
+        '400':
+          description: Falta email o token / error de validación del esquema.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+              examples:
+                missing_params: { value: { code: "bad_request", message: "Falta email o token" } }
+                schema_error:   { value: { code: "bad_request", message: "Error de validación del esquema" } }
+        '401':
+          description: Error de verificación.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+              examples:
+                verify_error: { value: { code: "unauthorized", message: "Error de verificación" } }
+  /:
+    get:
+      tags: [ Raíz ]
+      summary: Página informativa de acceso a la API
+      security: []  # sin autenticación
+      responses:
+        '200':
+          description: HTML de bienvenida / información.
+          content:
+            text/html:
+              schema: { type: string }
+              examples:
+                info:
+                  value: "<html><body>Acceso a la API</body></html>"
+  /health-check:
+    get:
+      tags: [ Salud ]
+      summary: Verifica el estado del servidor
+      description: Responde con “Server is running OK”.
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: Servidor en funcionamiento correcto.
+          content:
+            text/plain:
+              schema: { type: string, example: "Server is running OK" }
+        '401':
+          $ref: '#/components/responses/UnauthorizedCookieMissing'
+x-routing:
+  notFoundHandler:
+    description: Manejador 404 para cualquier método y ruta no definida.
+    pathPattern: "*"   # representativo; no estándar de OpenAPI
+    responseRef: '#/components/responses/NotFoundHTML'

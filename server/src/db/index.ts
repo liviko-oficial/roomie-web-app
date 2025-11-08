@@ -5,11 +5,11 @@ export default async function connect() {
     const db = await mongoose.connect(DB_URL);
     db.connection.on("error", (e) => {
       console.error(e);
-      throw Error("Conection to db fail");
+      throw Error("Connection to db fail");
     });
-    console.log("connection to db made");
+    console.log("Connection to db made");
   } catch (e) {
     console.error(e);
-    throw Error("Conection to db fail");
+    throw Error("Connection to db fail");
   }
 }
