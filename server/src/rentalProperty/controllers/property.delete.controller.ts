@@ -36,7 +36,9 @@ export class PropertyDeleteController {
         });
       }
 
-      if (propiedad.propietarioId?.toString() !== arrendadorId) {
+      const prop: any = propiedad;
+
+      if (prop.propietarioId?.toString() !== arrendadorId) {
         return res.status(403).json({
           success: false,
           message: MENSAJES_ERROR.ACCESO_DENEGADO
@@ -44,7 +46,7 @@ export class PropertyDeleteController {
       }
 
       // Verificar si hay inquilinos activos
-      if (propiedad.inquilinosActuales && propiedad.inquilinosActuales.length > 0) {
+      if (prop.inquilinosActuales && prop.inquilinosActuales.length > 0) {
         return res.status(400).json({
           success: false,
           message: "No se puede eliminar una propiedad con inquilinos activos. Por favor, finalice los contratos primero."
@@ -52,11 +54,11 @@ export class PropertyDeleteController {
       }
 
       // Realizar soft delete: cambiar estado a Inactiva y marcar como no disponible
-      propiedad.estado = ESTADOS_PROPIEDAD.INACTIVA;
-      if (propiedad.disponibilidad) {
-        propiedad.disponibilidad.disponible = false;
+      prop.estado = ESTADOS_PROPIEDAD.INACTIVA;
+      if (prop.disponibilidad) {
+        prop.disponibilidad.disponible = false;
       }
-      propiedad.fechaActualizacion = new Date();
+      prop.fechaActualizacion = new Date();
 
       await propiedad.save();
 
@@ -64,10 +66,10 @@ export class PropertyDeleteController {
         success: true,
         message: "Propiedad eliminada exitosamente (soft delete)",
         data: {
-          _id: propiedad._id,
-          titulo: propiedad.titulo,
-          estado: propiedad.estado,
-          disponible: propiedad.disponibilidad?.disponible,
+          _id: prop._id,
+          titulo: prop.titulo,
+          estado: prop.estado,
+          disponible: prop.disponibilidad?.disponible,
           mensaje: "La propiedad fue marcada como inactiva. Puede restaurarla en cualquier momento."
         }
       });
@@ -111,7 +113,9 @@ export class PropertyDeleteController {
         });
       }
 
-      if (propiedad.propietarioId?.toString() !== arrendadorId) {
+      const prop: any = propiedad;
+
+      if (prop.propietarioId?.toString() !== arrendadorId) {
         return res.status(403).json({
           success: false,
           message: MENSAJES_ERROR.ACCESO_DENEGADO
@@ -119,14 +123,14 @@ export class PropertyDeleteController {
       }
 
       // Verificaciones estrictas para eliminación permanente
-      if (propiedad.inquilinosActuales && propiedad.inquilinosActuales.length > 0) {
+      if (prop.inquilinosActuales && prop.inquilinosActuales.length > 0) {
         return res.status(400).json({
           success: false,
           message: "No se puede eliminar permanentemente una propiedad con inquilinos activos"
         });
       }
 
-      if (propiedad.aplicaciones && propiedad.aplicaciones.length > 0) {
+      if (prop.aplicaciones && prop.aplicaciones.length > 0) {
         return res.status(400).json({
           success: false,
           message: "No se puede eliminar permanentemente una propiedad con aplicaciones pendientes"
@@ -134,8 +138,8 @@ export class PropertyDeleteController {
       }
 
       // Guardar información antes de eliminar para respuesta
-      const tituloPropiedad = propiedad.titulo;
-      const idPropiedad = propiedad._id;
+      const tituloPropiedad = prop.titulo;
+      const idPropiedad = prop._id;
 
       // Eliminar la referencia del array de propiedades del arrendador
       await ArrendadorDB.findByIdAndUpdate(arrendadorId, {
@@ -194,7 +198,9 @@ export class PropertyDeleteController {
         });
       }
 
-      if (propiedad.propietarioId?.toString() !== arrendadorId) {
+      const prop: any = propiedad;
+
+      if (prop.propietarioId?.toString() !== arrendadorId) {
         return res.status(403).json({
           success: false,
           message: MENSAJES_ERROR.ACCESO_DENEGADO
@@ -202,19 +208,19 @@ export class PropertyDeleteController {
       }
 
       // Verificar que la propiedad esté inactiva (soft deleted)
-      if (propiedad.estado !== ESTADOS_PROPIEDAD.INACTIVA) {
+      if (prop.estado !== ESTADOS_PROPIEDAD.INACTIVA) {
         return res.status(400).json({
           success: false,
-          message: `No se puede restaurar una propiedad con estado "${propiedad.estado}". Solo se pueden restaurar propiedades inactivas.`
+          message: `No se puede restaurar una propiedad con estado "${prop.estado}". Solo se pueden restaurar propiedades inactivas.`
         });
       }
 
       // Restaurar la propiedad
-      propiedad.estado = ESTADOS_PROPIEDAD.ACTIVA;
-      if (propiedad.disponibilidad) {
-        propiedad.disponibilidad.disponible = true;
+      prop.estado = ESTADOS_PROPIEDAD.ACTIVA;
+      if (prop.disponibilidad) {
+        prop.disponibilidad.disponible = true;
       }
-      propiedad.fechaActualizacion = new Date();
+      prop.fechaActualizacion = new Date();
 
       await propiedad.save();
 
@@ -222,10 +228,10 @@ export class PropertyDeleteController {
         success: true,
         message: "Propiedad restaurada exitosamente",
         data: {
-          _id: propiedad._id,
-          titulo: propiedad.titulo,
-          estado: propiedad.estado,
-          disponible: propiedad.disponibilidad?.disponible,
+          _id: prop._id,
+          titulo: prop.titulo,
+          estado: prop.estado,
+          disponible: prop.disponibilidad?.disponible,
           mensaje: "La propiedad ha sido restaurada y está nuevamente activa."
         }
       });
