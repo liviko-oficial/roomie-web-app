@@ -107,6 +107,13 @@ const NavbarStudent = ({ currentPage, onNavigate }) => {
               Registro
             </button>
 
+            <Link
+              href="/students/profile"
+              className="px-3 py-2 text-[#042a5c] hover:text-[#fdd76c] rounded-md font-medium font-['Poppins'] transition-colors duration-300"
+            >
+              Mi perfil
+            </Link>
+
             {/* Botón iniciar sesión */}
             <button
               onClick={openLoginModal}
