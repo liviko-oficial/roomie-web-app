@@ -841,6 +841,8 @@ paths:
     post:
       tags: [ Arrendadores ]
       summary: Registrar un nuevo arrendador
+      operationId: registerArrendador
+      description: Crea una nueva cuenta de arrendador en el sistema. Requiere email válido y contraseña cumpliendo con requisitos de seguridad (8-32 caracteres con mayúscula, minúscula, número y carácter especial). El perfil es opcional en el registro inicial.
       security: [ ]
       requestBody:
         required: true
@@ -853,9 +855,23 @@ paths:
                 email: { $ref: '#/components/schemas/Email' }
                 password: { $ref: '#/components/schemas/Password' }
                 profile: { $ref: '#/components/schemas/ArrendadorProfile' }
+            examples:
+              basic_registration:
+                summary: Registro básico sin perfil
+                value:
+                  email: "arrendador@ejemplo.com"
+                  password: "SecurePass123!"
+              full_registration:
+                summary: Registro con perfil inicial
+                value:
+                  email: "arrendador@ejemplo.com"
+                  password: "SecurePass123!"
+                  profile:
+                    fullName: "Juan Pérez García"
+                    phone: "+52 55 1234 5678"
       responses:
         '201':
-          description: Arrendador registrado exitosamente
+          description: Arrendador registrado exitosamente con token JWT
           content:
             application/json:
               schema:
@@ -869,12 +885,25 @@ paths:
                       id: { type: string }
                       email: { $ref: '#/components/schemas/Email' }
                       token: { type: string }
-        '400': { $ref: '#/components/responses/ValidationError' }
+              examples:
+                success_response:
+                  value:
+                    success: true
+                    message: "Arrendador registrado exitosamente"
+                    data:
+                      id: "64a7b8c9d1e2f3a4b5c6d7e8"
+                      email: "arrendador@ejemplo.com"
+                      token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY0YTdiOGM5ZDFlMmYzYTRiNWM2ZDdlOCIsImVtYWlsIjoiYXJyZW5kYWRvckBlamVtcGxvLmNvbSIsImlhdCI6MTcwNDcwMzYwMH0.xxx"
+        '400':
+          description: Email ya registrado o datos inválidos
+          $ref: '#/components/responses/ValidationError'
         '500': { $ref: '#/components/responses/InternalError' }
   /api/arrendadores/login:
     post:
       tags: [ Arrendadores ]
       summary: Login de arrendador
+      operationId: loginArrendador
+      description: Autentica un arrendador registrado y devuelve un token JWT válido para acceder a endpoints protegidos. Solo arrendadores activos (no desactivados) pueden iniciar sesión.
       security: [ ]
       requestBody:
         required: true
@@ -886,9 +915,14 @@ paths:
               properties:
                 email: { $ref: '#/components/schemas/Email' }
                 password: { $ref: '#/components/schemas/Password' }
+            examples:
+              login_example:
+                value:
+                  email: "arrendador@ejemplo.com"
+                  password: "SecurePass123!"
       responses:
         '200':
-          description: Login exitoso
+          description: Login exitoso con token JWT
           content:
             application/json:
               schema:
@@ -903,13 +937,29 @@ paths:
                       email: { $ref: '#/components/schemas/Email' }
                       token: { type: string }
                       isEmailVerified: { type: boolean }
-        '400': { $ref: '#/components/responses/ValidationError' }
-        '401': { $ref: '#/components/responses/UnauthorizedBearer' }
+              examples:
+                success_response:
+                  value:
+                    success: true
+                    message: "Login exitoso"
+                    data:
+                      id: "64a7b8c9d1e2f3a4b5c6d7e8"
+                      email: "arrendador@ejemplo.com"
+                      token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.xxx"
+                      isEmailVerified: true
+        '400':
+          description: Email o contraseña incorrectos, o datos de validación incorrectos
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          description: Credenciales inválidas o arrendador inactivo
+          $ref: '#/components/responses/UnauthorizedBearer'
         '500': { $ref: '#/components/responses/InternalError' }
   /api/arrendadores:
     get:
+      operationId: listArrendadores
       tags: [ Arrendadores ]
       summary: Listar arrendadores activos (paginado)
+      description: Obtiene una lista paginada de todos los arrendadores activos en el sistema. Requiere autenticación JWT.
       security:
         - bearerAuth: [ ]
       parameters:
@@ -932,8 +982,10 @@ paths:
         '500': { $ref: '#/components/responses/InternalError' }
   /api/arrendadores/{id}:
     get:
+      operationId: getArrendador
       tags: [ Arrendadores ]
       summary: Obtener perfil de un arrendador
+      description: Obtiene el perfil completo de un arrendador. Solo el propietario o administradores pueden acceder.
       security:
         - bearerAuth: [ ]
       parameters:
@@ -951,8 +1003,10 @@ paths:
         '403': { $ref: '#/components/responses/Forbidden' }
         '404': { $ref: '#/components/responses/NotFound' }
     put:
+      operationId: updateArrendador
       tags: [ Arrendadores ]
       summary: Actualizar información general del arrendador
+      description: Actualiza campos básicos del arrendador como email, nombre completo y teléfono.
       security:
         - bearerAuth: [ ]
       requestBody:
@@ -970,8 +1024,10 @@ paths:
         '403': { $ref: '#/components/responses/Forbidden' }
         '404': { $ref: '#/components/responses/NotFound' }
     delete:
+      operationId: deleteArrendador
       tags: [ Arrendadores ]
       summary: Eliminar o desactivar un arrendador (soft delete)
+      description: Desactiva la cuenta del arrendador sin eliminar permanentemente sus datos.
       security:
         - bearerAuth: [ ]
       responses:
@@ -982,8 +1038,10 @@ paths:
         '404': { $ref: '#/components/responses/NotFound' }
   /api/arrendadores/{id}/perfil:
     put:
+      operationId: updateArrendadorProfile
       tags: [ Arrendadores ]
       summary: Actualizar perfil detallado del arrendador
+      description: Actualiza foto, documentos de identificación, fecha de nacimiento y otro datos del perfil detallado.
       security:
         - bearerAuth: [ ]
       requestBody:
@@ -1000,8 +1058,10 @@ paths:
         '404': { $ref: '#/components/responses/NotFound' }
   /api/arrendadores/{id}/cambiar-password:
     put:
+      operationId: changeArrendadorPassword
       tags: [ Arrendadores ]
       summary: Cambiar contraseña del arrendador
+      description: Cambia la contraseña. Requiere contraseña actual correcta y nueva contraseña cumpliendo requisitos de seguridad.
       security:
         - bearerAuth: [ ]
       requestBody:
@@ -1351,6 +1411,8 @@ paths:
     patch:
       tags: [ Propiedades Renta (CRUD) ]
       summary: Restaurar una propiedad eliminada lógicamente
+      operationId: restoreProperty
+      description: Restaura una propiedad que fue eliminada lógicamente (soft delete).
       security:
         - bearerAuth: [ ]
       parameters:
@@ -1361,6 +1423,57 @@ paths:
         '403': { $ref: '#/components/responses/Forbidden' }
         '404': { $ref: '#/components/responses/NotFound' }
   # Públicos adicionales
+  /api/propiedades-renta/{propertyId}/similares:
+    get:
+      tags: [ Propiedades Renta (Público) ]
+      summary: Obtener propiedades similares en el mismo campus
+      operationId: getSimilarProperties
+      description: Obtiene una lista de propiedades similares a la especificada en el mismo campus. Criterios de similitud incluyen rango de precio (±20%), tipo de propiedad, y características similares (baños, recámaras).
+      security: [ ]
+      parameters:
+        - $ref: '#/components/parameters/propertyIdParam'
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 20
+            default: 6
+          description: Número máximo de resultados (default 6, máximo 20)
+      responses:
+        '200':
+          description: Lista de propiedades similares
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/PropiedadRenta' }
+                  pagination: { $ref: '#/components/schemas/Pagination' }
+              examples:
+                similares_response:
+                  value:
+                    success: true
+                    data:
+                      - id: "64a7b8c9d1e2f3a4b5c6d7ea"
+                        tipoPropiedad: "Departamento"
+                        campus: "Guadalajara"
+                        precioMensual: 8200
+                        estado: "Activa"
+                      - id: "64a7b8c9d1e2f3a4b5c6d7eb"
+                        tipoPropiedad: "Departamento"
+                        campus: "Guadalajara"
+                        precioMensual: 8800
+                        estado: "Activa"
+                    pagination:
+                      total: 2
+                      page: 1
+                      limit: 6
+                      pages: 1
+        '404': { $ref: '#/components/responses/NotFound' }
   /api/propiedades-renta/arrendador/{arrendadorId}:
     get:
       tags: [ Propiedades Renta (Público) ]
