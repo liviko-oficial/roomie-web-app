@@ -1,19 +1,17 @@
 openapi: 3.1.0
 info:
-  title: API de Autenticación y Usuario
-  version: "1.0.0"
+  title: API de Autenticación, Usuario, Arrendadores y Propiedades de Renta
+  version: "1.1.0"
   description: |
-    Especificación OpenAPI generada a partir de la tabla provista. Se preservan los
-    mensajes, restricciones y flujos descritos (usuarios parciales/completos, cookies
-    de sesión y de recuperación, verificación por token, etc.).
+    Especificación OpenAPI consolidada para módulos de Usuario, Arrendadores y Propiedades de Renta.
+    Incluye rutas públicas y protegidas, esquemas reusables, autenticación con cookies (usuario)
+    y Bearer JWT (arrendadores), más endpoints en esqueleto para el módulo de clientes.
 
-    Notas:
-    - Donde se indica “debe pertenecer a un dominio permitido”, este documento no
-      impone un patrón específico; queda a implementación (véase `x-allowedDomains`).
-    - Para **usuarios parciales** y **completos**, se reflejan estados en `User.status`.
 servers:
   - url: https://api.ejemplo.com
     description: Servidor principal
+  - url: http://localhost:3000
+    description: Servidor local
 tags:
   - name: Registro
   - name: Login
@@ -21,18 +19,33 @@ tags:
   - name: Recuperación de contraseña
   - name: Salud
   - name: Raíz
+  - name: Arrendadores
+    description: Endpoints de autenticación y gestión de perfiles de arrendadores
+  - name: Propiedades (Arrendador)
+    description: CRUD de propiedades bajo prefijo /api/propiedades para arrendadores
+  - name: Propiedades Renta (Público)
+    description: Búsqueda pública de propiedades bajo /api/propiedades-renta
+  - name: Propiedades Renta (CRUD)
+    description: CRUD de propiedades bajo /api/propiedades-renta (arrendadores)
+  - name: Cliente Propiedades Renta
+    description: Funcionalidades orientadas a clientes (esqueleto)
 components:
   securitySchemes:
     cookieAuth:
       type: apiKey
       in: cookie
       name: session
-      description: Cookie de sesión. Requerida donde se indica “Requiere autenticación”.
+      description: Cookie de sesión (módulo Usuario)
     recoveryAuth:
       type: apiKey
       in: cookie
       name: pw_recovery
       description: Cookie de recuperación (emitida en `/password-recovery/verify`).
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Autenticación JWT para arrendadores y CRUD de propiedades
   parameters:
     emailQuery:
       name: email
@@ -41,7 +54,7 @@ components:
       schema:
         $ref: '#/components/schemas/Email'
       description: Email válido; **debe pertenecer a un dominio permitido**.
-      x-allowedDomains: []  # completar en implementación
+      x-allowedDomains: [ ]  # completar en implementación
     tokenQuery:
       name: token
       in: query
@@ -50,6 +63,51 @@ components:
         type: string
         format: uuid
       description: Token de verificación (UUID).
+    page:
+      name: page
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+      description: Número de página
+    limit:
+      name: limit
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
+      description: Tamaño de página
+    ordenarPor:
+      name: ordenarPor
+      in: query
+      schema:
+        type: string
+        enum: [ precio_asc, precio_desc, distancia, calificacion, fecha_desc ]
+      description: Criterio de ordenamiento
+    campusParam:
+      name: campus
+      in: path
+      required: true
+      schema:
+        $ref: '#/components/schemas/Campus'
+      description: Campus objetivo
+    propertyIdParam:
+      name: propertyId
+      in: path
+      required: true
+      schema:
+        type: string
+      description: ID de la propiedad
+    arrendadorIdParam:
+      name: arrendadorId
+      in: path
+      required: true
+      schema:
+        type: string
+      description: ID del arrendador
   responses:
     UnauthorizedCookieMissing:
       description: Cookie de sesión faltante.
@@ -86,6 +144,28 @@ components:
           examples:
             not_found:
               value: "<html><body>404 - Ruta no encontrada</body></html>"
+    UnauthorizedBearer:
+      description: Autenticación requerida o token inválido
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorResponse' }
+          examples:
+            bearer_missing: { value: { code: 'unauthorized', message: 'Autenticación requerida' } }
+            bearer_invalid: { value: { code: 'unauthorized', message: 'Token inválido' } }
+    Forbidden:
+      description: Acceso denegado (no tienes permisos / no eres propietario)
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorResponse' }
+          examples:
+            forbidden: { value: { code: 'forbidden', message: 'Acceso denegado' } }
+    NotFound:
+      description: Recurso no encontrado
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorResponse' }
+          examples:
+            not_found: { value: { code: 'not_found', message: 'Recurso no encontrado' } }
   schemas:
     Email:
       type: string
@@ -199,13 +279,137 @@ components:
           description: Información adicional opcional del error.
           nullable: true
       required: [ code, message ]
+    # New shared enums and value objects
+    Campus:
+      type: string
+      enum: [ Guadalajara, Monterrey, 'Ciudad de México', Otro ]
+    TipoPropiedad:
+      type: string
+      enum: [ Casa, Departamento, Cuarto, Studio, Loft ]
+    GeneroPreferido:
+      type: string
+      enum: [ 'Solo hombres', 'Solo mujeres', 'Mixto', 'Sin preferencia' ]
+    EstadoPropiedad:
+      type: string
+      enum: [ Activa, Inactiva, Rentada, 'En mantenimiento', Pausada ]
+    Address:
+      type: object
+      properties:
+        calle: { type: string }
+        colonia: { type: string, nullable: true }
+        ciudad: { type: string }
+        estado: { type: string }
+        codigoPostal: { type: string }
+        latitud: { type: number, nullable: true }
+        longitud: { type: number, nullable: true }
+      required: [ calle, ciudad, estado, codigoPostal ]
+    Pagination:
+      type: object
+      properties:
+        total: { type: integer }
+        page: { type: integer }
+        limit: { type: integer }
+        pages: { type: integer }
+    ArrendadorProfile:
+      type: object
+      properties:
+        profilePicture: { type: string, format: uri, nullable: true }
+        officialId:
+          type: object
+          properties:
+            type: { type: string, enum: [ INE, passport, license ] }
+            fileUrl: { type: string, format: uri }
+            fileName: { type: string }
+          required: [ type, fileUrl, fileName ]
+          nullable: true
+        dateOfBirth:
+          type: object
+          properties:
+            day: { type: integer }
+            month: { type: integer }
+            year: { type: integer }
+          nullable: true
+        gender: { type: string, enum: [ masculino, femenino, otro ], nullable: true }
+        phone: { type: string, nullable: true }
+        fullName: { type: string, nullable: true }
+        isVerified: { type: boolean }
+    Arrendador:
+      type: object
+      properties:
+        id: { type: string }
+        email: { $ref: '#/components/schemas/Email' }
+        profile: { $ref: '#/components/schemas/ArrendadorProfile' }
+        properties: { type: array, items: { type: string } }
+        isEmailVerified: { type: boolean }
+        isActive: { type: boolean }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    PropiedadRenta:
+      type: object
+      properties:
+        id: { type: string }
+        tipoPropiedad: { $ref: '#/components/schemas/TipoPropiedad' }
+        tipoRenta: { type: string }
+        campus: { $ref: '#/components/schemas/Campus' }
+        generoPreferido: { $ref: '#/components/schemas/GeneroPreferido' }
+        precioMensual: { type: number }
+        serviciosIncluidos: { type: boolean }
+        servicios: { type: array, items: { type: string } }
+        amueblado: { type: boolean }
+        muebles: { type: array, items: { type: string }, nullable: true }
+        direccion: { $ref: '#/components/schemas/Address' }
+        imagenes: { type: array, items: { type: string, format: uri } }
+        descripcion: { type: string }
+        estado: { $ref: '#/components/schemas/EstadoPropiedad' }
+        propietarioId: { type: string }
+        verificada: { type: boolean }
+        destacada: { type: boolean }
+        calificacion: { type: number }
+        numeroReviews: { type: integer }
+        vistas: { type: integer }
+        favoritos: { type: integer }
+        inquilinosActuales: { type: array, items: { type: string } }
+        fechaCreacion: { type: string, format: date-time }
+        fechaActualizacion: { type: string, format: date-time }
+      required: [ tipoPropiedad, tipoRenta, campus, precioMensual, direccion ]
+    PropiedadCreacion:
+      type: object
+      properties:
+        tipoPropiedad: { $ref: '#/components/schemas/TipoPropiedad' }
+        tipoRenta: { type: string }
+        campus: { $ref: '#/components/schemas/Campus' }
+        precioMensual: { type: number }
+        direccion: { $ref: '#/components/schemas/Address' }
+        amueblado: { type: boolean }
+        mascotasPermitidas: { type: boolean, nullable: true }
+        serviciosIncluidos: { type: boolean }
+        servicios: { type: array, items: { type: string }, nullable: true }
+        numeroBanos: { type: integer, nullable: true }
+        numeroRecamaras: { type: integer, nullable: true }
+        metrosCuadrados: { type: number, nullable: true }
+        generoPreferido: { $ref: '#/components/schemas/GeneroPreferido' }
+        descripcion: { type: string, nullable: true }
+        imagenes: { type: array, items: { type: string, format: uri }, nullable: true }
+      required: [ tipoPropiedad, tipoRenta, campus, precioMensual, direccion ]
+    PropiedadActualizacion:
+      allOf:
+        - $ref: '#/components/schemas/PropiedadCreacion'
+      description: Versión parcial para actualización (todas las propiedades opcionales)
+    Disponibilidad:
+      type: object
+      properties:
+        fechaDisponibilidad: { type: string, format: date }
+        duracionMinima: { type: integer }
+        duracionMaxima: { type: integer }
+        renovacionAutomatica: { type: boolean }
+      required: [ fechaDisponibilidad, duracionMinima ]
 paths:
   /register:
     post:
       tags: [ Registro ]
       summary: Registro de usuario (email + password)
       description: Crea un **usuario parcial** tras verificación de token (véase `/register/verify`).
-      security: []  # sin autenticación
+      security: [ ]  # sin autenticación
       requestBody:
         required: true
         content:
@@ -227,8 +431,8 @@ paths:
               schema: { $ref: '#/components/schemas/ErrorResponse' }
               examples:
                 password_missing: { value: { code: "bad_request", message: "No se proporcionó contraseña" } }
-                password_format:  { value: { code: "bad_request", message: "Contraseña con formato incorrecto" } }
-                cookie_missing:   { value: { code: "bad_request", message: "No se proporcionó cookie" } }
+                password_format: { value: { code: "bad_request", message: "Contraseña con formato incorrecto" } }
+                cookie_missing: { value: { code: "bad_request", message: "No se proporcionó cookie" } }
         '401':
           description: Token no verificado para el email proporcionado.
           content:
@@ -248,7 +452,7 @@ paths:
     get:
       tags: [ Registro ]
       summary: Verifica token y registra usuario parcial
-      security: []  # sin autenticación
+      security: [ ]  # sin autenticación
       parameters:
         - $ref: '#/components/parameters/emailQuery'
         - $ref: '#/components/parameters/tokenQuery'
@@ -275,7 +479,7 @@ paths:
       summary: Login de usuario
       description: Realiza el inicio de sesión del usuario.
       security:
-        - cookieAuth: []   # según documento, requiere autenticación (cookie)
+        - cookieAuth: [ ]   # según documento, requiere autenticación (cookie)
       requestBody:
         required: true
         content:
@@ -301,7 +505,7 @@ paths:
               schema: { $ref: '#/components/schemas/ErrorResponse' }
               examples:
                 invalid_payload: { value: { code: "bad_request", message: "Datos de envío inválidos" } }
-                wrong_password:  { value: { code: "bad_request", message: "Contraseña incorrecta" } }
+                wrong_password: { value: { code: "bad_request", message: "Contraseña incorrecta" } }
         '401':
           $ref: '#/components/responses/UnauthorizedCookieMissing'
         '404':
@@ -311,7 +515,7 @@ paths:
       tags: [ Login ]
       summary: Convierte usuario parcial en usuario completo
       security:
-        - cookieAuth: []
+        - cookieAuth: [ ]
       responses:
         '200':
           description: |
@@ -340,13 +544,13 @@ paths:
               schema: { $ref: '#/components/schemas/ErrorResponse' }
               examples:
                 not_found_partial: { value: { code: "internal_error", message: "No se encontró usuario parcial para actualizar" } }
-                save_error:        { value: { code: "internal_error", message: "Error inesperado al guardar" } }
+                save_error: { value: { code: "internal_error", message: "Error inesperado al guardar" } }
   /user:
     get:
       tags: [ Usuario ]
       summary: Obtiene información de usuario
       security:
-        - cookieAuth: []
+        - cookieAuth: [ ]
       responses:
         '200':
           description: Información de usuario retornada (parcial o completa).
@@ -361,13 +565,13 @@ paths:
             application/json:
               schema: { $ref: '#/components/schemas/ErrorResponse' }
               examples:
-                db_error:   { value: { code: "internal_error", message: "Error al obtener usuario de la base de datos" } }
-                unknown:    { value: { code: "internal_error", message: "Error inesperado" } }
+                db_error: { value: { code: "internal_error", message: "Error al obtener usuario de la base de datos" } }
+                unknown: { value: { code: "internal_error", message: "Error inesperado" } }
     delete:
       tags: [ Usuario ]
       summary: Elimina al usuario autenticado
       security:
-        - cookieAuth: []
+        - cookieAuth: [ ]
       responses:
         '200':
           description: Usuario eliminado; sesión cerrada.
@@ -386,12 +590,12 @@ paths:
               schema: { $ref: '#/components/schemas/ErrorResponse' }
               examples:
                 delete_error: { value: { code: "internal_error", message: "Error al eliminar usuario" } }
-                unknown:      { value: { code: "internal_error", message: "Error inesperado" } }
+                unknown: { value: { code: "internal_error", message: "Error inesperado" } }
     put:
       tags: [ Usuario ]
       summary: Cambia propiedades generales del usuario
       security:
-        - cookieAuth: []
+        - cookieAuth: [ ]
       requestBody:
         required: true
         content:
@@ -410,7 +614,7 @@ paths:
               schema: { $ref: '#/components/schemas/ErrorResponse' }
               examples:
                 body_missing: { value: { code: "bad_request", message: "Body ausente" } }
-                validation:   { value: { code: "bad_request", message: "Error de validación de cambios" } }
+                validation: { value: { code: "bad_request", message: "Error de validación de cambios" } }
         '401':
           $ref: '#/components/responses/UnauthorizedCookieMissing'
         '500':
@@ -425,7 +629,7 @@ paths:
       tags: [ Usuario ]
       summary: Actualiza preferencias del usuario
       security:
-        - cookieAuth: []
+        - cookieAuth: [ ]
       requestBody:
         required: true
         content:
@@ -448,7 +652,7 @@ paths:
               schema: { $ref: '#/components/schemas/ErrorResponse' }
               examples:
                 nothing_to_change: { value: { code: "bad_request", message: "No hay preferencias para cambiar" } }
-                validation:        { value: { code: "bad_request", message: "Error de validación de preferencias" } }
+                validation: { value: { code: "bad_request", message: "Error de validación de preferencias" } }
         '401':
           $ref: '#/components/responses/UnauthorizedCookieMissing'
         '500':
@@ -461,7 +665,7 @@ paths:
       tags: [ Usuario ]
       summary: Carga formulario de registro extendido
       security:
-        - cookieAuth: []
+        - cookieAuth: [ ]
       requestBody:
         required: true
         content:
@@ -487,7 +691,7 @@ paths:
     get:
       tags: [ Recuperación de contraseña ]
       summary: Envía email para recuperar contraseña
-      security: []  # sin autenticación
+      security: [ ]  # sin autenticación
       parameters:
         - $ref: '#/components/parameters/emailQuery'
       responses:
@@ -526,7 +730,7 @@ paths:
       summary: Cambia la contraseña
       description: Requiere **password recovery cookie** (emitida por `/password-recovery/verify`).
       security:
-        - recoveryAuth: []
+        - recoveryAuth: [ ]
       requestBody:
         required: true
         content:
@@ -554,14 +758,14 @@ paths:
               schema: { $ref: '#/components/schemas/ErrorResponse' }
               examples:
                 password_missing: { value: { code: "bad_request", message: "No se proporcionó contraseña" } }
-                password_format:  { value: { code: "bad_request", message: "Formato de contraseña incorrecto" } }
-                recovery_cookie:  { value: { code: "bad_request", message: "Falta cookie de recuperación" } }
+                password_format: { value: { code: "bad_request", message: "Formato de contraseña incorrecto" } }
+                recovery_cookie: { value: { code: "bad_request", message: "Falta cookie de recuperación" } }
   /password-recovery/verify:
     get:
       tags: [ Recuperación de contraseña ]
       summary: Verifica token para habilitar cambio de password
       description: Requiere **token válido**.
-      security: []  # sin autenticación adicional; validación vía query
+      security: [ ]  # sin autenticación adicional; validación vía query
       parameters:
         - $ref: '#/components/parameters/emailQuery'
         - $ref: '#/components/parameters/tokenQuery'
@@ -586,7 +790,7 @@ paths:
                       - "Verificación exitosa"
               examples:
                 neutral: { value: { message: "Usuario no encontrado" } }
-                ok:      { value: { message: "Verificación exitosa" } }
+                ok: { value: { message: "Verificación exitosa" } }
         '400':
           description: Falta email o token / error de validación del esquema.
           content:
@@ -594,7 +798,7 @@ paths:
               schema: { $ref: '#/components/schemas/ErrorResponse' }
               examples:
                 missing_params: { value: { code: "bad_request", message: "Falta email o token" } }
-                schema_error:   { value: { code: "bad_request", message: "Error de validación del esquema" } }
+                schema_error: { value: { code: "bad_request", message: "Error de validación del esquema" } }
         '401':
           description: Error de verificación.
           content:
@@ -606,7 +810,7 @@ paths:
     get:
       tags: [ Raíz ]
       summary: Página informativa de acceso a la API
-      security: []  # sin autenticación
+      security: [ ]  # sin autenticación
       responses:
         '200':
           description: HTML de bienvenida / información.
@@ -622,7 +826,7 @@ paths:
       summary: Verifica el estado del servidor
       description: Responde con “Server is running OK”.
       security:
-        - cookieAuth: []
+        - cookieAuth: [ ]
       responses:
         '200':
           description: Servidor en funcionamiento correcto.
@@ -631,8 +835,669 @@ paths:
               schema: { type: string, example: "Server is running OK" }
         '401':
           $ref: '#/components/responses/UnauthorizedCookieMissing'
-x-routing:
-  notFoundHandler:
-    description: Manejador 404 para cualquier método y ruta no definida.
-    pathPattern: "*"   # representativo; no estándar de OpenAPI
-    responseRef: '#/components/responses/NotFoundHTML'
+  # -------------------------------------------------------------
+  # Arrendadores - Autenticación y Perfil
+  /api/arrendadores/registro:
+    post:
+      tags: [ Arrendadores ]
+      summary: Registrar un nuevo arrendador
+      security: [ ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [ email, password ]
+              properties:
+                email: { $ref: '#/components/schemas/Email' }
+                password: { $ref: '#/components/schemas/Password' }
+                profile: { $ref: '#/components/schemas/ArrendadorProfile' }
+      responses:
+        '201':
+          description: Arrendador registrado exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  message: { type: string }
+                  data:
+                    type: object
+                    properties:
+                      id: { type: string }
+                      email: { $ref: '#/components/schemas/Email' }
+                      token: { type: string }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '500': { $ref: '#/components/responses/InternalError' }
+  /api/arrendadores/login:
+    post:
+      tags: [ Arrendadores ]
+      summary: Login de arrendador
+      security: [ ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [ email, password ]
+              properties:
+                email: { $ref: '#/components/schemas/Email' }
+                password: { $ref: '#/components/schemas/Password' }
+      responses:
+        '200':
+          description: Login exitoso
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  message: { type: string }
+                  data:
+                    type: object
+                    properties:
+                      id: { type: string }
+                      email: { $ref: '#/components/schemas/Email' }
+                      token: { type: string }
+                      isEmailVerified: { type: boolean }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/UnauthorizedBearer' }
+        '500': { $ref: '#/components/responses/InternalError' }
+  /api/arrendadores:
+    get:
+      tags: [ Arrendadores ]
+      summary: Listar arrendadores activos (paginado)
+      security:
+        - bearerAuth: [ ]
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/limit'
+      responses:
+        '200':
+          description: Lista de arrendadores
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/Arrendador' }
+                  pagination: { $ref: '#/components/schemas/Pagination' }
+        '401': { $ref: '#/components/responses/UnauthorizedBearer' }
+        '500': { $ref: '#/components/responses/InternalError' }
+  /api/arrendadores/{id}:
+    get:
+      tags: [ Arrendadores ]
+      summary: Obtener perfil de un arrendador
+      security:
+        - bearerAuth: [ ]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Perfil del arrendador
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Arrendador' }
+        '401': { $ref: '#/components/responses/UnauthorizedBearer' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    put:
+      tags: [ Arrendadores ]
+      summary: Actualizar información general del arrendador
+      security:
+        - bearerAuth: [ ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Campos parciales de arrendador
+      responses:
+        '200':
+          description: Arrendador actualizado
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/UnauthorizedBearer' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    delete:
+      tags: [ Arrendadores ]
+      summary: Eliminar o desactivar un arrendador (soft delete)
+      security:
+        - bearerAuth: [ ]
+      responses:
+        '200':
+          description: Arrendador eliminado
+        '401': { $ref: '#/components/responses/UnauthorizedBearer' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /api/arrendadores/{id}/perfil:
+    put:
+      tags: [ Arrendadores ]
+      summary: Actualizar perfil detallado del arrendador
+      security:
+        - bearerAuth: [ ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ArrendadorProfile' }
+      responses:
+        '200':
+          description: Perfil actualizado
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/UnauthorizedBearer' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /api/arrendadores/{id}/cambiar-password:
+    put:
+      tags: [ Arrendadores ]
+      summary: Cambiar contraseña del arrendador
+      security:
+        - bearerAuth: [ ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [ currentPassword, newPassword ]
+              properties:
+                currentPassword: { $ref: '#/components/schemas/Password' }
+                newPassword: { $ref: '#/components/schemas/Password' }
+      responses:
+        '200': { description: Contraseña cambiada }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/UnauthorizedBearer' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  # -------------------------------------------------------------
+  # Propiedades (Arrendador) - /api/propiedades
+  /api/propiedades:
+    get:
+      tags: [ Propiedades (Arrendador) ]
+      summary: Obtener propiedades activas (público)
+      security: [ ]
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/limit'
+      responses:
+        '200':
+          description: Lista de propiedades
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/PropiedadRenta' }
+                  pagination: { $ref: '#/components/schemas/Pagination' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '500': { $ref: '#/components/responses/InternalError' }
+  /api/propiedades/{propertyId}:
+    get:
+      tags: [ Propiedades (Arrendador) ]
+      summary: Obtener detalle de una propiedad (público)
+      security: [ ]
+      parameters:
+        - $ref: '#/components/parameters/propertyIdParam'
+      responses:
+        '200':
+          description: Detalle de propiedad
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PropiedadRenta' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '500': { $ref: '#/components/responses/InternalError' }
+  /api/propiedades/{arrendadorId}:
+    post:
+      tags: [ Propiedades (Arrendador) ]
+      summary: Crear propiedad (arrendador propietario)
+      security:
+        - bearerAuth: [ ]
+      parameters:
+        - $ref: '#/components/parameters/arrendadorIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/PropiedadCreacion' }
+      responses:
+        '201': { description: Propiedad creada }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/UnauthorizedBearer' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /api/propiedades/{arrendadorId}/mis-propiedades:
+    get:
+      tags: [ Propiedades (Arrendador) ]
+      summary: Obtener propiedades del arrendador
+      security:
+        - bearerAuth: [ ]
+      parameters:
+        - $ref: '#/components/parameters/arrendadorIdParam'
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/limit'
+      responses:
+        '200': { description: Lista de propiedades propias }
+        '401': { $ref: '#/components/responses/UnauthorizedBearer' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /api/propiedades/{arrendadorId}/propiedad/{propertyId}:
+    put:
+      tags: [ Propiedades (Arrendador) ]
+      summary: Actualizar propiedad
+      security:
+        - bearerAuth: [ ]
+      parameters:
+        - $ref: '#/components/parameters/arrendadorIdParam'
+        - $ref: '#/components/parameters/propertyIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/PropiedadActualizacion' }
+      responses:
+        '200': { description: Propiedad actualizada }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/UnauthorizedBearer' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    delete:
+      tags: [ Propiedades (Arrendador) ]
+      summary: Eliminar propiedad (soft delete)
+      security:
+        - bearerAuth: [ ]
+      parameters:
+        - $ref: '#/components/parameters/arrendadorIdParam'
+        - $ref: '#/components/parameters/propertyIdParam'
+      responses:
+        '200': { description: Propiedad eliminada }
+        '401': { $ref: '#/components/responses/UnauthorizedBearer' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /api/propiedades/{arrendadorId}/propiedad/{propertyId}/estado:
+    patch:
+      tags: [ Propiedades (Arrendador) ]
+      summary: Cambiar estado de propiedad
+      security:
+        - bearerAuth: [ ]
+      parameters:
+        - $ref: '#/components/parameters/arrendadorIdParam'
+        - $ref: '#/components/parameters/propertyIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                isActive: { type: boolean }
+      responses:
+        '200': { description: Estado actualizado }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/UnauthorizedBearer' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  # -------------------------------------------------------------
+  # Propiedades Renta (Público) - /api/propiedades-renta
+  /api/propiedades-renta:
+    get:
+      tags: [ Propiedades Renta (Público) ]
+      summary: Obtener todas las propiedades activas con filtros y paginación
+      security: [ ]
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/limit'
+        - name: campus
+          in: query
+          schema: { $ref: '#/components/schemas/Campus' }
+        - name: tipoPropiedad
+          in: query
+          schema: { $ref: '#/components/schemas/TipoPropiedad' }
+        - name: tipoRenta
+          in: query
+          schema: { type: string }
+        - name: precioMinimo
+          in: query
+          schema: { type: number }
+        - name: precioMaximo
+          in: query
+          schema: { type: number }
+        - name: amueblado
+          in: query
+          schema: { type: boolean }
+        - name: mascotasPermitidas
+          in: query
+          schema: { type: boolean }
+        - name: serviciosIncluidos
+          in: query
+          schema: { type: boolean }
+        - name: numeroBanos
+          in: query
+          schema: { type: integer }
+        - name: numeroRecamaras
+          in: query
+          schema: { type: integer }
+        - name: generoPreferido
+          in: query
+          schema: { $ref: '#/components/schemas/GeneroPreferido' }
+        - $ref: '#/components/parameters/ordenarPor'
+      responses:
+        '200':
+          description: Lista de propiedades
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/PropiedadRenta' }
+                  pagination: { $ref: '#/components/schemas/Pagination' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '500': { $ref: '#/components/responses/InternalError' }
+    post:
+      tags: [ Propiedades Renta (CRUD) ]
+      summary: Crear una nueva propiedad (arrendador)
+      security:
+        - bearerAuth: [ ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/PropiedadCreacion' }
+      responses:
+        '201': { description: Propiedad creada }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/UnauthorizedBearer' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /api/propiedades-renta/{propertyId}:
+    get:
+      tags: [ Propiedades Renta (Público) ]
+      summary: Obtener detalles de una propiedad específica
+      security: [ ]
+      parameters:
+        - $ref: '#/components/parameters/propertyIdParam'
+      responses:
+        '200':
+          description: Detalles de propiedad
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PropiedadRenta' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    put:
+      tags: [ Propiedades Renta (CRUD) ]
+      summary: Actualizar una propiedad existente (arrendador propietario)
+      security:
+        - bearerAuth: [ ]
+      parameters:
+        - $ref: '#/components/parameters/propertyIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/PropiedadActualizacion' }
+      responses:
+        '200': { description: Propiedad actualizada }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/UnauthorizedBearer' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    delete:
+      tags: [ Propiedades Renta (CRUD) ]
+      summary: Eliminar una propiedad (soft delete)
+      security:
+        - bearerAuth: [ ]
+      parameters:
+        - $ref: '#/components/parameters/propertyIdParam'
+      responses:
+        '200': { description: Propiedad eliminada }
+        '401': { $ref: '#/components/responses/UnauthorizedBearer' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /api/propiedades-renta/{propertyId}/estado:
+    patch:
+      tags: [ Propiedades Renta (CRUD) ]
+      summary: Cambiar estado de una propiedad
+      security:
+        - bearerAuth: [ ]
+      parameters:
+        - $ref: '#/components/parameters/propertyIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                estado: { $ref: '#/components/schemas/EstadoPropiedad' }
+      responses:
+        '200': { description: Estado actualizado }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/UnauthorizedBearer' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /api/propiedades-renta/{propertyId}/disponibilidad:
+    patch:
+      tags: [ Propiedades Renta (CRUD) ]
+      summary: Actualizar disponibilidad de una propiedad
+      security:
+        - bearerAuth: [ ]
+      parameters:
+        - $ref: '#/components/parameters/propertyIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/Disponibilidad' }
+      responses:
+        '200': { description: Disponibilidad actualizada }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/UnauthorizedBearer' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /api/propiedades-renta/{propertyId}/imagenes:
+    patch:
+      tags: [ Propiedades Renta (CRUD) ]
+      summary: Actualizar imágenes de una propiedad
+      security:
+        - bearerAuth: [ ]
+      parameters:
+        - $ref: '#/components/parameters/propertyIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                imagenes:
+                  type: array
+                  items: { type: string, format: uri }
+                  maxItems: 20
+      responses:
+        '200': { description: Imágenes actualizadas }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/UnauthorizedBearer' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /api/propiedades-renta/{propertyId}/permanente:
+    delete:
+      tags: [ Propiedades Renta (CRUD) ]
+      summary: Eliminar permanentemente una propiedad (hard delete)
+      security:
+        - bearerAuth: [ ]
+      parameters:
+        - $ref: '#/components/parameters/propertyIdParam'
+      responses:
+        '200': { description: Propiedad eliminada permanentemente }
+        '401': { $ref: '#/components/responses/UnauthorizedBearer' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /api/propiedades-renta/{propertyId}/restaurar:
+    patch:
+      tags: [ Propiedades Renta (CRUD) ]
+      summary: Restaurar una propiedad eliminada lógicamente
+      security:
+        - bearerAuth: [ ]
+      parameters:
+        - $ref: '#/components/parameters/propertyIdParam'
+      responses:
+        '200': { description: Propiedad restaurada }
+        '401': { $ref: '#/components/responses/UnauthorizedBearer' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  # Públicos adicionales
+  /api/propiedades-renta/arrendador/{arrendadorId}:
+    get:
+      tags: [ Propiedades Renta (Público) ]
+      summary: Obtener propiedades de un arrendador específico
+      security: [ ]
+      parameters:
+        - $ref: '#/components/parameters/arrendadorIdParam'
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/limit'
+      responses:
+        '200': { description: Lista de propiedades del arrendador }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /api/propiedades-renta/catalogo:
+    get:
+      tags: [ Propiedades Renta (Público) ]
+      summary: Catálogo principal para homepage
+      security: [ ]
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/limit'
+      responses:
+        '200': { description: Catálogo de propiedades }
+  /api/propiedades-renta/buscar:
+    get:
+      tags: [ Propiedades Renta (Público) ]
+      summary: Búsqueda avanzada con múltiples filtros
+      security: [ ]
+      parameters:
+        - name: textoLibre
+          in: query
+          schema: { type: string }
+        - name: distanciaMaxima
+          in: query
+          schema: { type: number }
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/ordenarPor'
+      responses:
+        '200': { description: Resultados de búsqueda }
+        '400': { $ref: '#/components/responses/ValidationError' }
+  /api/propiedades-renta/campus/{campus}:
+    get:
+      tags: [ Propiedades Renta (Público) ]
+      summary: Filtrar propiedades por campus
+      security: [ ]
+      parameters:
+        - $ref: '#/components/parameters/campusParam'
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/ordenarPor'
+      responses:
+        '200': { description: Propiedades por campus }
+  # -------------------------------------------------------------
+  # Cliente Propiedades Renta (Esqueleto - 501)
+  /api/propiedades-renta/cliente/recomendaciones:
+    get:
+      tags: [ Cliente Propiedades Renta ]
+      summary: Obtener propiedades recomendadas basadas en el perfil del cliente
+      security: [ ]
+      responses:
+        '501': { description: Not Implemented }
+  /api/propiedades-renta/cliente/busqueda-avanzada:
+    get:
+      tags: [ Cliente Propiedades Renta ]
+      summary: Búsqueda avanzada con filtros especiales para clientes
+      security: [ ]
+      responses:
+        '501': { description: Not Implemented }
+  /api/propiedades-renta/cliente/favoritos:
+    get:
+      tags: [ Cliente Propiedades Renta ]
+      summary: Obtener favoritos del cliente
+      security: [ ]
+      responses:
+        '501': { description: Not Implemented }
+    post:
+      tags: [ Cliente Propiedades Renta ]
+      summary: Agregar favorito
+      security: [ ]
+      responses:
+        '501': { description: Not Implemented }
+  /api/propiedades-renta/cliente/favoritos/{propertyId}:
+    delete:
+      tags: [ Cliente Propiedades Renta ]
+      summary: Eliminar favorito
+      security: [ ]
+      parameters:
+        - $ref: '#/components/parameters/propertyIdParam'
+      responses:
+        '501': { description: Not Implemented }
+  /api/propiedades-renta/cliente/vistas-recientes:
+    get:
+      tags: [ Cliente Propiedades Renta ]
+      summary: Obtener historial de vistas recientes
+      security: [ ]
+      responses:
+        '501': { description: Not Implemented }
+  /api/propiedades-renta/cliente/compatibilidad-roommate:
+    get:
+      tags: [ Cliente Propiedades Renta ]
+      summary: Buscar compatibilidad de roommates
+      security: [ ]
+      responses:
+        '501': { description: Not Implemented }
+  /api/propiedades-renta/cliente/similares/{propertyId}:
+    get:
+      tags: [ Cliente Propiedades Renta ]
+      summary: Obtener propiedades similares a una específica
+      security: [ ]
+      parameters:
+        - $ref: '#/components/parameters/propertyIdParam'
+      responses:
+        '501': { description: Not Implemented }
+  /api/propiedades-renta/cliente/busquedas-guardadas:
+    get:
+      tags: [ Cliente Propiedades Renta ]
+      summary: Obtener búsquedas guardadas del cliente
+      security: [ ]
+      responses:
+        '501': { description: Not Implemented }
+    post:
+      tags: [ Cliente Propiedades Renta ]
+      summary: Guardar una nueva búsqueda
+      security: [ ]
+      responses:
+        '501': { description: Not Implemented }
+  /api/propiedades-renta/cliente/comparar:
+    post:
+      tags: [ Cliente Propiedades Renta ]
+      summary: Comparar hasta 4 propiedades
+      security: [ ]
+      responses:
+        '501': { description: Not Implemented }
+  /api/propiedades-renta/cliente/mapa:
+    get:
+      tags: [ Cliente Propiedades Renta ]
+      summary: Obtener propiedades para mapa
+      security: [ ]
+      responses:
+        '501': { description: Not Implemented }
