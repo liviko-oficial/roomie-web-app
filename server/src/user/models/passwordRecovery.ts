@@ -8,15 +8,15 @@ type EmailsTokens = Map<string, Entries>;
 
 function cron_delete(email_token: EmailsTokens) {
   const now = new Date();
-  for (const [email, entrie] of email_token) {
-    if (entrie.expires_at < now) {
+  for (const [email, entry] of email_token) {
+    if (entry.expires_at < now) {
       email_token.delete(email);
     }
   }
 }
 const MINUTE = 60 * 1000;
 class ValidateToken {
-  private emails_tokens: EmailsTokens;
+  private readonly emails_tokens: EmailsTokens;
   private static _instance: ValidateToken;
   static get instance() {
     if (!this._instance) {

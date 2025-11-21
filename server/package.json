@@ -5,7 +5,8 @@
   "main": "index.ts",
   "scripts": {
     "test": "vitest",
-    "dev:server": "tsx --env-file-if-exists=.env.local --watch ./index.ts",
+    "start:server": "tsx --env-file-if-exists=.env.local --watch ./index.ts",
+    "dev:server": "bun ./index.ts --env-file .env.local",
     "dev:email": "email dev -d src/email_templates -p 4500"
   },
   "keywords": [],
@@ -23,13 +24,19 @@
     "mongoose": "^8.16.4",
     "react": "19.1.0",
     "react-dom": "19.1.0",
-    "resend": "^4.7.0"
+    "resend": "^4.7.0",
+    "swagger-ui-express": "^5.0.1",
+    "yamljs": "^0.3.0"
   },
   "devDependencies": {
     "@react-email/preview-server": "^4.2.4",
     "@types/express": "^5.0.3",
     "@types/node": "^24.1.0",
+    "@types/supertest": "^6.0.3",
+    "@types/swagger-ui-express": "^4.1.8",
+    "@types/yamljs": "^0.2.34",
     "react-email": "4.2.4",
+    "supertest": "^7.1.4",
     "tsx": "^4.20.3",
     "typescript": "^5.8.3",
     "vite-tsconfig-paths": "^5.1.4",

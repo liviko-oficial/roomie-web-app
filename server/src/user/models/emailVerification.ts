@@ -1,18 +1,18 @@
 import { randomUUID } from "node:crypto";
-type User = { token: string; exipiresAt: Date; password: string };
+type User = { token: string; expiresAt: Date; password: string };
 type Users = Map<string, User>;
 const MINUTE = 60 * 1000;
 function cron_service(users: Users) {
   const now = new Date();
   for (const [key, user] of users) {
-    if (user.exipiresAt < now) {
+    if (user.expiresAt < now) {
       users.delete(key);
     }
   }
 }
 export class VerificationEmail {
   private static _instance: VerificationEmail;
-  private users: Users;
+  private readonly users: Users;
   private constructor() {
     this.users = new Map();
     setInterval(() => {
@@ -32,7 +32,7 @@ export class VerificationEmail {
     if (!this.users.has(email))
       return { success: false, error: "Token not found" };
     const user = this.users.get(email);
-    if (user.exipiresAt < new Date()) {
+    if (user.expiresAt < new Date()) {
       return { success: false, error: "Token expired" };
     }
     if (user.token !== token)
@@ -42,12 +42,12 @@ export class VerificationEmail {
   }
   private set_email({ email, password }) {
     const now = new Date();
-    if (this.users.has(email) && this.users.get(email).exipiresAt > now) {
+    if (this.users.has(email) && this.users.get(email).expiresAt > now) {
       return this.users.get(email).token;
     }
     const token = randomUUID();
-    const exipiresAt = new Date(now.getTime() + 60 * 60 * 1000);
-    this.users.set(email, { token, exipiresAt, password });
+    const expiresAt = new Date(now.getTime() + 60 * 60 * 1000);
+    this.users.set(email, { token, expiresAt: expiresAt, password });
     return token;
   }
   get_link_token({ email, password }): string {
