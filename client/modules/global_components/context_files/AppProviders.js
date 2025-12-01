@@ -3,14 +3,18 @@
 "use client"
 import { RegistrationModalProvider } from "./RegistrationModalContext"; // Contexto del registration Modal
 import { LoginModalProvider } from "./LoginModalContext"; // Contexto del login Modal
+import { PropertyFilterProvider } from "./PropertyFilterContext"
 
 export const AppProviders = ({ children }) => {
   return (
     <RegistrationModalProvider>
+      <PropertyFilterProvider>
       <LoginModalProvider>
         {children}
       </LoginModalProvider>
+      </PropertyFilterProvider>
     </RegistrationModalProvider>
+    
   );
 };
 
