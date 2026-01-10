@@ -6,6 +6,8 @@ info:
     Especificación OpenAPI consolidada para módulos de Usuario, Arrendadores y Propiedades de Renta.
     Incluye rutas públicas y protegidas, esquemas reusables, autenticación con cookies (usuario)
     y Bearer JWT (arrendadores), más endpoints en esqueleto para el módulo de clientes.
+    NOTa: Esta es una version de endpoints simplificada para guiar,
+    actualizar para futuras versiones y con cada nueva iteración.
 
 servers:
   - url: https://api.ejemplo.com
@@ -403,6 +405,86 @@ components:
         duracionMaxima: { type: integer }
         renovacionAutomatica: { type: boolean }
       required: [ fechaDisponibilidad, duracionMinima ]
+    # Nuevos esquemas para peticiones
+    CreatePeticionRequest:
+      type: object
+      required: [ userId ]
+      properties:
+        userId:
+          type: string
+          description: MongoDB ObjectId del usuario solicitante
+        oferta:
+          $ref: '#/components/schemas/PeticionOferta'
+    PeticionOferta:
+      type: object
+      properties:
+        montoOfrecidoMXN:
+          type: number
+          minimum: 0
+          description: Monto ofrecido por el usuario (MXN)
+        numeroOfertas:
+          type: integer
+          minimum: 1
+        historialOfertas:
+          type: array
+          items:
+            type: number
+    UsuarioVisible:
+      type: object
+      required: [ nombres, apellidoPaterno ]
+      properties:
+        nombres: { type: string }
+        apellidoPaterno: { type: string }
+        fotoPerfilUrl: { type: string, format: uri }
+        edad: { type: integer, minimum: 16, maximum: 120 }
+        genero: { type: string }
+        nacionalidad: { type: string }
+        estadoOrigen: { type: string }
+        hobbies:
+          type: array
+          maxItems: 5
+          items: { type: string }
+        noNegociables:
+          type: array
+          maxItems: 5
+          items: { type: string }
+        preferenciaRoomies: { type: string, enum: [ 'Solo mujeres', 'Solo hombres', 'Mixto' ] }
+        tieneMascota: { type: boolean }
+        tipoMascota: { type: string, nullable: true }
+        nivelEducativo: { type: string }
+        areaPrograma: { type: string, description: '4 letras en mayúsculas, sin números' }
+        semestreOGraduacion: { type: string }
+        contactoEmergencia:
+          type: object
+          properties:
+            nombre: { type: string }
+            telefono: { type: string }
+    PeticionContexto:
+      type: object
+      properties:
+        propertyId: { type: string }
+        fechaSolicitud: { type: string, format: date-time }
+        estatus: { type: string, enum: [ 'En proceso', 'Aceptada', 'Rechazada' ] }
+    Peticion:
+      type: object
+      properties:
+        _id: { type: string }
+        propertyId: { type: string }
+        usuarioVisible: { $ref: '#/components/schemas/UsuarioVisible' }
+        contexto: { $ref: '#/components/schemas/PeticionContexto' }
+        oferta: { $ref: '#/components/schemas/PeticionOferta' }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    PeticionResponse:
+      type: object
+      properties:
+        success: { type: boolean }
+        data: { $ref: '#/components/schemas/Peticion' }
+    ErrorResponse:
+      type: object
+      properties:
+        code: { type: string }
+        message: { type: string }
 paths:
   /register:
     post:
@@ -1614,3 +1696,119 @@ paths:
       security: [ ]
       responses:
         '501': { description: Not Implemented }
+  /api/propiedades-renta/{propertyId}/solicitar:
+    post:
+      tags: [ Propiedades Renta (Público) ]
+      summary: Crear una petición de renta para una propiedad
+      description: |
+        Crea una petición de renta. En el prototipo no requiere autenticación; en producción debe validar que el userId coincide con el usuario autenticado y aplicar rate limiting.
+      parameters:
+        - $ref: '#/components/parameters/propertyIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePeticionRequest'
+            examples:
+              completo:
+                value:
+                  userId: '64a7b8c9d1e2f3a4b5c6d7e8'
+                  oferta:
+                    montoOfrecidoMXN: 8500
+                    numeroOfertas: 1
+                    historialOfertas: [ 8500 ]
+      responses:
+        '201':
+          description: Petición creada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PeticionResponse'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '404':
+          description: Propiedad o usuario no encontrado
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security: [ ]  # TODO (PRODUCCIÓN): Requerir cookieAuth/bearer para usuarios
+
+  /api/propiedades/{arrendadorId}/peticiones:
+    get:
+      tags: [ Propiedades (Arrendador) ]
+      summary: Listar peticiones del arrendador
+      description: Lista peticiones de todas las propiedades del arrendador. En producción debe validar ownership y aplicar rate limiting.
+      parameters:
+        - $ref: '#/components/parameters/arrendadorIdParam'
+        - name: propertyId
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Filtrar por ID de propiedad
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/limit'
+      responses:
+        '200':
+          description: Lista de peticiones
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/Peticion' }
+                  pagination:
+                    type: object
+                    properties:
+                      page: { type: integer }
+                      limit: { type: integer }
+                      total: { type: integer }
+                      totalPages: { type: integer }
+        '401':
+          $ref: '#/components/responses/UnauthorizedBearer'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearerAuth: [ ]
+
+  /api/propiedades/{arrendadorId}/peticiones/{peticionId}:
+    get:
+      tags: [ Propiedades (Arrendador) ]
+      summary: Obtener detalle de una petición
+      description: Devuelve información visible del usuario solicitante, el contexto y oferta económica si aplica. En producción debe validar ownership de la propiedad asociada.
+      parameters:
+        - $ref: '#/components/parameters/arrendadorIdParam'
+        - name: peticionId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: ID de la petición
+      responses:
+        '200':
+          description: Detalle de petición
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data: { $ref: '#/components/schemas/Peticion' }
+        '401':
+          $ref: '#/components/responses/UnauthorizedBearer'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearerAuth: [ ]

@@ -1,6 +1,8 @@
 import { Request, Response } from "express";
 import { PropiedadRentaDB, PropiedadRenta } from "../models/rentalProperty.schema";
 import { MENSAJES_ERROR, LIMITES, ESTADOS_PROPIEDAD } from "../lib/constants";
+import { PeticionDB, PeticionUsuarioVisible, PeticionOferta } from "../models";
+import { extractVisibleUserData } from "../lib/extractVisibleUserData";
 
 /**
  * Controlador de búsqueda de propiedades para clientes/estudiantes
@@ -474,6 +476,82 @@ export class PropertyClientController {
       return res.status(500).json({
         success: false,
         message: "Error al obtener propiedades similares",
+        error: error.message
+      });
+    }
+  }
+
+  /**
+   * POST /api/propiedades-renta/:propertyId/solicitar
+   * Crear una petición de renta para una propiedad
+   *
+   * SEGURIDAD: Actualmente NO requiere autenticación
+   * TODO (PRODUCCIÓN): Implementar autenticación de usuario
+   * - DEBE verificar que userId pertenece al usuario autenticado
+   * - DEBE validar token JWT del usuario
+   * - DEBE implementar rate limiting (eg máx 10 peticiones/usuario/día)
+   * - DEBE registrar intentos fallidos para detección de abuso
+   *
+   * Request body:
+   * - userId: ID del usuario que solicita la propiedad (MongoDB ObjectId)
+   * - oferta?: Información de la oferta económica (opcional)
+   */
+  static async createPeticion(req: Request, res: Response) {
+    try {
+      const { propertyId } = req.params;
+      const { userId, oferta } = req.body as {
+        userId: string;
+        oferta?: PeticionOferta;
+      };
+
+      if (!userId) {
+        return res.status(400).json({
+          success: false,
+          message: "El ID del usuario es requerido"
+        });
+      }
+
+      // TODO (PRODUCCIÓN): Validar formato de MongoDB ObjectId
+      // TODO (PRODUCCIÓN): Validar que userId pertenece al usuario autenticado
+      // if (req.user?.id !== userId) {
+      //   return res.status(403).json({ success: false, message: "No autorizado" });
+      // }
+
+      const propiedad = await PropiedadRentaDB.findById(propertyId);
+      if (!propiedad) {
+        return res.status(404).json({
+          success: false,
+          message: MENSAJES_ERROR.PROPIEDAD_NO_ENCONTRADA
+        });
+      }
+
+      let usuarioVisible: PeticionUsuarioVisible;
+      try {
+        usuarioVisible = await extractVisibleUserData(userId);
+      } catch (error: any) {
+        return res.status(404).json({
+          success: false,
+          message: error.message || "Error al extraer datos del usuario"
+        });
+      }
+
+      const peticion = await PeticionDB.create({
+        propertyId,
+        usuarioVisible,
+        contexto: {
+          propertyId,
+          fechaSolicitud: new Date(),
+          estatus: "En proceso"
+        },
+        oferta
+      });
+
+      return res.status(201).json({ success: true, data: peticion });
+    } catch (error: any) {
+      console.error("Error al crear petición:", error);
+      return res.status(500).json({
+        success: false,
+        message: "Error al crear la petición",
         error: error.message
       });
     }

@@ -4,6 +4,7 @@ import {
   CreatePropertySchema,
   UpdatePropertySchema
 } from "../validation/arrendador.validation";
+import { PeticionDB } from "@/rentalProperty";
 
 export class PropertyController {
   /**
@@ -329,6 +330,134 @@ export class PropertyController {
       res.status(500).json({
         success: false,
         message: "Error interno del servidor",
+        error: error.message
+      });
+    }
+  }
+
+  /**
+   * GET /api/propiedades/:arrendadorId/peticiones
+   * Listar todas las peticiones del arrendador
+   *
+   * SEGURIDAD: Validación incompleta
+   * TODO (PRODUCCIÓN): Validar ownership de propiedades
+   * - Actualmente NO valida que arrendador es dueño de propiedades
+   * - DEBE validar que cada petición pertenece a propiedad del arrendador
+   * - DEBE filtrar peticiones solo de sus propiedades
+   *
+   * TODO (PRODUCCIÓN): Implementar logging y auditoría
+   * - DEBE registrar qué arrendador vio qué peticiones
+   * - DEBE alertar sobre acceso no autorizado
+   * - DEBE mantener audit trail para compliance
+   *
+   * TODO (PRODUCCIÓN): Agregar límites de rate limiting
+   * - Limitar llamadas para evitar data scraping
+   * - Máx 60 peticiones/minuto por arrendador
+   */
+  static async listPeticiones(req: Request, res: Response) {
+    try {
+      const arrendadorId = req.params.arrendadorId;
+      const { propertyId } = req.query;
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = Math.min(parseInt(req.query.limit as string) || 20, 100);
+
+      const arrendador = await ArrendadorDB.findById(arrendadorId).lean();
+      if (!arrendador) {
+        return res.status(404).json({ success: false, message: "Arrendador no encontrado" });
+      }
+
+      // TODO (PRODUCCIÓN): Validar que token pertenece al arrendador
+      // if (req.user?.id !== arrendadorId) {
+      //   logUnauthorizedAccess(req.user?.id, arrendadorId);
+      //   return res.status(403).json({ success: false });
+      // }
+
+      // TODO (PRODUCCIÓN): Filtrar solo peticiones de propiedades del arrendador
+      // const propiedadesDelArrendador = await PropiedadRentaDB.find({ propietarioId: arrendadorId }).select('_id');
+      // const propertyIds = propiedadesDelArrendador.map(p => p._id);
+      const propertyFilter = propertyId ? { propertyId } : {};
+
+      // TODO (PRODUCCIÓN): En producción DEBE incluir validación de ownership
+      // const peticiones = await PeticionDB.find({
+      //   ...propertyFilter,
+      //   propertyId: { $in: propertyIds }  // Solo sus propiedades
+      // })
+      const peticiones = await PeticionDB.find({ ...propertyFilter })
+        .sort({ createdAt: -1 })
+        .skip((page - 1) * limit)
+        .limit(limit)
+        .lean();
+
+      // TODO (PRODUCCIÓN): Contar total para paginación adecuada
+      const total = await PeticionDB.countDocuments(propertyFilter);
+
+      return res.status(200).json({
+        success: true,
+        data: peticiones,
+        pagination: {
+          page,
+          limit,
+          total,
+          totalPages: Math.ceil(total / limit)
+        }
+      });
+    } catch (error: any) {
+      // TODO (PRODUCCIÓN): Loguear errores completos para auditoría
+      return res.status(500).json({
+        success: false,
+        message: "Error al listar peticiones",
+        error: error.message
+      });
+    }
+  }
+
+  /**
+   * GET /api/propiedades/:arrendadorId/peticiones/:peticionId
+   * Ver detalle de una petición específica
+   *
+   * SEGURIDAD: Sin validación de ownership
+   * TODO (PRODUCCIÓN): Validar que petición pertenece a propiedad del arrendador
+   * - DEBE verificar que propertyId de petición pertenece a arrendador
+   * - DEBE rechazar si propiedad no pertenece al arrendador
+   *
+   * TODO (PRODUCCIÓN): Implementar logging
+   * - DEBE registrar acceso a peticiones sensibles
+   * - DEBE alertar sobre accesos sospechosos (ej: muchos accesos rápidos)
+   *
+   * TODO (PRODUCCIÓN): Data sanitization
+   * - Asegurar que no hay datos no permitidos en respuesta
+   * - Auditar que extractVisibleUserData funciona correctamente
+   */
+  static async getPeticion(req: Request, res: Response) {
+    try {
+      const { peticionId, arrendadorId } = req.params;
+
+      const arrendador = await ArrendadorDB.findById(arrendadorId).lean();
+      if (!arrendador) {
+        return res.status(404).json({ success: false, message: "Arrendador no encontrado" });
+      }
+
+      const peticion = await PeticionDB.findById(peticionId).lean();
+      if (!peticion) {
+        return res.status(404).json({ success: false, message: "Petición no encontrada" });
+      }
+
+      // TODO (PRODUCCIÓN): Validar que petición pertenece a propiedad del arrendador
+      // const propiedad = await PropiedadRentaDB.findById(peticion.propertyId);
+      // if (!propiedad || propiedad.propietarioId !== arrendadorId) {
+      //   logUnauthorizedAccess(arrendadorId, peticionId);
+      //   return res.status(403).json({ success: false, message: "No autorizado" });
+      // }
+
+      // TODO (PRODUCCIÓN): Loguear acceso a petición para auditoría
+      // logPeticionAccess(arrendadorId, peticionId);
+
+      return res.status(200).json({ success: true, data: peticion });
+    } catch (error: any) {
+      // TODO (PRODUCCIÓN): Loguear errores sin exposición
+      return res.status(500).json({
+        success: false,
+        message: "Error al obtener petición",
         error: error.message
       });
     }
