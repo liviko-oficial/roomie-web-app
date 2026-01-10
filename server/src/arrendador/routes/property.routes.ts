@@ -35,4 +35,18 @@ router.put("/:arrendadorId/propiedad/:propertyId", checkOwnership("arrendadorId"
 router.delete("/:arrendadorId/propiedad/:propertyId", checkOwnership("arrendadorId"), PropertyController.deleteProperty);
 router.patch("/:arrendadorId/propiedad/:propertyId/estado", checkOwnership("arrendadorId"), PropertyController.togglePropertyStatus);
 
+/* ----------------------------------------------
+   Rutas para manejo de peticiones por arrendador
+   - TODO: autenticación, checkOwnership
+------------------------------------------------ */
+router.get(
+  "/:arrendadorId/peticiones",
+  PropertyController.listPeticiones
+);
+
+router.get(
+  "/:arrendadorId/peticiones/:peticionId",
+  PropertyController.getPeticion
+);
+
 export default router;

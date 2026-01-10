@@ -50,3 +50,18 @@ export type {
   GeneroPreferidoType,
   EstadoPropiedadType
 } from '../lib/constants';
+
+export {
+  PeticionSchema,
+  PeticionUsuarioVisibleSchema,
+  PeticionContextoSchema,
+  PeticionOfertaSchema,
+  PeticionDB
+} from './peticion.schema';
+
+export type {
+  Peticion,
+  PeticionUsuarioVisible,
+  PeticionContexto,
+  PeticionOferta
+} from './peticion.schema';
