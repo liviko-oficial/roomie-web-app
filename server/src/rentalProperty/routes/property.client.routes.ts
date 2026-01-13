@@ -99,4 +99,11 @@ router.get(
   PropertyClientController.getSimilarProperties
 );
 
+// Crear petición de renta para una propiedad
+// TODO: Improve and document
+router.post(
+  "/:propertyId/solicitar",
+  PropertyClientController.createPeticion
+);
+
 export default router;
