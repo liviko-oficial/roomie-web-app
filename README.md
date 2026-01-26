@@ -1,4 +1,4 @@
-# Roomie Web App (Liviko) 
+# Liviko
 
 This README documents the repo with a focus on devs who will contribute to the project. 
 
