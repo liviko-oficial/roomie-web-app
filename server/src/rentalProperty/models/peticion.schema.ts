@@ -35,7 +35,9 @@ export const PeticionContextoSchema = z.object({
 export const PeticionOfertaSchema = z.object({
   montoOfrecidoMXN: z.number().optional(),
   numeroOfertas: z.number().int().min(1).max(2).optional(),
-  historialOfertas: z.array(z.number()).optional()
+  historialOfertas: z.array(z.number()).optional(),
+  motivo: String.optional(),
+  estatusOferta: z.string().default("En proceso"),
 });
 
 export const PeticionSchema = z.object({
@@ -86,7 +88,9 @@ const PeticionContextoMongo = new Schema<PeticionContexto>({
 const PeticionOfertaMongo = new Schema<PeticionOferta>({
   montoOfrecidoMXN: Number,
   numeroOfertas: Number,
-  historialOfertas: [Number]
+  historialOfertas: [Number],
+  motivo: String,
+  estatusOferta: {type: String, default: "En proceso"}
 }, { _id: false });
 
 const PeticionMongoSchema = new Schema<Peticion>({

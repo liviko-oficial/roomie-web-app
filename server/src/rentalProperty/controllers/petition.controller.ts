@@ -147,23 +147,184 @@ export class PetitionController {
         }
     }
 
-    static async enviarOferta(req: Request, res: Response) {
-        /*
-         * Función para que, como arrendador o Estudiante, pueda enviar una oferta o contraoferta
-         * Pd: Sólo pueden realizar un mázimo de 2 contraofertas por ID
-         * */
+    static async crearOferta(req: Request, res: Response) {
+      try{
+        const {PetitionId} = req.params;
+        const {propertyId, montoOferta, motivo} = req.body;
+
+        const petition = await PetitionDB.findById(peticionId);
+
+        if(!petition){
+          return res.status(400).json({message: "Solicitud no encontrada"})
+        }
+
+        if(petition.contexto.estatus !== "En proceso"){
+          return res.status(400).json({
+            message: `La solicitud ya tiene el estatus: ${petition.contexto.estatus}`
+          });
+        }
+
+        if(!petition.oferta){
+          const nuevaOferta = new PeticionDB({
+            montoOfrecidoMXN:Number(montoOferta),
+            numeroOfertas: 1,
+            historialOfertas:[]
+            motivo: motivo,
+          });
+
+          await nuevaOferta.save();
+
+          await PeticionDB.findByIdAndUpdate(PetitionId,{
+            $push{oferta: nuevaOferta},
+          });
+
+          return res.status(200).json({
+            message: "Oferta creada.",
+            data:{
+              studentId,
+              propertyId
+              motivo
+            }
+          });
+        } else if (petition.oferta && petition.oferta.numeroOfertas <= 4){
+          await PeticionDB.findByIdAndUpdate(peticionId, {
+            "oferta.montoOfrecidoMXN": Number(montoOferta),
+            "oferta.numeroOfertas": petition.oferta.numeroOfertas + 1,
+            $addToSet:{
+              "oferta.historialOfertas": Number(montoOferta),
+              "oferta.motivo": motivo, 
+              }
+            });
+
+            return res.status(200).json({
+              message: "Contraoferta enviada.",
+              data:{
+                studentId,
+                propertyId
+                motivo
+              }
+            });
+          }
+        } 
+
+        return res.status(400).json({
+          message: "Cantidad de ofertas maxima alcanzada."
+        })
+
+        catch(error){
+        console.error("Error al crear oferta:", error);
+
+        return res.status(500).json({
+          message: "Error interno de servidor",
+          error: error.message
+        });
+      }
+    }
+    
+    static async aceptarOferta(req: Request, res: Response) {
+      try{
+        const {PetitionId} = req.params;
+        const {landlordId} = req.body;
+
+        const petition = await PetitionDB.findById(peticionId);
+
+        if(!petition){
+          return res.status(400).json({message: "Solicitud no encontrada"})
+        }
+
+        if(peticion.contexto.estatus !== "En proceso"){
+          return res.estatus(400).json({
+            message: `La solicitud ya tiene el estatus: ${petition.contexto.estatus}`
+          });
+        }
+
+        if(!petition.oferta){
+          return res.status(400).json({message: "Oferta no encontrada"})
+        }
+
+        const studentId = petition.contexto.usuarioId;
+        const propertyId = petition.contexto.propertyId;
+
+        const property = await PropiedadRentaDB.findById(propertyId);
+        if(!property || property.propietarioId.toString() !== landlordId){
+          return res.status(403).json({
+            message: "No tienes permiso para aceptar ofertas de esta propiedad"
+          });
+        }
+
+        await Promise.all([
+          PeticionDB.findByIdAndUpdate(petitionId,{
+            "oferta.estatusOferta": "Aceptada",
+            updatedAt: new Date()
+          })
+        ])
+
+        return res.status(200).json({
+          message: "Oferta/contraoferta aceptada.",
+          data:{
+            studentId,
+            propertyId,
+            estatus: "Aceptada"
+          }
+        });
+      } catch (error){
+        console.error("Error al aceptar la oferta:", error);
+        return res.status(500).json({
+          message: "Error interno del servidor al aceptar la oferta"
+        });
+      }
     }
 
-    static async aceptarOferta(req: Request, res: Response) {
-        /*
-         *Función para que, como arrendador o estudiante, pueda aceptar una oferta o
-         contraoferta
-        */
-    }
 
     static async rechazarOferta(req: Request, res: Response) {
-        /*
-         * Función para que, como arrendador o estudiante, pueda rechazar una oferta o 
-         * contraoferta*/
+      try{
+
+        const { PetitionId } = req.params;
+        const { landlordId, motivo } = req.body;
+
+        const petition = await PeticionDB.findById(peticionId);
+
+        if(!petition){
+          return res.status(400).json({ message: "Solicitud no encontrada" });
+        }
+
+        if(!petition.oferta){
+          return res.status(400).json({message: "Oferta no encontrada."})
+        }
+
+        if (petition.contexto.estatus !== "En proceso"){
+          return res.status(400).json({
+            message: `La solicitud ya tiene el estatus: ${petition.contexto.estatus}`
+          });
+        }
+
+        const property = await PropiedadRentaDB.findById(petition.propertyId);
+        if (!property || property.propietarioId.toString() !== landlordId){
+          return res.status(403).json({
+            message: "No tienes permiso para rechazar ofertas de esta propiedad"
+          });
+        }
+
+        await PeticionDB.findByIdAndUpdate(peticionId, {
+          "oferta.estatusOferta": "Rechazada",
+          "contexto.motivo": motivo,
+          updatedAt: new Date()
+        });
+
+        return res.status(200).json({
+          message: "Oferta rechazada."
+          data:{
+            peticionId,
+            status: "Rechazada"
+            motivo: motivo
+          }
+        });
+
+      } catch (error){
+        console.error("Error al rechazar la oferta:", error);
+        return res.status(500).json({
+          message: "Error interno del servidor al rechazar la oferta"
+        })
+      }
     }
 }

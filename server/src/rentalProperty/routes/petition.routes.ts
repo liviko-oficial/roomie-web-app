@@ -38,4 +38,22 @@ router.put(
     PetitionController.rechazarSolicitud
 );
 
+router.post(
+  "/:petitionId/crearOferta",
+  authenticateArrendador,
+  PetitionController,crearOferta
+);
+
+router.put(
+  "/:petitionId/aceptarOferta",
+  authenticateArrendador,
+  PetitionController,aceptarOferta
+);
+
+router.put(
+  "/:petitionId/rechazarOferta",
+  authenticateArrendador,
+  PetitionController, rechazarOferta
+);
+
 export default router;
