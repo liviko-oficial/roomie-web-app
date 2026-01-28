@@ -10,6 +10,8 @@ import LandingRegisterForm from '@/modules/lessor/components/LandingRegisterForm
 import LandingLoginPopup from '@/modules/lessor/components/LandingLoginPopup';
 import LandingFooter from '@/modules/lessor/components/LandingFooter';
 
+import PropertyOffers from '@/modules/lessor/components/property/PropertyOffers';
+
 
 export default function Home() {
 
@@ -30,7 +32,7 @@ export default function Home() {
     // After successful registration attempt (shows verification popup)
     console.log('Registro exitoso, esperando verificación de correo');
   };
-  
+
   return (
     <>
       <LandingHeader/>
@@ -42,7 +44,8 @@ export default function Home() {
       <LandingRegisterForm
         onLoginClick={handleLoginClick}
         onRegisterSuccess={handleRegisterSuccess}
-      />      
+      />
+      <PropertyOffers />
       <LandingFooter />
     </>
   );
