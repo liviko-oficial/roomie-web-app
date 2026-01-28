@@ -118,22 +118,25 @@ const PropertyCard = ({
           </div>
           <div className="flex space-x-2">
             <Link
-               href={`/properties/${property.id}`} 
+               href={`/properties/${property.id}`}
               onClick={() => onViewDetails(property)}
               className="px-3 py-1 bg-brand-accent text-brand-dark rounded font-medium hover:bg-yellow-400 transition duration-300"
             >
               Ver detalles
             </Link>
-            <button
+            {
+              isComparing != null &&
+              <button
               onClick={() => onCompareToggle(property)}
               className={`px-3 py-1 rounded font-medium transition duration-300 ${
                 isComparing
-                  ? "bg-black text-white"
-                  : "bg-white text-brand-dark border border-black hover:bg-gray-100"
-              }`}
-            >
+                ? "bg-black text-white"
+                : "bg-white text-brand-dark border border-black hover:bg-gray-100"
+                }`}
+                >
               Comparar
             </button>
+            }
           </div>
         </div>
       </div>
