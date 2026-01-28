@@ -7,7 +7,36 @@ import React, { useState } from 'react';
 import { properties } from '@/modules/home/mock/properties';
 import { propertySummary } from "@/modules/home/mappers/propertySummary";
 
-export default function BaseLayaout({property, CaracteristicaExtra, SeccionesExtra})  {
+interface BaseLayoutProps {
+  property: {
+    title: string;
+    type: string;
+    price: number;
+    location: string;
+    image: string;
+    features: string[];
+    rating: number;
+    isVerified: boolean;
+    bathrooms?: number;
+    petFriendly?: boolean;
+    description?: string;
+    images?: string[];
+    owner?: {
+      name: string;
+      phone?: string;
+      photo?: string;
+      avatar?: string;
+      contact?: string;
+    };
+    includedServices?: string[];
+    securityType?: string;
+    comuneAreas?: string[];
+  };
+  CaracteristicaExtra?: React.ReactNode;
+  SeccionesExtra?: React.ReactNode;
+}
+
+export default function BaseLayaout({property, CaracteristicaExtra, SeccionesExtra}: BaseLayoutProps)  {
   const router = useRouter();
   
   const {
@@ -45,7 +74,7 @@ export default function BaseLayaout({property, CaracteristicaExtra, SeccionesExt
   const genderType = features.find(f => ["Solo hombres", "Solo mujeres", "Mixto"].includes(f)) || "No especificado";
 
   // Formatear precios y cantidades con coma
-  const formatPrice = (value) => {
+  const formatPrice = (value: number | string): string | number => {
     if (typeof value !== 'number') return value;
     return value.toLocaleString('en-US');
   };

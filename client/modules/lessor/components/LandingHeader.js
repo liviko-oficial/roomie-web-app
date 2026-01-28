@@ -49,9 +49,15 @@ const LandingHeader = () => {
             </li>
           </ul>
 
+          <Link
+            href="/registro-propiedad"
+            className="bg-[#fdd76c] text-[#042a5c] px-4 py-2 rounded-md font-bold hover:bg-[#fdd76c]/90 transition"
+          >
+            Registrar Propiedad
+          </Link>
           <button
               onClick={openRegistrationModal}
-            className="border-2 border-brand-accent text-brand-dark px-4 py-2 rounded-md font-bold hover:bg-yellow-100 transition"
+            className="border-2 border-[#042a5c] text-[#042a5c] px-4 py-2 rounded-md font-bold hover:bg-[#042a5c] hover:text-white transition"
           >
             Registrarse
           </button>
@@ -107,9 +113,15 @@ const LandingHeader = () => {
             </li>
           </ul>
 
+          <Link
+            href="/registro-propiedad"
+            className="block w-full text-center bg-[#fdd76c] text-[#042a5c] px-4 py-2 rounded-md font-bold hover:bg-[#fdd76c]/90 transition"
+          >
+            Registrar Propiedad
+          </Link>
           <button
               onClick={openRegistrationModal}
-            className="block w-full text-center border-2 border-brand-accent text-brand-dark px-4 py-2 rounded-md font-bold hover:bg-yellow-100 transition"
+            className="block w-full text-center border-2 border-[#042a5c] text-[#042a5c] px-4 py-2 rounded-md font-bold hover:bg-[#042a5c] hover:text-white transition"
           >
             Registrarse
           </button>

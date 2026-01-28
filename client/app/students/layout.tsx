@@ -4,10 +4,10 @@ import { AppProviders } from "@/modules/global_components/context_files/AppProvi
 export default function MainLayout({ children }: { children: React.ReactNode }) {
   return (
     <>
-      
+
       <main>
         <AppProviders>
-          <NavbarStudent />
+          <NavbarStudent currentPage="home" onNavigate={() => {}} />
           {children}
         </AppProviders>
       </main>

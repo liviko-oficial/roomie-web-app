@@ -1,4 +1,5 @@
 import apiClient from './client';
+import type { UserUpdateData } from './types';
 
 export const userService = {
   // Registro
@@ -37,7 +38,7 @@ export const userService = {
   },
 
   // Actualizar perfil
-  updateProfile: async (userData: any) => {
+  updateProfile: async (userData: UserUpdateData) => {
     const response = await apiClient.put('/user', userData);
     return response.data;
   },

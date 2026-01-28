@@ -1,8 +1,9 @@
 import apiClient from './client';
+import type { PropertyQueryParams, PropertyCreateData, PropertyUpdateData } from './types';
 
 export const propertyService = {
   // Obtener todas las propiedades (con filtros)
-  getAll: async (params?: any) => {
+  getAll: async (params?: PropertyQueryParams) => {
     const response = await apiClient.get('/api/propiedades-renta', {
       params, // campus, precio, tipo, etc
     });
@@ -22,13 +23,13 @@ export const propertyService = {
   },
 
   // Crear propiedad (protegido - solo arrendador)
-  create: async (propertyData: any) => {
+  create: async (propertyData: PropertyCreateData) => {
     const response = await apiClient.post('/api/propiedades-renta', propertyData);
     return response.data;
   },
 
   // Actualizar propiedad (protegido)
-  update: async (id: string, propertyData: any) => {
+  update: async (id: string, propertyData: PropertyUpdateData) => {
     const response = await apiClient.put(`/api/propiedades-renta/${id}`, propertyData);
     return response.data;
   },

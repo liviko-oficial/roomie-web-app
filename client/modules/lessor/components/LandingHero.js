@@ -10,7 +10,7 @@ const LandingHero = () => {
             Conecta con estudiantes del Tec de Monterrey y <span className="font-bold">maximiza tus ingresos</span>
           </p>
           <a
-            href="#registro"
+            href="/registro-propiedad"
             className="inline-block bg-[#fdd76c] text-[#042a5c] py-3 px-8 rounded-lg text-lg md:text-xl font-medium hover:bg-[#fcd34d] transition-colors shadow-md"
           >
             Publica tu propiedad
