@@ -264,3 +264,46 @@ npm install
 npm run dev
 ```
 
+## 9. Frontend: key features
+
+### 9.1 Requests dashboard
+
+The dashboard allows students to view all the requests they have made to properties.
+
+**Route:** `/dashboard`
+
+**Files:**
+
+* `client/modules/dashboard/components/RequestCard.jsx` - card that displays each request.
+* `client/modules/dashboard/sections/DashboardHeader.jsx` - yellow header with the title.
+* `client/modules/dashboard/sections/RequestColumns.jsx` - the 3 sections (in progress, approved, rejected).
+* `client/modules/dashboard/mock/requests.js` - mock data for testing.
+
+**Functionality:**
+
+Requests are divided into 3 categories:
+
+* In progress (yellow) - no response yet.
+* Approved (green) - the landlord accepted.
+* Rejected (red) - the landlord declined.
+
+Each card displays:
+
+* Property photo.
+* Price.
+* Landlord info.
+* Message left by the landlord.
+* Offer status.
+* Buttons to send email or call.
+
+**Available states:**
+
+* `status`: `"en_proceso"` | `"aprobada"` | `"rechazada"`
+* `offerStatus`: `"sin_oferta"` | `"contraoferta_por_revisar"` | `"oferta_aceptada"` | `"oferta_rechazada"`
+
+**Pending:**
+
+* Connect to the real backend.
+* Add functionality to accept/reject counteroffers.
+* Notifications when status changes.
+
