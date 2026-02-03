@@ -36,7 +36,7 @@ export const PeticionOfertaSchema = z.object({
   montoOfrecidoMXN: z.number().optional(),
   numeroOfertas: z.number().int().min(1).max(2).optional(),
   historialOfertas: z.array(z.number()).optional(),
-  motivo: String.optional(),
+  motivo: z.string().optional(),
   estatusOferta: z.string().default("En proceso"),
 });
 

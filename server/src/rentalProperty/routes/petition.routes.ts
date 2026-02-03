@@ -41,19 +41,19 @@ router.put(
 router.post(
   "/:petitionId/crearOferta",
   authenticateArrendador,
-  PetitionController,crearOferta
+  PetitionController.crearOferta
 );
 
 router.put(
   "/:petitionId/aceptarOferta",
   authenticateArrendador,
-  PetitionController,aceptarOferta
+  PetitionController.aceptarOferta
 );
 
 router.put(
   "/:petitionId/rechazarOferta",
   authenticateArrendador,
-  PetitionController, rechazarOferta
+  PetitionController.rechazarOferta
 );
 
 export default router;

@@ -152,7 +152,8 @@ export class PetitionController {
         const {PetitionId} = req.params;
         const {propertyId, montoOferta, motivo} = req.body;
 
-        const petition = await PetitionDB.findById(peticionId);
+        const petition = await PeticionDB.findById(PetitionId);
+        const studentId = petition.contexto.usuarioId;
 
         if(!petition){
           return res.status(400).json({message: "Solicitud no encontrada"})
@@ -168,28 +169,28 @@ export class PetitionController {
           const nuevaOferta = new PeticionDB({
             montoOfrecidoMXN:Number(montoOferta),
             numeroOfertas: 1,
-            historialOfertas:[]
+            historialOfertas:[],
             motivo: motivo,
           });
 
           await nuevaOferta.save();
 
           await PeticionDB.findByIdAndUpdate(PetitionId,{
-            $push{oferta: nuevaOferta},
+            $push: {oferta: nuevaOferta},
           });
 
           return res.status(200).json({
             message: "Oferta creada.",
             data:{
               studentId,
-              propertyId
+              propertyId,
               motivo
             }
           });
-        } else if (petition.oferta && petition.oferta.numeroOfertas <= 4){
-          await PeticionDB.findByIdAndUpdate(peticionId, {
+        } else if (petition.oferta && Number(petition.oferta.numeroOfertas) <= 4){
+          await PeticionDB.findByIdAndUpdate(PetitionId, {
             "oferta.montoOfrecidoMXN": Number(montoOferta),
-            "oferta.numeroOfertas": petition.oferta.numeroOfertas + 1,
+            "oferta.numeroOfertas": Number(petition.oferta.numeroOfertas) + 1,
             $addToSet:{
               "oferta.historialOfertas": Number(montoOferta),
               "oferta.motivo": motivo, 
@@ -200,18 +201,17 @@ export class PetitionController {
               message: "Contraoferta enviada.",
               data:{
                 studentId,
-                propertyId
+                propertyId,
                 motivo
               }
             });
-          }
-        } 
-
-        return res.status(400).json({
-          message: "Cantidad de ofertas maxima alcanzada."
-        })
-
-        catch(error){
+          } else {
+            return res.status(400).json({
+              success: false,
+              message: "Cantidad de ofertas maxima alcanzada."
+            });
+        }
+        } catch(error){
         console.error("Error al crear oferta:", error);
 
         return res.status(500).json({
@@ -226,14 +226,14 @@ export class PetitionController {
         const {PetitionId} = req.params;
         const {landlordId} = req.body;
 
-        const petition = await PetitionDB.findById(peticionId);
+        const petition = await PeticionDB.findById(PetitionId);
 
         if(!petition){
           return res.status(400).json({message: "Solicitud no encontrada"})
         }
 
-        if(peticion.contexto.estatus !== "En proceso"){
-          return res.estatus(400).json({
+        if(petition.contexto.estatus !== "En proceso"){
+          return res.status(400).json({
             message: `La solicitud ya tiene el estatus: ${petition.contexto.estatus}`
           });
         }
@@ -253,7 +253,7 @@ export class PetitionController {
         }
 
         await Promise.all([
-          PeticionDB.findByIdAndUpdate(petitionId,{
+          PeticionDB.findByIdAndUpdate(PetitionId,{
             "oferta.estatusOferta": "Aceptada",
             updatedAt: new Date()
           })
@@ -282,7 +282,7 @@ export class PetitionController {
         const { PetitionId } = req.params;
         const { landlordId, motivo } = req.body;
 
-        const petition = await PeticionDB.findById(peticionId);
+        const petition = await PeticionDB.findById(PetitionId);
 
         if(!petition){
           return res.status(400).json({ message: "Solicitud no encontrada" });
@@ -305,17 +305,17 @@ export class PetitionController {
           });
         }
 
-        await PeticionDB.findByIdAndUpdate(peticionId, {
+        await PeticionDB.findByIdAndUpdate(PetitionId, {
           "oferta.estatusOferta": "Rechazada",
           "contexto.motivo": motivo,
           updatedAt: new Date()
         });
 
         return res.status(200).json({
-          message: "Oferta rechazada."
+          message: "Oferta rechazada.",
           data:{
-            peticionId,
-            status: "Rechazada"
+            PetitionId,
+            status: "Rechazada",
             motivo: motivo
           }
         });
