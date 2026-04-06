@@ -1,6 +1,6 @@
 import { model, Schema, Types } from "mongoose";
 import { z } from "zod";
-import { ObjectIdZod } from "@/lib/types.ts";
+import { ObjectIdZod } from "@/lib/types";
 
 export const PeticionUsuarioVisibleSchema = z.object({
   nombres: z.string().min(1),
@@ -25,19 +25,20 @@ export const PeticionUsuarioVisibleSchema = z.object({
 });
 
 export const PeticionContextoSchema = z.object({
-  propertyId: ObjectIdZod,
+  // Se removio propertyId - ya está en el root de PeticionSchema
   fechaSolicitud: z.date().default(() => new Date()),
-  estatus: z.string().default("En proceso"),
+  estatus: z.enum(["En proceso", "Aceptada", "Rechazada", "Cancelada"]).default("En proceso"),
 });
 
 export const PeticionOfertaSchema = z.object({
-  montoOfrecidoMXN: z.number().optional(),
+  montoOfrecidoMXN: z.number().positive().optional(),
   numeroOfertas: z.number().int().min(1).max(2).optional(),
   historialOfertas: z.array(z.number()).optional()
 });
 
 export const PeticionSchema = z.object({
   _id: ObjectIdZod.optional(),
+  userId: ObjectIdZod,
   propertyId: ObjectIdZod,
   usuarioVisible: PeticionUsuarioVisibleSchema,
   contexto: PeticionContextoSchema,
@@ -74,9 +75,9 @@ const PeticionUsuarioVisibleMongo = new Schema<PeticionUsuarioVisible>({
 }, { _id: false });
 
 const PeticionContextoMongo = new Schema<PeticionContexto>({
-  propertyId: { type: Types.ObjectId, ref: "PropiedadRenta", required: true },
+  // Se removio propertyId - evita duplicación en MongoDB
   fechaSolicitud: { type: Date, default: Date.now },
-  estatus: { type: String, default: "En proceso" }
+  estatus: { type: String, enum: ["En proceso", "Aceptada", "Rechazada", "Cancelada"], default: "En proceso" }
 }, { _id: false });
 
 const PeticionOfertaMongo = new Schema<PeticionOferta>({
@@ -86,6 +87,7 @@ const PeticionOfertaMongo = new Schema<PeticionOferta>({
 }, { _id: false });
 
 const PeticionMongoSchema = new Schema<Peticion>({
+  userId: { type: Types.ObjectId, ref: "User", required: true },
   propertyId: { type: Types.ObjectId, ref: "PropiedadRenta", required: true },
   usuarioVisible: { type: PeticionUsuarioVisibleMongo, required: true },
   contexto: { type: PeticionContextoMongo, required: true },
@@ -94,5 +96,10 @@ const PeticionMongoSchema = new Schema<Peticion>({
   updatedAt: { type: Date, default: Date.now }
 });
 
-export const PeticionDB = model<Peticion>("Peticion", PeticionMongoSchema, "Peticiones");
+// Crear índices para búsquedas comunes
+PeticionMongoSchema.index({ userId: 1, propertyId: 1 }, { unique: true }); // Evita peticiones duplicadas
+PeticionMongoSchema.index({ propertyId: 1 }); // Para ver peticiones de una propiedad
+PeticionMongoSchema.index({ userId: 1 }); // Para ver peticiones de un usuario
+PeticionMongoSchema.index({ createdAt: -1 }); // Para ordenar por fecha
 
+export const PeticionDB = model<Peticion>("Peticion", PeticionMongoSchema, "Peticiones");

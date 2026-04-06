@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { PropertyClientController } from "../controllers/property.client.controller";
+import { require_auth } from "@/user/routes/middleware/login.middleware";
 
 /**
  * Rutas públicas para búsqueda de propiedades (clientes/estudiantes)
@@ -103,6 +104,7 @@ router.get(
 // TODO: Improve and document
 router.post(
   "/:propertyId/solicitar",
+  require_auth,
   PropertyClientController.createPeticion
 );
 

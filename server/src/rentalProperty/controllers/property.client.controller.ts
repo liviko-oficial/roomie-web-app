@@ -3,6 +3,7 @@ import { PropiedadRentaDB, PropiedadRenta } from "../models/rentalProperty.schem
 import { MENSAJES_ERROR, LIMITES, ESTADOS_PROPIEDAD } from "../lib/constants";
 import { PeticionDB, PeticionUsuarioVisible, PeticionOferta } from "../models";
 import { extractVisibleUserData } from "../lib/extractVisibleUserData";
+import { Types } from "mongoose";
 
 /**
  * Controlador de búsqueda de propiedades para clientes/estudiantes
@@ -484,40 +485,64 @@ export class PropertyClientController {
   /**
    * POST /api/propiedades-renta/:propertyId/solicitar
    * Crear una petición de renta para una propiedad
-   *
-   * SEGURIDAD: Actualmente NO requiere autenticación
-   * TODO (PRODUCCIÓN): Implementar autenticación de usuario
-   * - DEBE verificar que userId pertenece al usuario autenticado
-   * - DEBE validar token JWT del usuario
-   * - DEBE implementar rate limiting (eg máx 10 peticiones/usuario/día)
-   * - DEBE registrar intentos fallidos para detección de abuso
+   * - Requiere autenticación de usuario
+   * - El userId se toma desde la sesión autenticada
+   * - Evita solicitudes duplicadas a la misma propiedad
+   * - Solo permite aplicar a propiedades activas y disponibles
    *
    * Request body:
-   * - userId: ID del usuario que solicita la propiedad (MongoDB ObjectId)
    * - oferta?: Información de la oferta económica (opcional)
+   *
+   
+   * Ahorita req.user no está tipado en este controller, por eso se está usando:
+
+    const userId = (req as any).user?._id;
+
+    Para salir rápido, está bien.
+
+    esto es temporal
+    luego podría tipar RequestWithUser
+   * 
    */
+// ...existing code...
+
   static async createPeticion(req: Request, res: Response) {
     try {
+      // 1. Obtener el ID de la propiedad desde la URL
       const { propertyId } = req.params;
-      const { userId, oferta } = req.body as {
-        userId: string;
+
+      // 2. Del body solo tomamos la oferta
+      const { oferta } = req.body as {
         oferta?: PeticionOferta;
       };
 
+      // 3. Tomar el usuario autenticado desde req.user
+      // Temporalmente usamos req as any porque este controller aún no tipa RequestWithUser
+      const userId = (req as any).user?._id;
+
+      // 4. Si no hay usuario autenticado, bloquear la operación
       if (!userId) {
-        return res.status(400).json({
+        return res.status(401).json({
           success: false,
-          message: "El ID del usuario es requerido"
+          message: "Autenticación requerida"
         });
       }
 
-      // TODO (PRODUCCIÓN): Validar formato de MongoDB ObjectId
-      // TODO (PRODUCCIÓN): Validar que userId pertenece al usuario autenticado
-      // if (req.user?.id !== userId) {
-      //   return res.status(403).json({ success: false, message: "No autorizado" });
-      // }
+      // 5. Validar formato de IDs antes de usarlos
+      if (!Types.ObjectId.isValid(String(userId)) || !Types.ObjectId.isValid(propertyId)) {
+        return res.status(400).json({
+          success: false,
+          message: "ID inválido"
+        });
+      }
 
-      const propiedad = await PropiedadRentaDB.findById(propertyId);
+      // 6. Convertir una sola vez a ObjectId y reutilizar
+      const userObjectId = new Types.ObjectId(String(userId));
+      const propertyObjectId = new Types.ObjectId(propertyId);
+
+      // 7. Buscar la propiedad
+      const propiedad = await PropiedadRentaDB.findById(propertyObjectId);
+
       if (!propiedad) {
         return res.status(404).json({
           success: false,
@@ -525,9 +550,42 @@ export class PropertyClientController {
         });
       }
 
+      // 8. Convertir temporalmente a any para evitar problemas de tipado
+      const propiedadData = propiedad as any;
+
+      // 9. Validar que la propiedad esté activa
+      if (propiedadData.estado !== ESTADOS_PROPIEDAD.ACTIVA) {
+        return res.status(400).json({
+          success: false,
+          message: "La propiedad no está activa"
+        });
+      }
+
+      // 10. Validar que la propiedad siga disponible
+      if (!propiedadData.disponibilidad?.disponible) {
+        return res.status(400).json({
+          success: false,
+          message: "La propiedad no está disponible"
+        });
+      }
+
+      // 11. Evitar solicitudes duplicadas del mismo usuario a la misma propiedad
+      const peticionExistente = await PeticionDB.findOne({
+        userId: userObjectId,
+        propertyId: propertyObjectId
+      });
+
+      if (peticionExistente) {
+        return res.status(400).json({
+          success: false,
+          message: "Ya aplicaste a esta propiedad"
+        });
+      }
+
+      // 12. Extraer la versión visible del perfil del usuario
       let usuarioVisible: PeticionUsuarioVisible;
       try {
-        usuarioVisible = await extractVisibleUserData(userId);
+        usuarioVisible = await extractVisibleUserData(String(userId));
       } catch (error: any) {
         return res.status(404).json({
           success: false,
@@ -535,20 +593,26 @@ export class PropertyClientController {
         });
       }
 
+      // 13. Crear la petición usando ObjectId reales
       const peticion = await PeticionDB.create({
-        propertyId,
+        userId: userObjectId,
+        propertyId: propertyObjectId,
         usuarioVisible,
         contexto: {
-          propertyId,
           fechaSolicitud: new Date(),
           estatus: "En proceso"
         },
         oferta
       });
 
-      return res.status(201).json({ success: true, data: peticion });
+      // 14. Responder con la petición creada
+      return res.status(201).json({
+        success: true,
+        data: peticion
+      });
     } catch (error: any) {
       console.error("Error al crear petición:", error);
+
       return res.status(500).json({
         success: false,
         message: "Error al crear la petición",
@@ -556,4 +620,4 @@ export class PropertyClientController {
       });
     }
   }
-}
+} 
