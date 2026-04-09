@@ -1,12 +1,16 @@
 "use client";
 import React from "react";
-import { Mail, Phone, MapPin, Calendar, User } from "lucide-react";
+import { Mail, Phone, MapPin, Calendar, User, Repeat } from "lucide-react";
 import { statusLabels, offerStatusLabels } from "../mock/requests";
 
-// Tarjeta de solicitud - muestra propiedad, arrendador y estado
+const MAX_COUNTEROFFERS = 2;
+
+// Tarjeta de solicitud - muestra propiedad, inquilino y estado
 // index se usa para la animacion escalonada de entrada
-const RequestCard = ({ request, index }) => {
-  const { landlord, property, status, offerStatus, offerAmount, createdAt, message } = request;
+const RequestCard = ({ request, index, onCounterOffer }) => {
+  const { landlord, property, status, offerStatus, offerAmount, createdAt, message, counterOffersMade = 0 } = request;
+  const hasActiveOffer = offerAmount != null && offerStatus !== "sin_oferta";
+  const counterDisabled = !hasActiveOffer || counterOffersMade >= MAX_COUNTEROFFERS;
 
   // Estilos del badge segun estado de solicitud (en_proceso, aprobada, rechazada)
   const getStatusStyles = () => {
@@ -48,7 +52,7 @@ const RequestCard = ({ request, index }) => {
 
   return (
     <div
-      className="bg-white font-sans rounded-lg shadow-md overflow-hidden transition duration-300 hover:shadow-lg hover:-translate-y-1 animate-slideIn w-full h-[456px] flex flex-col"
+      className="bg-white font-sans rounded-lg shadow-md overflow-hidden transition duration-300 hover:shadow-lg hover:-translate-y-1 animate-slideIn w-full h-[470px] flex flex-col"
       style={{
         animationDelay: `${index * 100}ms`,
         animationFillMode: "backwards",
@@ -89,16 +93,37 @@ const RequestCard = ({ request, index }) => {
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-1">
               <User className="w-3 h-3 text-gray-400" />
-              <span className="text-xs text-gray-500">Arrendador</span>
+              <span className="text-xs text-gray-500">Inquilino</span>
             </div>
             <p className="text-sm font-medium text-brand-dark truncate">{landlord.name}</p>
           </div>
         </div>
 
-        {/* Mensaje del arrendador */}
+        {/* Mensaje del inquilino */}
         <p className="text-xs text-gray-600 mb-3 line-clamp-2 italic flex-1">
           "{message}"
         </p>
+
+        {/* Boton de contraoferta - solo habilitado si hay oferta activa */}
+        <button
+          onClick={() => !counterDisabled && onCounterOffer?.(request)}
+          disabled={counterDisabled}
+          title={
+            !hasActiveOffer
+              ? "Sin oferta activa"
+              : counterOffersMade >= MAX_COUNTEROFFERS
+              ? "Límite de contraofertas alcanzado"
+              : "Hacer contraoferta"
+          }
+          className={`flex items-center justify-center gap-1 w-full mb-3 px-2 py-1.5 rounded text-xs font-semibold transition ${
+            counterDisabled
+              ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+              : "bg-brand-dark text-white hover:bg-brand-dark/90"
+          }`}
+        >
+          <Repeat className="w-3 h-3" />
+          Contraoferta {counterOffersMade}/{MAX_COUNTEROFFERS}
+        </button>
 
         {/* Oferta y fecha */}
         <div className="flex items-center justify-between gap-2 mt-auto">

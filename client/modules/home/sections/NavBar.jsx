@@ -37,8 +37,18 @@ const Navbar = () => {
             <li>
               <NavLink href="/propiedades">Buscar propiedades</NavLink>
             </li>
-            <li>
+            <li className="relative group">
               <NavLink href="/dashboard">Mi Dashboard</NavLink>
+              <div className="absolute left-0 top-full pt-1 w-56 invisible opacity-0 group-hover:visible group-hover:opacity-100 transition z-50">
+                <div className="bg-white rounded-md shadow-lg border border-gray-200 overflow-hidden">
+                  <Link
+                    href="/dashboard/mis-propiedades"
+                    className="block px-4 py-2 text-brand-dark font-semibold hover:bg-yellow-100 transition"
+                  >
+                    Mis propiedades
+                  </Link>
+                </div>
+              </div>
             </li>
             <li>
               <NavLink href="/perfil">Mi Perfil</NavLink>
@@ -97,6 +107,9 @@ const Navbar = () => {
             </li>
             <li>
               <NavLink href="/dashboard">Mi Dashboard</NavLink>
+            </li>
+            <li>
+              <NavLink href="/dashboard/mis-propiedades">Mis propiedades</NavLink>
             </li>
             <li>
               <NavLink href="/perfil">Mi Perfil</NavLink>

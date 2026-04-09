@@ -1,12 +1,20 @@
 "use client";
 import React, { useState, useMemo } from "react";
-import { Clock, CheckCircle, XCircle, SlidersHorizontal, X, RotateCcw } from "lucide-react";
+import {
+  Clock,
+  CheckCircle,
+  XCircle,
+  RotateCcw,
+  SlidersHorizontal,
+  X,
+} from "lucide-react";
 import RequestCard from "../components/RequestCard";
 import { offerStatusLabels } from "../mock/requests";
+import SortBySelect from "@/modules/renter-dashboard/components/SortBySelect";
+import { sortProperties } from "@/modules/renter-dashboard/utils/categorize";
 
 // Panel de filtros expandible
 const FilterPanel = ({ filters, setFilters, requests, onReset }) => {
-  // Calcular rango de precios disponible en los datos
   const priceRange = useMemo(() => {
     const prices = requests.map((r) => r.property.price);
     return { min: Math.min(...prices), max: Math.max(...prices) };
@@ -93,6 +101,7 @@ const FilterPanel = ({ filters, setFilters, requests, onReset }) => {
 
 // Secciones horizontales de solicitudes agrupadas por estado
 const RequestColumns = ({ requests }) => {
+  const [sortBy, setSortBy] = useState("date_desc");
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [filters, setFilters] = useState({
     minPrice: "",
@@ -107,29 +116,22 @@ const RequestColumns = ({ requests }) => {
     filters.maxPrice !== "" ||
     filters.offerStatus !== "all";
 
-  // Aplicar filtros a las solicitudes
-  const filteredRequests = useMemo(() => {
-    return requests.filter((r) => {
-      if (filters.minPrice !== "" && r.property.price < Number(filters.minPrice)) {
-        return false;
-      }
-      if (filters.maxPrice !== "" && r.property.price > Number(filters.maxPrice)) {
-        return false;
-      }
-      if (filters.offerStatus !== "all" && r.offerStatus !== filters.offerStatus) {
-        return false;
-      }
+  // Filtrar primero, luego ordenar
+  const processed = useMemo(() => {
+    const filtered = requests.filter((r) => {
+      if (filters.minPrice !== "" && r.property.price < Number(filters.minPrice)) return false;
+      if (filters.maxPrice !== "" && r.property.price > Number(filters.maxPrice)) return false;
+      if (filters.offerStatus !== "all" && r.offerStatus !== filters.offerStatus) return false;
       return true;
     });
-  }, [requests, filters]);
+    // sortProperties espera "price" en el nivel raiz
+    const adapted = filtered.map((r) => ({ ...r, price: r.property.price }));
+    return sortProperties(adapted, sortBy);
+  }, [requests, filters, sortBy]);
 
-  // En proceso: ordenadas de mas antigua a mas reciente
-  const enProceso = filteredRequests
-    .filter((r) => r.status === "en_proceso")
-    .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
-
-  const aprobadas = filteredRequests.filter((r) => r.status === "aprobada");
-  const rechazadas = filteredRequests.filter((r) => r.status === "rechazada");
+  const enProceso = processed.filter((r) => r.status === "en_proceso");
+  const aprobadas = processed.filter((r) => r.status === "aprobada");
+  const rechazadas = processed.filter((r) => r.status === "rechazada");
 
   const SectionHeader = ({ icon: Icon, title, count, colorClass }) => (
     <div className={`flex items-center gap-2 mb-4 pb-3 border-b-2 ${colorClass}`}>
@@ -150,8 +152,9 @@ const RequestColumns = ({ requests }) => {
   return (
     <section className="py-8 bg-gray-50 min-h-screen">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 font-sans space-y-6">
-        {/* Boton de filtros */}
-        <div className="flex items-center justify-end">
+        {/* Controles: ordenar + filtros */}
+        <div className="flex items-center justify-end gap-3 flex-wrap">
+          <SortBySelect value={sortBy} onChange={setSortBy} />
           <button
             onClick={() => setFiltersOpen(!filtersOpen)}
             className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition shadow-sm ${
