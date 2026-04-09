@@ -1,17 +1,23 @@
 "use client";
-import React from "react";
+import React, { useMemo, useState } from "react";
 import { Clock, CheckCircle, XCircle } from "lucide-react";
 import RequestCard from "../components/RequestCard";
+import SortBySelect from "@/modules/renter-dashboard/components/SortBySelect";
+import { sortProperties } from "@/modules/renter-dashboard/utils/categorize";
 
 // Secciones horizontales de solicitudes agrupadas por estado
 const RequestColumns = ({ requests }) => {
-  // En proceso: ordenadas de mas antigua a mas reciente
-  const enProceso = requests
-    .filter((r) => r.status === "en_proceso")
-    .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+  const [sortBy, setSortBy] = useState("date_desc");
 
-  const aprobadas = requests.filter((r) => r.status === "aprobada");
-  const rechazadas = requests.filter((r) => r.status === "rechazada");
+  // Las requests no tienen "price" sino "property.price" — adaptamos para reusar sortProperties
+  const sorted = useMemo(() => {
+    const adapted = requests.map((r) => ({ ...r, price: r.property.price }));
+    return sortProperties(adapted, sortBy);
+  }, [requests, sortBy]);
+
+  const enProceso = sorted.filter((r) => r.status === "en_proceso");
+  const aprobadas = sorted.filter((r) => r.status === "aprobada");
+  const rechazadas = sorted.filter((r) => r.status === "rechazada");
 
   const SectionHeader = ({ icon: Icon, title, count, colorClass }) => (
     <div className={`flex items-center gap-2 mb-4 pb-3 border-b-2 ${colorClass}`}>
@@ -32,6 +38,9 @@ const RequestColumns = ({ requests }) => {
   return (
     <section className="py-8 bg-gray-50 min-h-screen">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 font-sans space-y-8">
+        <div className="flex justify-end">
+          <SortBySelect value={sortBy} onChange={setSortBy} />
+        </div>
         {/* Seccion: En Proceso */}
         <div className="bg-white rounded-xl p-6 shadow-sm">
           <SectionHeader
