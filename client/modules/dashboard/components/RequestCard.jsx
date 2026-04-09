@@ -1,12 +1,21 @@
 "use client";
 import React from "react";
-import { Mail, Phone, MapPin, Calendar, User } from "lucide-react";
+import { Mail, Phone, MapPin, Calendar, User, HandCoins, Repeat } from "lucide-react";
 import { statusLabels, offerStatusLabels } from "../mock/requests";
+
+const MAX_COUNTEROFFERS = 2;
 
 // Tarjeta de solicitud - muestra propiedad, arrendador y estado
 // index se usa para la animacion escalonada de entrada
-const RequestCard = ({ request, index }) => {
-  const { landlord, property, status, offerStatus, offerAmount, createdAt, message } = request;
+const RequestCard = ({ request, index, onViewDetails, onMakeOffer, onCounterOffer }) => {
+  const { landlord, property, status, offerStatus, offerAmount, createdAt, message, counterOffersMade = 0 } = request;
+  const hasInitialOffer = property.initialOffer != null;
+  const hasActiveOffer = offerAmount != null && offerStatus !== "sin_oferta";
+  const offerDisabled = !hasInitialOffer || hasActiveOffer;
+  const counterDisabled = !hasActiveOffer || counterOffersMade >= MAX_COUNTEROFFERS;
+
+  const handleCardClick = () => onViewDetails?.(request);
+  const stop = (e) => e.stopPropagation();
 
   // Estilos del badge segun estado de solicitud (en_proceso, aprobada, rechazada)
   const getStatusStyles = () => {
@@ -48,7 +57,8 @@ const RequestCard = ({ request, index }) => {
 
   return (
     <div
-      className="bg-white font-sans rounded-lg shadow-md overflow-hidden transition duration-300 hover:shadow-lg hover:-translate-y-1 animate-slideIn w-full h-[456px] flex flex-col"
+      onClick={handleCardClick}
+      className="bg-white font-sans rounded-lg shadow-md overflow-hidden transition duration-300 hover:shadow-lg hover:-translate-y-1 animate-slideIn w-full h-[540px] flex flex-col cursor-pointer"
       style={{
         animationDelay: `${index * 100}ms`,
         animationFillMode: "backwards",
@@ -100,6 +110,54 @@ const RequestCard = ({ request, index }) => {
           "{message}"
         </p>
 
+        {/* Botones de oferta y contraoferta */}
+        <div className="flex gap-2 mb-3">
+          <button
+            onClick={(e) => {
+              stop(e);
+              if (!offerDisabled) onMakeOffer?.(request);
+            }}
+            disabled={offerDisabled}
+            title={
+              !hasInitialOffer
+                ? "Esta propiedad no tiene oferta inicial"
+                : hasActiveOffer
+                ? "Ya hay una oferta activa"
+                : "Hacer oferta"
+            }
+            className={`flex-1 flex items-center justify-center gap-1 px-2 py-1.5 rounded text-xs font-semibold transition ${
+              offerDisabled
+                ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                : "bg-brand-accent text-brand-dark hover:bg-yellow-400"
+            }`}
+          >
+            <HandCoins className="w-3 h-3" />
+            Hacer oferta
+          </button>
+          <button
+            onClick={(e) => {
+              stop(e);
+              if (!counterDisabled) onCounterOffer?.(request);
+            }}
+            disabled={counterDisabled}
+            title={
+              !hasActiveOffer
+                ? "Sin oferta activa"
+                : counterOffersMade >= MAX_COUNTEROFFERS
+                ? "Límite de contraofertas alcanzado"
+                : "Hacer contraoferta"
+            }
+            className={`flex-1 flex items-center justify-center gap-1 px-2 py-1.5 rounded text-xs font-semibold transition ${
+              counterDisabled
+                ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                : "bg-brand-dark text-white hover:bg-brand-dark/90"
+            }`}
+          >
+            <Repeat className="w-3 h-3" />
+            Contraoferta {counterOffersMade}/{MAX_COUNTEROFFERS}
+          </button>
+        </div>
+
         {/* Oferta y fecha */}
         <div className="flex items-center justify-between gap-2 mt-auto">
           <div className="flex flex-col gap-1">
@@ -121,6 +179,7 @@ const RequestCard = ({ request, index }) => {
         {/* Contacto rapido */}
         <div className="flex gap-2 mt-3 pt-3 border-t border-gray-100">
           <a
+            onClick={stop}
             href={`mailto:${landlord.email}`}
             className="flex-1 flex items-center justify-center gap-1 px-2 py-1.5 bg-gray-100 text-brand-dark rounded text-xs font-medium hover:bg-gray-200 transition"
           >
@@ -128,6 +187,7 @@ const RequestCard = ({ request, index }) => {
             Email
           </a>
           <a
+            onClick={stop}
             href={`tel:${landlord.phone.replace(/\s/g, "")}`}
             className="flex-1 flex items-center justify-center gap-1 px-2 py-1.5 bg-brand-accent text-brand-dark rounded text-xs font-medium hover:bg-yellow-400 transition"
           >

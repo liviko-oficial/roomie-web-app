@@ -2,6 +2,9 @@
 import React, { useState, useMemo } from "react";
 import { Clock, CheckCircle, XCircle, SlidersHorizontal, X, RotateCcw } from "lucide-react";
 import RequestCard from "../components/RequestCard";
+import SortBySelect from "../components/SortBySelect";
+import PropertyDetailsModal from "../components/PropertyDetailsModal";
+import { sortRequests } from "../utils/sortRequests";
 import { offerStatusLabels } from "../mock/requests";
 
 // Panel de filtros expandible
@@ -93,6 +96,8 @@ const FilterPanel = ({ filters, setFilters, requests, onReset }) => {
 
 // Secciones horizontales de solicitudes agrupadas por estado
 const RequestColumns = ({ requests }) => {
+  const [sortBy, setSortBy] = useState("date_desc");
+  const [selectedRequest, setSelectedRequest] = useState(null);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [filters, setFilters] = useState({
     minPrice: "",
@@ -107,29 +112,24 @@ const RequestColumns = ({ requests }) => {
     filters.maxPrice !== "" ||
     filters.offerStatus !== "all";
 
-  // Aplicar filtros a las solicitudes
-  const filteredRequests = useMemo(() => {
-    return requests.filter((r) => {
-      if (filters.minPrice !== "" && r.property.price < Number(filters.minPrice)) {
-        return false;
-      }
-      if (filters.maxPrice !== "" && r.property.price > Number(filters.maxPrice)) {
-        return false;
-      }
-      if (filters.offerStatus !== "all" && r.offerStatus !== filters.offerStatus) {
-        return false;
-      }
+  // Aplicar filtros y luego ordenar
+  const processedRequests = useMemo(() => {
+    const filtered = requests.filter((r) => {
+      if (filters.minPrice !== "" && r.property.price < Number(filters.minPrice)) return false;
+      if (filters.maxPrice !== "" && r.property.price > Number(filters.maxPrice)) return false;
+      if (filters.offerStatus !== "all" && r.offerStatus !== filters.offerStatus) return false;
       return true;
     });
-  }, [requests, filters]);
+    return sortRequests(filtered, sortBy);
+  }, [requests, filters, sortBy]);
 
-  // En proceso: ordenadas de mas antigua a mas reciente
-  const enProceso = filteredRequests
-    .filter((r) => r.status === "en_proceso")
-    .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+  const enProceso = processedRequests.filter((r) => r.status === "en_proceso");
+  const aprobadas = processedRequests.filter((r) => r.status === "aprobada");
+  const rechazadas = processedRequests.filter((r) => r.status === "rechazada");
 
-  const aprobadas = filteredRequests.filter((r) => r.status === "aprobada");
-  const rechazadas = filteredRequests.filter((r) => r.status === "rechazada");
+  const handleViewDetails = (req) => setSelectedRequest(req);
+  const handleMakeOffer = (req) => console.log("Hacer oferta:", req);
+  const handleCounterOffer = (req) => console.log("Contraoferta:", req);
 
   const SectionHeader = ({ icon: Icon, title, count, colorClass }) => (
     <div className={`flex items-center gap-2 mb-4 pb-3 border-b-2 ${colorClass}`}>
@@ -150,8 +150,9 @@ const RequestColumns = ({ requests }) => {
   return (
     <section className="py-8 bg-gray-50 min-h-screen">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 font-sans space-y-6">
-        {/* Boton de filtros */}
-        <div className="flex items-center justify-end">
+        {/* Controles: ordenar + filtros */}
+        <div className="flex items-center justify-end gap-3 flex-wrap">
+          <SortBySelect value={sortBy} onChange={setSortBy} />
           <button
             onClick={() => setFiltersOpen(!filtersOpen)}
             className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition shadow-sm ${
@@ -194,7 +195,13 @@ const RequestColumns = ({ requests }) => {
             {enProceso.length > 0 ? (
               enProceso.map((request, index) => (
                 <div key={request.id} className="min-w-[280px] max-w-[300px] flex-shrink-0">
-                  <RequestCard request={request} index={index} />
+                  <RequestCard
+                    request={request}
+                    index={index}
+                    onViewDetails={handleViewDetails}
+                    onMakeOffer={handleMakeOffer}
+                    onCounterOffer={handleCounterOffer}
+                  />
                 </div>
               ))
             ) : (
@@ -215,7 +222,13 @@ const RequestColumns = ({ requests }) => {
             {aprobadas.length > 0 ? (
               aprobadas.map((request, index) => (
                 <div key={request.id} className="min-w-[280px] max-w-[300px] flex-shrink-0">
-                  <RequestCard request={request} index={index} />
+                  <RequestCard
+                    request={request}
+                    index={index}
+                    onViewDetails={handleViewDetails}
+                    onMakeOffer={handleMakeOffer}
+                    onCounterOffer={handleCounterOffer}
+                  />
                 </div>
               ))
             ) : (
@@ -236,7 +249,13 @@ const RequestColumns = ({ requests }) => {
             {rechazadas.length > 0 ? (
               rechazadas.map((request, index) => (
                 <div key={request.id} className="min-w-[280px] max-w-[300px] flex-shrink-0">
-                  <RequestCard request={request} index={index} />
+                  <RequestCard
+                    request={request}
+                    index={index}
+                    onViewDetails={handleViewDetails}
+                    onMakeOffer={handleMakeOffer}
+                    onCounterOffer={handleCounterOffer}
+                  />
                 </div>
               ))
             ) : (
@@ -245,6 +264,11 @@ const RequestColumns = ({ requests }) => {
           </div>
         </div>
       </div>
+
+      <PropertyDetailsModal
+        request={selectedRequest}
+        onClose={() => setSelectedRequest(null)}
+      />
     </section>
   );
 };
