@@ -5,6 +5,7 @@ import { PeticionDB, PeticionUsuarioVisible, PeticionOferta } from "../models";
 import { extractVisibleUserData } from "../lib/extractVisibleUserData";
 import { Types } from "mongoose";
 
+
 /**
  * Controlador de búsqueda de propiedades para clientes/estudiantes
  * Endpoints públicos para buscar y explorar propiedades
@@ -620,4 +621,56 @@ export class PropertyClientController {
       });
     }
   }
-} 
+// ...existing code...
+
+  /**
+   * GET /api/peticiones/mis-peticiones
+   * Obtiene todas las peticiones del usuario autenticado
+   * Devuelve la propiedad relacionada, el estado y la fecha
+   */
+  static async getMisPeticiones(req: Request, res: Response) {
+    try {
+      // Temporalmente usamos req as any porque este controller aún no tipa RequestWithUser
+      const userId = (req as any).user?._id;
+
+      if (!userId) {
+        return res.status(401).json({
+          success: false,
+          message: "Autenticación requerida"
+        });
+      }
+
+      if (!Types.ObjectId.isValid(String(userId))) {
+        return res.status(400).json({
+          success: false,
+          message: "ID de usuario inválido"
+        });
+      }
+
+      const userObjectId = new Types.ObjectId(String(userId));
+
+      const peticiones = await PeticionDB.find({
+        userId: userObjectId
+      })
+        .sort({ createdAt: -1 })
+        .populate(
+          "propertyId",
+          "titulo resumen estado disponibilidad informacionFinanciera ubicacion imagenes"
+        )
+        .lean();
+
+      return res.status(200).json({
+        success: true,
+        data: peticiones
+      });
+    } catch (error: any) {
+      console.error("Error al obtener mis peticiones:", error);
+
+      return res.status(500).json({
+        success: false,
+        message: "Error al obtener tus peticiones",
+        error: error.message
+      });
+    }
+  }
+}

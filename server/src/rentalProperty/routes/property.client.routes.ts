@@ -78,6 +78,16 @@ router.get(
 );
 
 /**
+ * GET /api/propiedades-renta/mis-peticiones
+ * Ver todas las peticiones del usuario autenticado
+ */
+router.get(
+  "/mis-peticiones",
+  require_auth,
+  PropertyClientController.getMisPeticiones
+);
+
+/**
  * GET /api/propiedades-renta/:propertyId/similares
  * Obtener propiedades similares en el mismo campus
  * - No requiere autenticación
