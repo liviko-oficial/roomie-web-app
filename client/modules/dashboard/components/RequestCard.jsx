@@ -48,7 +48,7 @@ const RequestCard = ({ request, index }) => {
 
   return (
     <div
-      className="bg-white font-sans rounded-lg shadow-md overflow-hidden transition duration-300 hover:shadow-lg hover:-translate-y-1 animate-slideIn w-full h-[456px] flex flex-col"
+      className="bg-white font-sans rounded-lg shadow-md overflow-hidden transition duration-300 hover:shadow-lg hover:-translate-y-1 animate-slideIn w-full h-[420px] flex flex-col"
       style={{
         animationDelay: `${index * 100}ms`,
         animationFillMode: "backwards",
