@@ -38,7 +38,7 @@ const Navbar = () => {
               <NavLink href="/propiedades">Buscar propiedades</NavLink>
             </li>
             <li>
-              <NavLink href="/dashboard">Mi Dashboard</NavLink>
+              <NavLink href="/contacto">Contacto</NavLink>
             </li>
             <li>
               <NavLink href="/perfil">Mi Perfil</NavLink>
@@ -96,7 +96,7 @@ const Navbar = () => {
               <NavLink href="/propiedades">Buscar propiedades</NavLink>
             </li>
             <li>
-              <NavLink href="/dashboard">Mi Dashboard</NavLink>
+              <NavLink href="/contacto">Contacto</NavLink>
             </li>
             <li>
               <NavLink href="/perfil">Mi Perfil</NavLink>
