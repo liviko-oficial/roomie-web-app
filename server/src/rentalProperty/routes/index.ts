@@ -2,6 +2,7 @@ import { Router } from "express";
 import propertyRoutes from "./property.routes";
 import customerRoutes from "./property.customer.routes";
 import clientRoutes from "./property.client.routes";
+import petitionRoutes from "./petition.routes";
 
 const router = Router();
 
@@ -26,5 +27,12 @@ router.use("/propiedades-renta", propertyRoutes);
    - ESTADO: Esqueleto - Pendiente de autenticación de clientes
 ------------------------------------------------ */
 router.use("/propiedades-renta/cliente", customerRoutes);
+
+/* ----------------------------------------------
+    Rutas para gestión de solicitudes de renta
+    - Envío, aceptación, rechazo de solicitudes
+    - Gestión de ofertas y contraofertas
+    ------------------------------------------------ */
+    router.use("/propiedades/peticiones", petitionRoutes);
 
 export default router;

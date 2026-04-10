@@ -25,7 +25,9 @@ export const PeticionUsuarioVisibleSchema = z.object({
 });
 
 export const PeticionContextoSchema = z.object({
+  usuarioId: ObjectIdZod,
   propertyId: ObjectIdZod,
+  motivo: z.string().optional(),
   fechaSolicitud: z.date().default(() => new Date()),
   estatus: z.string().default("En proceso"),
 });
@@ -74,7 +76,9 @@ const PeticionUsuarioVisibleMongo = new Schema<PeticionUsuarioVisible>({
 }, { _id: false });
 
 const PeticionContextoMongo = new Schema<PeticionContexto>({
-  propertyId: { type: Types.ObjectId, ref: "PropiedadRenta", required: true },
+  usuarioId: [{ type: Types.ObjectId, ref: "User", required: true }],
+  propertyId: [{ type: Types.ObjectId, ref: "PropiedadRenta", required: true }],
+  motivo: String,
   fechaSolicitud: { type: Date, default: Date.now },
   estatus: { type: String, default: "En proceso" }
 }, { _id: false });
@@ -86,7 +90,7 @@ const PeticionOfertaMongo = new Schema<PeticionOferta>({
 }, { _id: false });
 
 const PeticionMongoSchema = new Schema<Peticion>({
-  propertyId: { type: Types.ObjectId, ref: "PropiedadRenta", required: true },
+  propertyId: [{ type: Types.ObjectId, ref: "PropiedadRenta", required: true }],
   usuarioVisible: { type: PeticionUsuarioVisibleMongo, required: true },
   contexto: { type: PeticionContextoMongo, required: true },
   oferta: PeticionOfertaMongo,

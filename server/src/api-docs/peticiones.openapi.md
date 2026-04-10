@@ -54,6 +54,29 @@ arrendadores pueden revisar todas las peticiones de sus propiedades y ver inform
     - Ver contexto de la solicitud
     - Ver oferta económica si fue incluida
 
+### Arrendador puede ver aceptar una petición
+
+- **Endpoint:** `PUT /api/propiedades/peticiones/:petitionId/aceptar`
+- **Autenticación:** **SÍ REQUIERE** Token JWT del arrendador
+- **Lo que funciona:**
+    - Valida que la petición exista y no haya sido procesada previamente.
+    - Valida que el arrendador autenticado sea el dueño real de la propiedad.
+    - Cambia el estatus de la petición a `"Aceptada"`.
+    - Agrega al estudiante a `inquilinosActuales` y `historialInquilinos` de la propiedad.
+    - Vincula al estudiante con la lista de `tenants` del arrendador.
+    - Retorna éxito y los IDs vinculados.
+
+### Arrendador puede rechazar una petición
+
+- **Endpoint:** `PUT /api/propiedades/peticiones/:petitionId/rechazar`
+- **Autenticación:** **SÍ REQUIERE** Token JWT del arrendador
+- **Lo que funciona:**
+    - Valida que la petición exista y esté en estatus `"En proceso"`.
+    - Valida que el arrendador sea el propietario del inmueble.
+    - Cambia el estatus de la petición a `"Rechazada"`.
+    - Permite incluir un campo de `motivo` para dar feedback al estudiante.
+    - No afecta la disponibilidad de la propiedad ni vincula inquilinos.
+
 ---
 
 ## CANNOT DO - Limitaciones y Restricciones
@@ -424,6 +447,144 @@ GET /api/propiedades/:arrendadorId/peticiones/:peticionId
 
 ---
 
+### PUT - Aceptar Petición
+```
+PUT /api/propiedades/peticiones/:petitionId/aceptar
+```
+
+**Descripción:** El arrendador formaliza la renta aceptando al estudiante. Este proceso vincula permanentemente al estudiante con la propiedad y actualiza el historial de inquilinos.
+
+**Autenticación:** **SÍ REQUIERE** Token JWT del arrendador.
+
+**Request Body:**
+
+```json
+{
+  "landlordId": "64a7b8c9d1e2f3a4b5c6d7e8"
+}
+```
+
+**Parámetros de Ruta:**
+
+| Campo        | Tipo   | Requerido | Descripción                                  |
+|--------------|--------|-----------|----------------------------------------------|
+| `petitionId` | string | SÍ        | ID único de la petición (MongoDB ObjectId)   |
+
+**Responses:**
+
+**200 OK - Éxito en la vinculación**
+{
+  "success": true,
+  "message": "¡Solicitud aceptada! El estudiante ha sido vinculado a la propiedad.",
+  "data": {
+    "studentId": "64a7b8c9d1e2f3a4b5c6d7e8",
+    "propertyId": "64a7b8c9d1e2f3a4b5c6d7e9",
+    "status": "Aceptada"
+  }
+}
+
+**400 Bad Request - Solicitud ya procesada**
+```json
+{
+  "success": false,
+  "message": "La solicitud ya tiene el estatus: Aceptada"
+}
+```
+
+**403 Forbidden - El arrendador no es el dueño**
+```json
+{
+  "success": false,
+  "message": "No tienes permiso para aceptar solicitudes de esta propiedad."
+}
+```
+
+**404 Not Found - No existe la petición o la propiedad**
+```json
+{
+  "success": false,
+  "message": "Solicitud no encontrada."
+}
+```
+
+**500 Internal Server Error - Error de servidor**
+```json
+{
+  "success": false,
+  "message": "Error interno del servidor al aceptar la solicitud."
+}
+```
+
+### PUT - Rechazar Petición
+```
+PUT /api/propiedades/peticiones/:petitionId/rechazar
+```
+**Descripción:** El arrendador declina formalmente la solicitud del estudiante. Este proceso marca la petición como finalizada, impidiendo futuras acciones de aceptación o negociación sobre la misma y notificando el cierre del proceso al solicitante.
+
+**Autenticación:** ✅ **SÍ REQUIERE** Token JWT del arrendador.
+
+**Request Body:**
+
+```json
+{
+  "landlordId": "64a7b8c9d1e2f3a4b5c6d7e8",
+  "motivo": "El perfil no se ajusta a las reglas de convivencia actuales o la habitación ya no está disponible."
+}
+```
+**Parámetros de Ruta:**
+
+| Campo        | Tipo   | Requerido | Descripción                                  |
+|--------------|--------|-----------|----------------------------------------------|
+| `petitionId` | string | SÍ        | ID único de la petición (MongoDB ObjectId)   |
+**Responses:**
+
+**200 OK - Solicitud Rechazada**
+```json
+{
+  "success": true,
+  "message": "La solicitud ha sido rechazada exitosamente.",
+  "data": {
+    "petitionId": "64a7b8c9d1e2f3a4b5c6d7ea",
+    "status": "Rechazada",
+    "motivoRechazo": "El perfil no se ajusta a las reglas de convivencia actuales."
+  }
+}
+```
+
+**400 Bad Request: Petición ya Rechazada**
+```json
+{
+  "success": false,
+  "message": "No se puede rechazar. La solicitud ya tiene el estatus: Aceptada/Rechazada"
+}
+```
+
+**403 Forbidden - No autorizado (Ownership error)**
+```json
+{
+  "success": false,
+  "message": "No tienes permiso para gestionar esta solicitud."
+}
+```
+
+**404 Not Found - Petición no encontrada**
+```json
+{
+  "success": false,
+  "message": "Solicitud no encontrada."
+}
+```
+
+**500 Internal Server Error - Error de servidor**
+```json
+{
+  "success": false,
+  "message": "Error interno del servidor al procesar el rechazo."
+}
+```
+
+---
+
 ## Ejemplos de Uso
 
 ### Ejemplo 1: Usuario crea petición
@@ -462,6 +623,28 @@ curl -X GET http://localhost:3000/api/propiedades/64a7b8c9d1e2f3a4b5c6d7e8/petic
   -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIs..."
 ```
 
+### Ejemplo 5: Arrendador acepta petición
+
+```bash
+curl -X PATCH http://localhost:3000/api/propiedades/peticiones/64a7b8c9d1e2f3a4b5c6d7ea/aceptar \
+  -H "Authorization: Bearer <token_jwt>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "landlordId": "64a7b8c9d1e2f3a4b5c6d7e8"
+  }'
+```
+
+### Ejemplo 6: Arrendador rechaza petición
+
+```bash
+curl -X PUT http://localhost:3000/api/propiedades/peticiones/64a7b8c9d1e2f3a4b5c6d7ea/rechazar \
+  -H "Authorization: Bearer <token_jwt>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "landlordId": "64a7b8c9d1e2f3a4b5c6d7e8",
+    "motivo": "El perfil no se ajusta a las reglas de convivencia actuales."
+  }'
+```
 ---
 
 ## Notas Importantes para Producción

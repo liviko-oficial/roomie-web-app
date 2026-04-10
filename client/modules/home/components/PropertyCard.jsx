@@ -1,4 +1,5 @@
 import React from "react";
+import Link from "next/link";
 
 const PropertyCard = ({
   property,
@@ -116,12 +117,13 @@ const PropertyCard = ({
             <span className="text-sm text-gray-600"> /mes</span>
           </div>
           <div className="flex space-x-2">
-            <button
+            <Link
+               href={`/properties/${property.id}`} 
               onClick={() => onViewDetails(property)}
               className="px-3 py-1 bg-brand-accent text-brand-dark rounded font-medium hover:bg-yellow-400 transition duration-300"
             >
               Ver detalles
-            </button>
+            </Link>
             <button
               onClick={() => onCompareToggle(property)}
               className={`px-3 py-1 rounded font-medium transition duration-300 ${

@@ -373,7 +373,7 @@ const PropiedadRentaMongoSchema = new Schema<PropiedadRenta>({
   favoritos: { type: Number, min: 0, default: 0 },
 
   // Relaciones
-  propietarioId: { type: Types.ObjectId, ref: 'Arrendador', required: true },
+  propietarioId: [{ type: Types.ObjectId, ref: 'Arrendador', required: true }],
   inquilinosActuales: [{ type: Types.ObjectId, ref: 'User' }],
   aplicaciones: [{ type: Types.ObjectId, ref: 'Application' }],
   historialInquilinos: [{ type: Types.ObjectId, ref: 'User' }],

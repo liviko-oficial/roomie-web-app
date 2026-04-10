@@ -107,6 +107,11 @@ export const properties = [
       "Seguridad 24/7"
     ],
     includedServices: ["Luz", "Agua", "Internet", "Limpieza", "Gas"],
+    comuneAreas: ["sala", "comedor", "Area de lavado", "Cocina"],
+    essentialRequirements: ["2 meses de anticipo", "ser estudiante"],
+    contractDuration: 12,
+    propertyRequirements: "Aval",
+    securityDeposit: 3,
     bathrooms: 2,
     rating: 4.3,
     isVerified: false,
