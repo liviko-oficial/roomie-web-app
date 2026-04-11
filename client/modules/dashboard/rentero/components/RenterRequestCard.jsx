@@ -1,17 +1,15 @@
 "use client";
 import React from "react";
-import { MapPin, Calendar, User, HandCoins, Repeat } from "lucide-react";
-import { statusLabels, offerStatusLabels } from "../mock/requests";
+import { MapPin, Calendar, User, Repeat } from "lucide-react";
+import { renterStatusLabels, renterOfferStatusLabels } from "../mock/renterRequests";
 
 const MAX_COUNTEROFFERS = 2;
 
-const RequestCard = ({ request, index, onViewDetails, onMakeOffer, onCounterOffer }) => {
-  const { landlord, property, status, offerStatus, offerAmount, createdAt, message, counterOffersMade = 0 } = request;
-  const hasInitialOffer = property.initialOffer != null;
+const RenterRequestCard = ({ request, index, onViewDetails, onCounterOffer }) => {
+  const { tenant, property, status, offerStatus, offerAmount, createdAt, message, counterOffersMade = 0 } = request;
   const hasActiveOffer = offerAmount != null && offerStatus !== "sin_oferta";
   const isRechazada = status === "rechazada";
 
-  const showMakeOffer = !isRechazada && hasInitialOffer && !hasActiveOffer && offerStatus !== "sin_oferta";
   const showCounterOffer = !isRechazada && hasActiveOffer;
   const counterDisabled = counterOffersMade >= MAX_COUNTEROFFERS;
 
@@ -37,19 +35,19 @@ const RequestCard = ({ request, index, onViewDetails, onMakeOffer, onCounterOffe
     }
   };
 
-  const formatPrice = (value) => typeof value === "number" ? value.toLocaleString("es-MX") : value;
-  const formatDate = (dateString) => new Date(dateString).toLocaleDateString("es-MX", { day: "numeric", month: "short" });
+  const formatPrice = (v) => typeof v === "number" ? v.toLocaleString("es-MX") : v;
+  const formatDate = (d) => new Date(d).toLocaleDateString("es-MX", { day: "numeric", month: "short" });
 
   return (
     <div
       onClick={handleCardClick}
-      className="bg-white font-sans rounded-lg shadow-md overflow-hidden transition duration-300 hover:shadow-lg hover:-translate-y-1 animate-slideIn w-full h-[470px] flex flex-col cursor-pointer"
+      className="bg-white font-sans rounded-lg shadow-md overflow-hidden transition duration-300 hover:shadow-lg hover:-translate-y-1 animate-slideIn w-full h-[420px] flex flex-col cursor-pointer"
       style={{ animationDelay: `${index * 100}ms`, animationFillMode: "backwards" }}
     >
       <div className="relative">
         <img src={property.image} alt={property.title} className="w-full h-32 object-cover" />
         <div className={`absolute top-2 left-2 text-xs font-bold px-2 py-1 rounded-md ${getStatusStyles()}`}>
-          {statusLabels[status]}
+          {renterStatusLabels[status]}
         </div>
         <div className="absolute bottom-2 right-2 bg-white text-brand-dark text-xs font-bold px-2 py-1 rounded-md">
           ${formatPrice(property.price)}/mes
@@ -66,48 +64,35 @@ const RequestCard = ({ request, index, onViewDetails, onMakeOffer, onCounterOffe
         </div>
 
         <div className="flex items-center gap-3 mb-3 pb-3 border-b border-gray-100">
-          <img src={landlord.avatar} alt={landlord.name} className="w-10 h-10 rounded-full object-cover border-2 border-gray-100" />
+          <img src={tenant.avatar} alt={tenant.name} className="w-10 h-10 rounded-full object-cover border-2 border-gray-100" />
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-1">
               <User className="w-3 h-3 text-gray-400" />
-              <span className="text-xs text-gray-500">Arrendador</span>
+              <span className="text-xs text-gray-500">Inquilino</span>
             </div>
-            <p className="text-sm font-medium text-brand-dark truncate">{landlord.name}</p>
+            <p className="text-sm font-medium text-brand-dark truncate">{tenant.name}</p>
           </div>
         </div>
 
         <p className="text-xs text-gray-600 mb-3 line-clamp-2 italic flex-1">"{message}"</p>
 
-        {(showMakeOffer || showCounterOffer) && (
-          <div className="flex gap-2 mb-3">
-            {showMakeOffer && (
-              <button
-                onClick={(e) => { stop(e); onMakeOffer?.(request); }}
-                className="flex-1 flex items-center justify-center gap-1 px-2 py-1.5 rounded text-xs font-semibold transition bg-brand-accent text-brand-dark hover:bg-yellow-400"
-              >
-                <HandCoins className="w-3 h-3" />
-                Hacer oferta
-              </button>
-            )}
-            {showCounterOffer && (
-              <button
-                onClick={(e) => { stop(e); if (!counterDisabled) onCounterOffer?.(request); }}
-                disabled={counterDisabled}
-                className={`flex-1 flex items-center justify-center gap-1 px-2 py-1.5 rounded text-xs font-semibold transition ${
-                  counterDisabled ? "bg-gray-100 text-gray-400 cursor-not-allowed" : "bg-brand-dark text-white hover:bg-brand-dark/90"
-                }`}
-              >
-                <Repeat className="w-3 h-3" />
-                Contraoferta {counterOffersMade}/{MAX_COUNTEROFFERS}
-              </button>
-            )}
-          </div>
+        {showCounterOffer && (
+          <button
+            onClick={(e) => { stop(e); if (!counterDisabled) onCounterOffer?.(request); }}
+            disabled={counterDisabled}
+            className={`flex items-center justify-center gap-1 w-full mb-3 px-2 py-1.5 rounded text-xs font-semibold transition ${
+              counterDisabled ? "bg-gray-100 text-gray-400 cursor-not-allowed" : "bg-brand-dark text-white hover:bg-brand-dark/90"
+            }`}
+          >
+            <Repeat className="w-3 h-3" />
+            Contraoferta {counterOffersMade}/{MAX_COUNTEROFFERS}
+          </button>
         )}
 
         <div className="flex items-center justify-between gap-2 mt-auto">
           <div className="flex flex-col gap-1">
             <span className={`text-xs font-medium px-2 py-1 rounded ${getOfferStatusStyles()}`}>
-              {offerStatusLabels[offerStatus]}
+              {renterOfferStatusLabels[offerStatus]}
             </span>
             {offerAmount && (
               <span className="text-xs text-brand-dark font-bold">Oferta: ${formatPrice(offerAmount)}</span>
@@ -123,4 +108,4 @@ const RequestCard = ({ request, index, onViewDetails, onMakeOffer, onCounterOffe
   );
 };
 
-export default RequestCard;
+export default RenterRequestCard;

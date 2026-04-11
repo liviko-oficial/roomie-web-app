@@ -1,14 +1,45 @@
 "use client";
-import React from "react";
-import { X, MapPin, User, Mail, Phone, Calendar, DollarSign } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { X, MapPin, User, Calendar, DollarSign } from "lucide-react";
 import { statusLabels, offerStatusLabels } from "../mock/requests";
+
+const REJECTION_REASONS = {
+  landlord: [
+    "Oferta muy baja",
+    "Oferta inaceptable",
+    "Prefiero no decir",
+  ],
+  student: [
+    "Precio muy alto para lo que ofrece",
+    "No incluye muebles y el precio no corresponde",
+    "No incluye servicios y el precio no corresponde",
+    "Malas reseñas del anfitrión o del alojamiento",
+    "Ya encontré otras opciones",
+    "Muy lejos del campus (costos extra de traslado) para el precio",
+  ],
+};
 
 const formatPrice = (v) =>
   typeof v === "number" ? v.toLocaleString("es-MX") : v;
 
-const PropertyDetailsModal = ({ request, onClose }) => {
+const PropertyDetailsModal = ({ request, onClose, role = "student", onAcceptOffer, onRejectOffer }) => {
+  const [showRejectReasons, setShowRejectReasons] = useState(false);
+  const [selectedReason, setSelectedReason] = useState(null);
+
+  useEffect(() => {
+    setShowRejectReasons(false);
+    setSelectedReason(null);
+  }, [request]);
+
   if (!request) return null;
-  const { property, landlord, status, offerStatus, offerAmount, createdAt, message } = request;
+  const { property, status, offerStatus, offerAmount, createdAt, message } = request;
+
+  const person = role === "student" ? request.landlord : request.tenant;
+  const personLabel = role === "student" ? "Arrendador" : "Inquilino";
+  const messageLabel = role === "student" ? "Mensaje del arrendador" : "Mensaje del inquilino";
+  const initialOfferLabel = role === "student" ? "Oferta inicial del arrendador" : "Oferta inicial";
+
+  const canActOnOffer = offerAmount != null && offerStatus === "contraoferta_por_revisar";
 
   return (
     <div
@@ -57,7 +88,7 @@ const PropertyDetailsModal = ({ request, onClose }) => {
               </p>
               {property.initialOffer && (
                 <p className="text-xs text-gray-600 mt-1">
-                  Oferta inicial del arrendador: ${formatPrice(property.initialOffer)}
+                  {initialOfferLabel}: ${formatPrice(property.initialOffer)}
                 </p>
               )}
             </div>
@@ -79,11 +110,11 @@ const PropertyDetailsModal = ({ request, onClose }) => {
           </div>
 
           <div className="border-t border-gray-100 pt-4">
-            <h3 className="text-sm font-bold text-brand-dark mb-3">Arrendador</h3>
+            <h3 className="text-sm font-bold text-brand-dark mb-3">{personLabel}</h3>
             <div className="flex items-center gap-3">
               <img
-                src={landlord.avatar}
-                alt={landlord.name}
+                src={person.avatar}
+                alt={person.name}
                 className="w-14 h-14 rounded-full object-cover border-2 border-gray-100"
               />
               <div className="flex-1">
@@ -91,25 +122,76 @@ const PropertyDetailsModal = ({ request, onClose }) => {
                   <User className="w-3 h-3" />
                   Contacto
                 </div>
-                <p className="font-semibold text-brand-dark">{landlord.name}</p>
+                <p className="font-semibold text-brand-dark">{person.name}</p>
                 <div className="flex flex-wrap gap-3 mt-1 text-xs text-gray-600">
-                  <a href={`mailto:${landlord.email}`} className="flex items-center gap-1 hover:text-brand-dark">
-                    <Mail className="w-3 h-3" />
-                    {landlord.email}
-                  </a>
-                  <a href={`tel:${landlord.phone.replace(/\s/g, "")}`} className="flex items-center gap-1 hover:text-brand-dark">
-                    <Phone className="w-3 h-3" />
-                    {landlord.phone}
-                  </a>
+                  <span>{person.email}</span>
+                  <span>{person.phone}</span>
                 </div>
               </div>
             </div>
           </div>
 
           <div className="border-t border-gray-100 pt-4">
-            <h3 className="text-sm font-bold text-brand-dark mb-2">Mensaje del arrendador</h3>
+            <h3 className="text-sm font-bold text-brand-dark mb-2">{messageLabel}</h3>
             <p className="text-sm text-gray-700 italic">"{message}"</p>
           </div>
+
+          {canActOnOffer && (
+            <div className="border-t border-gray-100 pt-4">
+              {showRejectReasons ? (
+                <div className="space-y-3">
+                  <h3 className="text-sm font-bold text-brand-dark">Motivo del rechazo</h3>
+                  <div className="space-y-2">
+                    {REJECTION_REASONS[role].map((reason) => (
+                      <button
+                        key={reason}
+                        onClick={() => setSelectedReason(reason)}
+                        className={`w-full text-left px-4 py-2.5 rounded-lg text-sm border transition ${
+                          selectedReason === reason
+                            ? "border-brand-dark bg-brand-dark/5 font-medium text-brand-dark"
+                            : "border-gray-200 text-gray-700 hover:border-gray-300"
+                        }`}
+                      >
+                        {reason}
+                      </button>
+                    ))}
+                  </div>
+                  <div className="flex gap-3 pt-2">
+                    <button
+                      onClick={() => { setShowRejectReasons(false); setSelectedReason(null); }}
+                      className="flex-1 py-2.5 border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition"
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      disabled={!selectedReason}
+                      onClick={() => { onRejectOffer?.(request, selectedReason); onClose(); }}
+                      className={`flex-1 py-2.5 rounded-lg text-sm font-semibold transition ${
+                        selectedReason ? "bg-red-500 text-white hover:bg-red-600" : "bg-gray-100 text-gray-400 cursor-not-allowed"
+                      }`}
+                    >
+                      Confirmar rechazo
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => onAcceptOffer?.(request)}
+                    className="flex-1 py-2.5 bg-green-500 text-white rounded-lg font-semibold text-sm hover:bg-green-600 transition"
+                  >
+                    Aceptar oferta
+                  </button>
+                  <button
+                    onClick={() => setShowRejectReasons(true)}
+                    className="flex-1 py-2.5 bg-red-500 text-white rounded-lg font-semibold text-sm hover:bg-red-600 transition"
+                  >
+                    Rechazar oferta
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>

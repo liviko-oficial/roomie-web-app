@@ -5,10 +5,12 @@ import NavLink from "../components/NavLink";
 import { useState } from "react";
 import { useRegistrationModal } from "@/modules/global_components/context_files/RegistrationModalContext";
 import { useLoginModal } from "@/modules/global_components/context_files/LoginModalContext";
+import { useAuthContext } from "@/modules/global_components/context_files/AuthContext";
 
 const Navbar = () => {
   const { openModal: openRegistrationModal } = useRegistrationModal();
   const { openModal: openLoginModal } = useLoginModal();
+  const { userType, logout } = useAuthContext();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const toggleMenu = () => {
@@ -41,17 +43,43 @@ const Navbar = () => {
             <li>
               <NavLink href="/properties">Buscar propiedades</NavLink>
             </li>
-            <li>
+            <li className="relative group">
               <NavLink href="/dashboard">Mi Dashboard</NavLink>
+              {userType === "arrendador" && (
+                <div className="absolute left-0 top-full pt-1 hidden group-hover:block z-50">
+                  <div className="bg-white border border-gray-200 rounded-md shadow-lg min-w-[180px]">
+                    <Link href="/dashboard/mis-propiedades" className="block px-4 py-2.5 text-sm font-medium text-brand-dark hover:bg-brand-accent/20 rounded-md transition">
+                      Mis propiedades
+                    </Link>
+                  </div>
+                </div>
+              )}
             </li>
           </ul>
 
-          <button
-              onClick={openRegistrationModal}
-            className="border-2 border-brand-accent text-brand-dark px-4 py-2 rounded-md font-bold hover:bg-yellow-100 transition"
-          >
-            Registrarse
-          </button>
+          {userType ? (
+            <button
+              onClick={logout}
+              className="border-2 border-red-400 text-red-600 px-4 py-2 rounded-md font-bold hover:bg-red-50 transition"
+            >
+              Cerrar sesión
+            </button>
+          ) : (
+            <div className="flex items-center gap-3">
+              <button
+                onClick={openLoginModal}
+                className="text-brand-dark px-4 py-2 rounded-md font-bold hover:bg-gray-100 transition"
+              >
+                Iniciar sesión
+              </button>
+              <button
+                onClick={openRegistrationModal}
+                className="border-2 border-brand-accent text-brand-dark px-4 py-2 rounded-md font-bold hover:bg-yellow-100 transition"
+              >
+                Registrarse
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Menu Movil */}
@@ -99,14 +127,36 @@ const Navbar = () => {
             <li>
               <NavLink href="/dashboard">Mi Dashboard</NavLink>
             </li>
+            {userType === "arrendador" && (
+              <li>
+                <NavLink href="/dashboard/mis-propiedades">Mis propiedades</NavLink>
+              </li>
+            )}
           </ul>
 
-          <button
-              onClick={openRegistrationModal}
-            className="block w-full text-center border-2 border-brand-accent text-brand-dark px-4 py-2 rounded-md font-bold hover:bg-yellow-100 transition"
-          >
-            Registrarse
-          </button>
+          {userType ? (
+            <button
+              onClick={logout}
+              className="block w-full text-center border-2 border-red-400 text-red-600 px-4 py-2 rounded-md font-bold hover:bg-red-50 transition"
+            >
+              Cerrar sesión
+            </button>
+          ) : (
+            <div className="space-y-2">
+              <button
+                onClick={openLoginModal}
+                className="block w-full text-center text-brand-dark px-4 py-2 rounded-md font-bold hover:bg-gray-100 transition"
+              >
+                Iniciar sesión
+              </button>
+              <button
+                onClick={openRegistrationModal}
+                className="block w-full text-center border-2 border-brand-accent text-brand-dark px-4 py-2 rounded-md font-bold hover:bg-yellow-100 transition"
+              >
+                Registrarse
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </nav>

@@ -268,6 +268,9 @@ const RequestColumns = ({ requests }) => {
       <PropertyDetailsModal
         request={selectedRequest}
         onClose={() => setSelectedRequest(null)}
+        role="student"
+        onAcceptOffer={(req) => { console.log("Aceptar oferta:", req); setSelectedRequest(null); }}
+        onRejectOffer={(req, reason) => { console.log("Rechazar oferta:", req, "Razón:", reason); setSelectedRequest(null); }}
       />
     </section>
   );
