@@ -42,10 +42,7 @@ const Navbar = () => {
               <NavLink href="/properties">Buscar propiedades</NavLink>
             </li>
             <li>
-              <NavLink href="/contacto">Contacto</NavLink>
-            </li>
-            <li>
-              <NavLink href="/perfil">Mi Perfil</NavLink>
+              <NavLink href="/dashboard">Mi Dashboard</NavLink>
             </li>
           </ul>
 
@@ -100,10 +97,7 @@ const Navbar = () => {
               <NavLink href="/propiedades">Buscar propiedades</NavLink>
             </li>
             <li>
-              <NavLink href="/contacto">Contacto</NavLink>
-            </li>
-            <li>
-              <NavLink href="/perfil">Mi Perfil</NavLink>
+              <NavLink href="/dashboard">Mi Dashboard</NavLink>
             </li>
           </ul>
 

@@ -2,44 +2,30 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { arrendadorService } from "@/lib/api/arrendadorService";
 
 export default function LoginArrendador() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const router = useRouter();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // TODO: REEMPLAZAR CON AUTENTICACIÓN REAL
-    // Ejemplo de implementación:
-    /*
-    const response = await fetch('/api/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        email,
-        password,
-        role: 'landlord', // Especificar rol de arrendador
-        rememberMe
-      }),
-    });
-
-    if (response.ok) {
-      const data = await response.json();
-      // Guardar JWT token y redirigir al dashboard
-      window.location.href = '/dashboard-arrendador';
-    } else {
-      // Manejar errores de login
-      const error = await response.json();
-      alert(`Error: ${error.message}`);
+    setLoading(true);
+    setError("");
+    try {
+      await arrendadorService.login(email, password);
+      router.push("/");
+    } catch (err: any) {
+      setError(err?.response?.data?.message || "Error al iniciar sesión. Verifica tus credenciales.");
+    } finally {
+      setLoading(false);
     }
-    */
-    
-    // PLACEHOLDER - Remover al implementar autenticación real
-    console.log("Login attempt:", { email, password, rememberMe });
-    alert("Login placeholder - Authentication not yet implemented");
   };
 
   return (
@@ -71,6 +57,12 @@ export default function LoginArrendador() {
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-8 px-4 shadow-lg sm:rounded-lg sm:px-10">
           <form className="space-y-6" onSubmit={handleSubmit}>
+            {error && (
+              <div className="rounded-md bg-red-50 p-3">
+                <p className="text-sm text-red-700">{error}</p>
+              </div>
+            )}
+
             <div>
               <label
                 htmlFor="email"
@@ -174,9 +166,10 @@ export default function LoginArrendador() {
             <div>
               <button
                 type="submit"
-                className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-brand-dark bg-brand-accent hover:bg-yellow-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-accent transition-colors"
+                disabled={loading}
+                className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-brand-dark bg-brand-accent hover:bg-yellow-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-accent transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
               >
-                Iniciar sesión
+                {loading ? "Iniciando sesión..." : "Iniciar sesión"}
               </button>
             </div>
           </form>
