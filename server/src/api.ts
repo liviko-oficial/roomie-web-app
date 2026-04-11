@@ -19,8 +19,8 @@ app.get("/health-check", (_, res) => {
 });
 
 app.use(user);
-app.use("/api", arrendador);
-app.use("/api", rentalProperty);
+app.use(arrendador);
+app.use(rentalProperty);
 app.use("/docs", swaggerUi.serve, swaggerUi.setup(YAML.load(path.resolve(__dirname, API_DOCS_PATH))));
 
 app.use((_, res) => {

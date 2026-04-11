@@ -4,8 +4,6 @@
 "use client";
 import { useRouter } from "next/navigation";
 import React, { useState } from 'react';
-import { properties } from '@/modules/home/mock/properties';
-import { propertySummary } from "@/modules/home/mappers/propertySummary";
 
 export default function BaseLayaout({property, CaracteristicaExtra, SeccionesExtra})  {
   const router = useRouter();

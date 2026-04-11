@@ -1,13 +1,22 @@
 "use client";
-import React from "react";
+import React, { useState, useEffect } from "react";
 import PropertyCard from "../components/PropertyCard";
-import { properties } from "../mock/properties";
+import { propertySummary } from "../mappers/propertySummary";
+import { propertyService } from "@/lib/api/propertyService";
 import Link from "next/link";
 
 const FeaturedProperties = () => {
-  const featuredProperties = properties
-    .filter((property) => property.isFeatured)
-    .slice(0, 6);
+  const [featuredProperties, setFeaturedProperties] = useState([]);
+
+  useEffect(() => {
+    propertyService
+      .getAll()
+      .then((res) => {
+        const all = (res.data || []).map(propertySummary).filter(Boolean);
+        setFeaturedProperties(all.filter((p) => p.isFeatured).slice(0, 6));
+      })
+      .catch(() => {});
+  }, []);
 
   return (
     <section className="py-16 bg-white">
