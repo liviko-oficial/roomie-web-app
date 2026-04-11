@@ -3,7 +3,7 @@ import apiClient from './client';
 export const arrendadorService = {
   // Registro de arrendador
   register: async (email: string, password: string, nombre: string, apellido: string, telefono: string) => {
-    const response = await apiClient.post('/api/arrendadores/register', {
+    const response = await apiClient.post('/api/arrendadores/registro', {
       email,
       password,
       nombre,
@@ -41,7 +41,7 @@ export const arrendadorService = {
 
   // Cambiar contraseña
   changePassword: async (id: string, currentPassword: string, newPassword: string) => {
-    const response = await apiClient.put(`/api/arrendadores/${id}/password`, {
+    const response = await apiClient.put(`/api/arrendadores/${id}/cambiar-password`, {
       currentPassword,
       newPassword,
     });
@@ -50,7 +50,7 @@ export const arrendadorService = {
 
   // Obtener mis propiedades
   getMyProperties: async (id: string) => {
-    const response = await apiClient.get(`/api/arrendadores/${id}/propiedades`);
+    const response = await apiClient.get(`/api/propiedades-renta/arrendador/${id}`);
     return response.data;
   },
 

@@ -3,7 +3,7 @@ import apiClient from './client';
 export const userService = {
   // Registro
   register: async (email: string, password: string) => {
-    const response = await apiClient.post('/user/register', {
+    const response = await apiClient.post('/api/register', {
       email,
       password,
     });
@@ -12,13 +12,13 @@ export const userService = {
 
   // Verificar email
   verifyEmail: async (token: string) => {
-    const response = await apiClient.get(`/user/register/verify?token=${token}`);
+    const response = await apiClient.get(`/api/register/verify?token=${token}`);
     return response.data;
   },
 
   // Login
   login: async (email: string, password: string) => {
-    const response = await apiClient.post('/user/login', {
+    const response = await apiClient.post('/api/login', {
       email,
       password,
     });
@@ -32,13 +32,13 @@ export const userService = {
 
   // Obtener perfil
   getProfile: async () => {
-    const response = await apiClient.get('/user');
+    const response = await apiClient.get('/api/user');
     return response.data;
   },
 
   // Actualizar perfil
   updateProfile: async (userData: any) => {
-    const response = await apiClient.put('/user', userData);
+    const response = await apiClient.put('/api/user', userData);
     return response.data;
   },
 

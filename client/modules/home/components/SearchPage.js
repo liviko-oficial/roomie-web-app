@@ -2,7 +2,8 @@
 import React, { useState, useEffect } from 'react';
 import PropertyCard from './PropertyCard';
 import PropertyComparator from './PropertyComparator'; // Importar el comparador
-import { properties } from '../mock/properties';
+import { propertySummary } from '../mappers/propertySummary';
+import { propertyService } from '@/lib/api/propertyService';
 import SearchFilters from './SearchFilters';
 import SearchMap from './SearchMap';
 import Link from "next/link";
@@ -10,13 +11,25 @@ import { usePropertyFilters } from "@/modules/global_components/context_files/Pr
 
 const SearchPage = ({ onNavigate, initialFilters }) => {
   const { filters: activeFilters, updateFilter, resetFilters } = usePropertyFilters();
-  const [filteredProperties, setFilteredProperties] = useState(properties);
+  const [allProperties, setAllProperties] = useState([]);
+  const [filteredProperties, setFilteredProperties] = useState([]);
   const [showMap, setShowMap] = useState(false);
   const [propertiesToCompare, setPropertiesToCompare] = useState([]); // Estado para propiedades a comparar
 
+  useEffect(() => {
+    propertyService
+      .getAll()
+      .then((res) => {
+        const mapped = (res.data || []).map(propertySummary).filter(Boolean);
+        setAllProperties(mapped);
+        setFilteredProperties(mapped);
+      })
+      .catch(() => {});
+  }, []);
+
   const applyFilters = (filtersToApply) => {
-    let results = [...properties];
-    
+    let results = [...allProperties];
+
     if (filtersToApply.propertyType) {
       results = results.filter(property => property.type === filtersToApply.propertyType);
     }
@@ -82,13 +95,13 @@ const SearchPage = ({ onNavigate, initialFilters }) => {
     if (filtersToApply.securityType) {
       results = results.filter(property => property.securityType === filtersToApply.securityType);
     }
-    
+
     setFilteredProperties(results);
   };
 
   useEffect(() => {
     applyFilters(activeFilters);
-  }, [activeFilters]);
+  }, [activeFilters, allProperties]);
 
   const toggleMapView = () => {
     setShowMap(!showMap);
@@ -129,7 +142,7 @@ const SearchPage = ({ onNavigate, initialFilters }) => {
               <SearchFilters onFilterChange={() => {}} activeFilters={activeFilters} />
             </div>
           </div>
-          
+
           <div className="md:w-3/4">
             <div className="mb-4 flex justify-between items-center">
               <div>
@@ -138,7 +151,7 @@ const SearchPage = ({ onNavigate, initialFilters }) => {
               </div>
               <div className="flex space-x-4">
                 {propertiesToCompare.length > 0 && (
-                  <Link 
+                  <Link
                     to="/compare"
                     onClick={handleGoToCompare}
                     className="flex items-center px-4 py-2 bg-black text-white rounded-md font-bold hover:bg-gray-800 transition duration-300"
@@ -146,7 +159,7 @@ const SearchPage = ({ onNavigate, initialFilters }) => {
                     Comparar ({propertiesToCompare.length})
                   </Link>
                 )}
-                <button 
+                <button
                   onClick={toggleMapView}
                   className="flex items-center px-4 py-2 bg-[#FFDC30] text-black rounded-md font-medium hover:bg-yellow-400 transition duration-300"
                 >
@@ -173,9 +186,9 @@ const SearchPage = ({ onNavigate, initialFilters }) => {
                 <div className="lg:col-span-1 overflow-y-auto max-h-[calc(100vh-200px)]">
                   <div className="grid grid-cols-1 gap-6">
                     {filteredProperties.map(property => (
-                      <PropertyCard 
-                        key={property.id} 
-                        property={property} 
+                      <PropertyCard
+                        key={property.id}
+                        property={property}
                         onViewDetails={() => {}}
                         onCompareToggle={() => {}}
                         isComparing={propertiesToCompare.some(p => p.id === property.id)}
@@ -191,9 +204,9 @@ const SearchPage = ({ onNavigate, initialFilters }) => {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
                 {filteredProperties.length > 0 ? (
                   filteredProperties.map(property => (
-                    <PropertyCard 
-                      key={property.id} 
-                      property={property} 
+                    <PropertyCard
+                      key={property.id}
+                      property={property}
                       onViewDetails={() => {}}
                       onCompareToggle={() => {}}
                       isComparing={propertiesToCompare.some(p => p.id === property.id)}
