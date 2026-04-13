@@ -1,3 +1,4 @@
+"use client";
 import NavbarStudent from '@/modules/Students/NavbarStudent';
 import { AppProviders } from "@/modules/global_components/context_files/AppProviders";
 
