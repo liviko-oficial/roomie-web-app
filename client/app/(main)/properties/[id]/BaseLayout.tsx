@@ -1,31 +1,73 @@
 // este componente fue hecho a base de el componente original de la pagina de detalles de una propiedad adaptado para 
 // que funcione con el ruteo de next y para que se le pueda poner información extra de ser necesario
 
-"use client";
-import { useRouter } from "next/navigation";
+'use client';
+import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
 
-export default function BaseLayaout({property, CaracteristicaExtra, SeccionesExtra})  {
+interface Property {
+  title: string;
+  type: 'Casa' | 'Departamento' | 'Cuarto' | 'Studio' | 'Loft';
+  price: number;
+  location: string;
+  image: string;
+  features: string[];
+  rating?: number;
+  isVerified?: boolean;
+  bathrooms?: number;
+  petFriendly?: boolean;
+  description?: string;
+  images?: string[];
+  owner?: {
+    name: string;
+    avatar?: string;
+    contact?: string;
+  };
+  includedServices?: string[];
+  securityType?: string;
+  comuneAreas?: string[];
+}
+
+interface BaseLayoutProps {
+  property?: Property;
+  CaracteristicaExtra?: React.ReactNode;
+  SeccionesExtra?: React.ReactNode;
+}
+
+export default function BaseLayout({
+  property,
+  CaracteristicaExtra,
+  SeccionesExtra
+}: BaseLayoutProps) {
   const router = useRouter();
   
+  // Validar que property existe
+  if (!property) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-red-600 font-bold">Propiedad no encontrada</p>
+      </div>
+    );
+  }
+  
   const {
-    title,
-    type,
-    price,
-    location,
-    image,
-    features,
-    rating,
-    isVerified,
-    bathrooms,
-    petFriendly,
+    title = 'Sin título',
+    type = 'Departamento',
+    price = 0,
+    location = 'Ubicación no disponible',
+    image = 'https://via.placeholder.com/800x420?text=Propiedad',
+    features = [],
+    rating = 0,
+    isVerified = false,
+    bathrooms = 1,
+    petFriendly = false,
     description,
-    images,
-    owner,
-    includedServices,
-    securityType
-
-  } = property
+    images = [],
+    owner = { name: 'Propietario', contact: 'Contacto no disponible' },
+    includedServices = [],
+    securityType,
+    comuneAreas = []
+  } = property;
 
   const [currentImage, setCurrentImage] = useState(0);
 
@@ -43,9 +85,11 @@ export default function BaseLayaout({property, CaracteristicaExtra, SeccionesExt
   const genderType = features.find(f => ["Solo hombres", "Solo mujeres", "Mixto"].includes(f)) || "No especificado";
 
   // Formatear precios y cantidades con coma
-  const formatPrice = (value) => {
-    if (typeof value !== 'number') return value;
-    return value.toLocaleString('en-US');
+  const formatPrice = (value: number | string | undefined): string => {
+    if (!value) return '0';
+    const numValue = typeof value === 'string' ? parseFloat(value) : value;
+    if (isNaN(numValue)) return '0';
+    return numValue.toLocaleString('es-MX');
   };
 
   return (
@@ -89,6 +133,9 @@ export default function BaseLayaout({property, CaracteristicaExtra, SeccionesExt
               src={allImages[currentImage]}
               alt={title}
               className="w-full h-full object-cover rounded-2xl"
+              onError={(e) => {
+                e.currentTarget.src = 'https://via.placeholder.com/800x420?text=Imagen+no+disponible';
+              }}
             />
             <button
               onClick={() => setCurrentImage((prev) => (prev === allImages.length - 1 ? 0 : prev + 1))}
@@ -102,11 +149,12 @@ export default function BaseLayaout({property, CaracteristicaExtra, SeccionesExt
               {allImages.map((_, idx) => (
                 <span
                   key={idx}
-                  className={`w-3 h-3 rounded-full border-2 transition-all duration-200 ${
+                  className={`w-3 h-3 rounded-full border-2 transition-all duration-200 cursor-pointer ${
                     idx === currentImage
                       ? 'bg-[#FDD76C] border-black'
                       : 'bg-black/40 border-black/70'
                   }`}
+                  onClick={() => setCurrentImage(idx)}
                 />
               ))}
             </div>
@@ -117,6 +165,9 @@ export default function BaseLayaout({property, CaracteristicaExtra, SeccionesExt
               src={allImages[0]}
               alt={title}
               className="w-full h-full object-cover rounded-2xl"
+              onError={(e) => {
+                e.currentTarget.src = 'https://via.placeholder.com/800x420?text=Imagen+no+disponible';
+              }}
             />
             {isVerified && (
               <div className="absolute top-4 left-4 bg-[#FDD76C] text-[#042A5C] text-sm font-bold px-3 py-1 rounded-md shadow">
@@ -227,6 +278,7 @@ export default function BaseLayaout({property, CaracteristicaExtra, SeccionesExt
         )}
 
         {/* Amenidades */}
+        {amenities && amenities.length > 0 && (
         <div className="mt-6">
           <h2 className="text-xl font-bold text-[#042A5C] mb-2">Amenidades</h2>
           <div className="flex flex-wrap gap-2">
@@ -240,6 +292,7 @@ export default function BaseLayaout({property, CaracteristicaExtra, SeccionesExt
             ))}
           </div>
         </div>
+        )}
 
         {/* Areas comunes */}
         {property.comuneAreas && property.comuneAreas.length > 0 && (
@@ -266,8 +319,11 @@ export default function BaseLayaout({property, CaracteristicaExtra, SeccionesExt
           <div className="flex items-center">
             <img
               src={owner?.avatar || "https://via.placeholder.com/60x60?text=User"}
-              alt="Propietario"
+              alt={owner?.name || "Propietario"}
               className="w-16 h-16 rounded-full object-cover mr-4"
+              onError={(e) => {
+                e.currentTarget.src = 'https://via.placeholder.com/60x60?text=User';
+              }}
             />
             <div>
               <h3 className="font-bold text-[#042A5C]">{owner?.name || "Propietario"}</h3>
@@ -288,4 +344,4 @@ export default function BaseLayaout({property, CaracteristicaExtra, SeccionesExt
       </div>
     </div>
   );
-};
+}
