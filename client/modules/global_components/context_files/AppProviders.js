@@ -4,9 +4,11 @@
 import { RegistrationModalProvider } from "./RegistrationModalContext"; // Contexto del registration Modal
 import { LoginModalProvider } from "./LoginModalContext"; // Contexto del login Modal
 import { PropertyFilterProvider } from "./PropertyFilterContext"
+import { AuthProvider } from "./AuthContext"; // Contexto de autenticación
 
 export const AppProviders = ({ children }) => {
   return (
+    <AuthProvider>
     <RegistrationModalProvider>
       <PropertyFilterProvider>
       <LoginModalProvider>
@@ -14,6 +16,7 @@ export const AppProviders = ({ children }) => {
       </LoginModalProvider>
       </PropertyFilterProvider>
     </RegistrationModalProvider>
+    </AuthProvider>
     
   );
 };

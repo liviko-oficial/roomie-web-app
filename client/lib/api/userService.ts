@@ -26,6 +26,7 @@ export const userService = {
     if (response.data.token) {
       localStorage.setItem('jwtToken', response.data.token);
       localStorage.setItem('userId', response.data.user.id);
+      localStorage.setItem('userType', 'student');
     }
     return response.data;
   },
@@ -46,5 +47,6 @@ export const userService = {
   logout: () => {
     localStorage.removeItem('jwtToken');
     localStorage.removeItem('userId');
+    localStorage.removeItem('userType');
   },
 };

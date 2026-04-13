@@ -5,7 +5,7 @@ import { arrendadorService } from '@/lib/api/arrendadorService';
 export const useAuth = () => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [userType, setUserType] = useState<'student' | 'landlord' | null>(null);
+  const [userType, setUserType] = useState<'student' | 'arrendador' | null>(null);
 
   // Verificar si hay sesión al cargar
   useEffect(() => {
@@ -14,7 +14,7 @@ export const useAuth = () => {
 
     if (token) {
       // Aquí podrías validar el token con el backend
-      setUserType(type as 'student' | 'landlord' | null);
+      setUserType(type as 'student' | 'arrendador' | null);
     }
     setLoading(false);
   }, []);
@@ -35,7 +35,7 @@ export const useAuth = () => {
     try {
       const response = await arrendadorService.login(email, password);
       setUser(response.arrendador);
-      setUserType('landlord');
+      setUserType('arrendador');
       return response;
     } catch (error) {
       console.error('Login failed:', error);
