@@ -7,10 +7,12 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
       
       <main>
         <AppProviders>
-          <NavbarStudent />
+          <NavbarStudent currentPage="students" onNavigate={() => {}} /> 
           {children}
         </AppProviders>
       </main>
     </>
   );
 }
+
+//Es mas rapido pasarselas en Navbas Student

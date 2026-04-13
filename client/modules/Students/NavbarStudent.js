@@ -5,6 +5,7 @@ import Link from "next/link";
 import NavLinkStudent from "./components/NavLinkStudent"
 import { useRegistrationModal } from "../global_components/context_files/RegistrationModalContext";
 import { useLoginModal } from "../global_components/context_files/LoginModalContext";
+
 // NavbarStudent: Barra de navegación superior pensada para estudiantes
 const NavbarStudent = ({ currentPage, onNavigate }) => {
   const { openModal: openRegistrationModal } = useRegistrationModal();
