@@ -1,17 +1,14 @@
-import Liviko from "@/assets/liviko-logo";
-
 const LandingFooter = () => {
   return (
     <footer id="contacto" className="bg-[#042a5c] text-white py-12 md:py-16 border-t border-gray-700">
       <div className="container mx-auto px-6">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 text-center md:text-left">
           <div>
-            {/* Logo 2 */}
-            <Liviko
-              alt="Liviko Logo"
-              width={120}
-              height={120}
-              className="object-contain text-brand-accent"
+            {/* Logo */}
+            <img
+              src="/happy-roomie-full-white.svg"
+              alt="Happy Roomie Logo"
+              className="h-10 w-auto"
             />
             <p className="text-sm md:text-base mb-4">
               La plataforma líder para conectar arrendadores con estudiantes del Tec de Monterrey.
@@ -65,22 +62,22 @@ const LandingFooter = () => {
             <h3 className="text-xl font-bold mb-4">Arrendadores</h3>
             <ul className="space-y-2">
               <li>
-                <a href="#" className="hover:text-[#fdd76c] transition-colors">
+                <a href="#como-funciona" className="hover:text-[#fdd76c] transition-colors">
                   Cómo funciona
                 </a>
               </li>
               <li>
-                <a href="#" className="hover:text-[#fdd76c] transition-colors">
+                <a href="/registrar-propiedad" className="hover:text-[#fdd76c] transition-colors">
                   Publica tu propiedad
                 </a>
               </li>
               <li>
-                <a href="#" className="hover:text-[#fdd76c] transition-colors">
-                  Precios y comisiones
+                <a href="#beneficios" className="hover:text-[#fdd76c] transition-colors">
+                  Beneficios
                 </a>
               </li>
               <li>
-                <a href="#" className="hover:text-[#fdd76c] transition-colors">
+                <a href="#como-funciona" className="hover:text-[#fdd76c] transition-colors">
                   Guía para arrendadores
                 </a>
               </li>
@@ -88,26 +85,16 @@ const LandingFooter = () => {
           </div>
 
           <div>
-            <h3 className="text-xl font-bold mb-4">Empresa</h3>
+            <h3 className="text-xl font-bold mb-4">Legal</h3>
             <ul className="space-y-2">
               <li>
-                <a href="#" className="hover:text-[#fdd76c] transition-colors">
-                  Sobre nosotros
+                <a href="/terminos" className="hover:text-[#fdd76c] transition-colors">
+                  Términos y Condiciones
                 </a>
               </li>
               <li>
-                <a href="#" className="hover:text-[#fdd76c] transition-colors">
-                  Blog
-                </a>
-              </li>
-              <li>
-                <a href="#" className="hover:text-[#fdd76c] transition-colors">
-                  Prensa
-                </a>
-              </li>
-              <li>
-                <a href="#" className="hover:text-[#fdd76c] transition-colors">
-                  Trabaja con nosotros
+                <a href="/privacidad" className="hover:text-[#fdd76c] transition-colors">
+                  Política de Privacidad
                 </a>
               </li>
             </ul>
@@ -126,10 +113,10 @@ const LandingFooter = () => {
         <div className="border-t border-gray-700 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center">
           <p className="text-sm md:text-base">© 2025 Happy Roomie. Todos los derechos reservados.</p>
           <div className="flex space-x-6 mt-4 md:mt-0 text-sm md:text-base">
-            <a href="#" className="hover:text-[#fdd76c] transition-colors">
+            <a href="/terminos" className="hover:text-[#fdd76c] transition-colors">
               Términos y Condiciones
             </a>
-            <a href="#" className="hover:text-[#fdd76c] transition-colors">
+            <a href="/privacidad" className="hover:text-[#fdd76c] transition-colors">
               Política de Privacidad
             </a>
           </div>

@@ -2,8 +2,12 @@ import { Router } from "express";
 import swaggerUi from "swagger-ui-express";
 import YAML from "yamljs";
 import path from "path";
+import { fileURLToPath } from "url";
 
 import { API_DOCS_PATH } from "@/lib/const.ts";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 import user from "@/user/routes";
 import arrendador from "@/arrendador/routes";
 import rentalProperty from "@/rentalProperty/routes";

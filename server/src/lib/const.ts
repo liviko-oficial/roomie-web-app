@@ -8,6 +8,9 @@ export const {
   API_DOCS_PATH = "api-docs/openapi.yml",
 } = process.env;
 
+if (!DB_URL) throw new Error("DB_URL is required — set it in .env");
+if (!JWT_SECRET) throw new Error("JWT_SECRET is required — set it in .env");
+
 
 import { fileURLToPath } from "url";
 import { dirname } from "path";

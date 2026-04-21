@@ -38,7 +38,7 @@ export const userService = {
   },
 
   // Actualizar perfil
-  updateProfile: async (userData: any) => {
+  updateProfile: async (userData: Record<string, unknown>) => {
     const response = await apiClient.put('/api/user', userData);
     return response.data;
   },

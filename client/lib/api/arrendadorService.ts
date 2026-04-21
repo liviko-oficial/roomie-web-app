@@ -34,7 +34,7 @@ export const arrendadorService = {
   },
 
   // Actualizar perfil
-  updateProfile: async (id: string, userData: any) => {
+  updateProfile: async (id: string, userData: Record<string, unknown>) => {
     const response = await apiClient.put(`/api/arrendadores/${id}`, userData);
     return response.data;
   },

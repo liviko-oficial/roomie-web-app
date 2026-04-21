@@ -1,5 +1,4 @@
 import React from "react";
-import Liviko from "@/assets/liviko-logo";
 import YearText from "./YearText";
 const Footer = () => {
   return (
@@ -7,11 +6,10 @@ const Footer = () => {
       <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8">
         {/* Logo y descripción */}
         <div className="flex flex-col items-center md:items-start text-center md:text-left">
-          <Liviko
-            alt="Liviko Logo"
-            width={120}
-            height={120}
-            className="object-contain text-brand-accent"
+          <img
+            src="/happy-roomie-full-white.svg"
+            alt="Happy Roomie Logo"
+            className="h-10 w-auto"
           />
           <p className="text-white text-sm leading-relaxed mb-4">
             Conectamos estudiantes foráneos del Tec de Monterrey con las mejores
@@ -52,22 +50,22 @@ const Footer = () => {
           </h3>
           <ul className="space-y-2">
             <li>
-              <a href="#" className="hover:text-brand-accent">
+              <a href="/" className="hover:text-brand-accent">
                 Inicio
               </a>
             </li>
             <li>
-              <a href="#" className="hover:text-brand-accent">
+              <a href="/properties" className="hover:text-brand-accent">
                 Buscar propiedades
               </a>
             </li>
             <li>
-              <a href="#" className="hover:text-brand-accent">
+              <a href="/registrar-propiedad" className="hover:text-brand-accent">
                 Publicar propiedad
               </a>
             </li>
             <li>
-              <a href="#" className="hover:text-brand-accent">
+              <a href="/students" className="hover:text-brand-accent">
                 Encontrar roomie
               </a>
             </li>
@@ -102,7 +100,7 @@ const Footer = () => {
               <span className="mr-2 text-brand-accent">
                 <i className="fas fa-envelope"></i>
               </span>
-              <span>liviko.oficial@gmail.com</span>
+              <span>contacto@happyroomie.mx</span>
             </li>
             <li className="flex items-center justify-center md:justify-start">
               <span className="mr-2 text-brand-accent">
@@ -125,7 +123,9 @@ const Footer = () => {
 
       {/* Ultima linea */}
       <div className="mt-10 pt-6 border-t border-gray-700 text-center text-gray-300 text-xs">
-        © <YearText /> Liviko. Todos los derechos reservados.
+        © <YearText /> Happy Roomie. Todos los derechos reservados. |{" "}
+        <a href="/terminos" className="hover:text-brand-accent">Términos</a> |{" "}
+        <a href="/privacidad" className="hover:text-brand-accent">Privacidad</a>
       </div>
     </footer>
   );

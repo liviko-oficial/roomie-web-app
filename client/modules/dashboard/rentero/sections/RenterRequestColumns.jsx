@@ -56,7 +56,7 @@ const FilterPanel = ({ filters, setFilters, requests, onReset }) => {
   );
 };
 
-const RenterRequestColumns = ({ requests }) => {
+const RenterRequestColumns = ({ requests, onAccept, onReject, onRefresh }) => {
   const [sortBy, setSortBy] = useState("date_desc");
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [filtersOpen, setFiltersOpen] = useState(false);
@@ -79,7 +79,7 @@ const RenterRequestColumns = ({ requests }) => {
   const rechazadas = processed.filter((r) => r.status === "rechazada");
 
   const handleViewDetails = (req) => setSelectedRequest(req);
-  const handleCounterOffer = (req) => console.log("Contraoferta:", req);
+  const handleCounterOffer = (req) => setSelectedRequest(req);
 
   const SectionHeader = ({ icon: Icon, title, count, colorClass }) => (
     <div className={`flex items-center gap-2 mb-4 pb-3 border-b-2 ${colorClass}`}>
@@ -142,8 +142,8 @@ const RenterRequestColumns = ({ requests }) => {
         request={selectedRequest}
         onClose={() => setSelectedRequest(null)}
         role="landlord"
-        onAcceptOffer={(req) => { console.log("Aceptar oferta:", req); setSelectedRequest(null); }}
-        onRejectOffer={(req, reason) => { console.log("Rechazar oferta:", req, "Razón:", reason); setSelectedRequest(null); }}
+        onAcceptOffer={(req) => { onAccept?.(req); setSelectedRequest(null); }}
+        onRejectOffer={(req, reason) => { onReject?.(req, reason); setSelectedRequest(null); }}
       />
     </section>
   );

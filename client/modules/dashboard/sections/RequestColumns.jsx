@@ -95,7 +95,7 @@ const FilterPanel = ({ filters, setFilters, requests, onReset }) => {
 };
 
 // Secciones horizontales de solicitudes agrupadas por estado
-const RequestColumns = ({ requests }) => {
+const RequestColumns = ({ requests, onCounterOfferSubmit, onRefresh }) => {
   const [sortBy, setSortBy] = useState("date_desc");
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [filtersOpen, setFiltersOpen] = useState(false);
@@ -128,8 +128,8 @@ const RequestColumns = ({ requests }) => {
   const rechazadas = processedRequests.filter((r) => r.status === "rechazada");
 
   const handleViewDetails = (req) => setSelectedRequest(req);
-  const handleMakeOffer = (req) => console.log("Hacer oferta:", req);
-  const handleCounterOffer = (req) => console.log("Contraoferta:", req);
+  const handleMakeOffer = (req) => setSelectedRequest(req);
+  const handleCounterOffer = (req) => setSelectedRequest(req);
 
   const SectionHeader = ({ icon: Icon, title, count, colorClass }) => (
     <div className={`flex items-center gap-2 mb-4 pb-3 border-b-2 ${colorClass}`}>
@@ -269,8 +269,8 @@ const RequestColumns = ({ requests }) => {
         request={selectedRequest}
         onClose={() => setSelectedRequest(null)}
         role="student"
-        onAcceptOffer={(req) => { console.log("Aceptar oferta:", req); setSelectedRequest(null); }}
-        onRejectOffer={(req, reason) => { console.log("Rechazar oferta:", req, "Razón:", reason); setSelectedRequest(null); }}
+        onAcceptOffer={(req) => { setSelectedRequest(null); }}
+        onRejectOffer={(req, reason) => { setSelectedRequest(null); }}
       />
     </section>
   );

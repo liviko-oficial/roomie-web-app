@@ -1,11 +1,24 @@
 import apiClient from './client';
 
 export const propertyService = {
-  // Obtener todas las propiedades (con filtros)
-  getAll: async (params?: any) => {
-    const response = await apiClient.get('/api/propiedades-renta', {
-      params, // campus, precio, tipo, etc
-    });
+  getAll: async (params?: {
+    page?: number;
+    limit?: number;
+    tipoPropiedad?: string;
+    tipoRenta?: string;
+    generoPreferido?: string;
+    precioMinimo?: number;
+    precioMaximo?: number;
+    campus?: string;
+    distanciaMaxima?: number;
+    amueblado?: boolean;
+    mascotasPermitidas?: boolean;
+    serviciosIncluidos?: boolean;
+    numeroBanos?: number;
+    numeroRecamaras?: number;
+    ordenarPor?: string;
+  }) => {
+    const response = await apiClient.get('/api/propiedades-renta', { params });
     return response.data;
   },
 
@@ -22,13 +35,13 @@ export const propertyService = {
   },
 
   // Crear propiedad (protegido - solo arrendador)
-  create: async (propertyData: any) => {
+  create: async (propertyData: Record<string, unknown>) => {
     const response = await apiClient.post('/api/propiedades-renta', propertyData);
     return response.data;
   },
 
   // Actualizar propiedad (protegido)
-  update: async (id: string, propertyData: any) => {
+  update: async (id: string, propertyData: Record<string, unknown>) => {
     const response = await apiClient.put(`/api/propiedades-renta/${id}`, propertyData);
     return response.data;
   },

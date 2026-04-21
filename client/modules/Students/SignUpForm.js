@@ -130,7 +130,7 @@ const SignUpForm = () => {
               <div className="flex items-center">
                 <div className="w-4 h-4 bg-[#042a5c] rounded-full flex items-center justify-center mr-3 flex-shrink-0">
                   <svg className="w-3 h-3 text-[#fdd76c]" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293..." clipRule="evenodd" />
+                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                   </svg>
                 </div>
                 <span className="text-[#042a5c] text-sm font-medium">Acceso exclusivo para estudiantes Tec</span>
@@ -138,7 +138,7 @@ const SignUpForm = () => {
               <div className="flex items-center">
                 <div className="w-4 h-4 bg-[#042a5c] rounded-full flex items-center justify-center mr-3 flex-shrink-0">
                   <svg className="w-3 h-3 text-[#fdd76c]" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293..." clipRule="evenodd" />
+                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                   </svg>
                 </div>
                 <span className="text-[#042a5c] text-sm font-medium">Comunidad verificada y segura</span>
@@ -146,7 +146,7 @@ const SignUpForm = () => {
               <div className="flex items-center">
                 <div className="w-4 h-4 bg-[#042a5c] rounded-full flex items-center justify-center mr-3 flex-shrink-0">
                   <svg className="w-3 h-3 text-[#fdd76c]" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293..." clipRule="evenodd" />
+                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                   </svg>
                 </div>
                 <span className="text-[#042a5c] text-sm font-medium">Opciones adaptadas a tu presupuesto</span>
@@ -203,8 +203,17 @@ const SignUpForm = () => {
                 <label className="block text-sm font-medium text-[#042a5c] mb-1">Contraseña</label>
                 <div className="relative">
                   <input type={showPassword ? "text" : "password"} name="contrasena" value={formData.contrasena} onChange={handleInputChange} className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#fdd76c] focus:border-transparent pr-10 ${errors.contrasena ? "border-red-500" : "border-gray-300"}`} required />
-                  <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-[#042a5c]">
-                    {/* Ícono que cambia según si la contraseña está visible o no */}
+                  <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-[#042a5c]" aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}>
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      {showPassword ? (
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21" />
+                      ) : (
+                        <>
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        </>
+                      )}
+                    </svg>
                   </button>
                 </div>
                 {errors.contrasena && <p className="text-red-500 text-sm mt-1">{errors.contrasena}</p>}
@@ -215,8 +224,17 @@ const SignUpForm = () => {
                 <label className="block text-sm font-medium text-[#042a5c] mb-1">Confirmar contraseña</label>
                 <div className="relative">
                   <input type={showConfirmPassword ? "text" : "password"} name="confirmarContrasena" value={formData.confirmarContrasena} onChange={handleInputChange} className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#fdd76c] focus:border-transparent pr-10 ${errors.confirmarContrasena ? "border-red-500" : "border-gray-300"}`} required />
-                  <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-[#042a5c]">
-                    {/* Ícono que cambia según si la contraseña está visible o no */}
+                  <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-[#042a5c]" aria-label={showConfirmPassword ? "Ocultar contraseña" : "Mostrar contraseña"}>
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      {showConfirmPassword ? (
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21" />
+                      ) : (
+                        <>
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        </>
+                      )}
+                    </svg>
                   </button>
                 </div>
                 {errors.confirmarContrasena && <p className="text-red-500 text-sm mt-1">{errors.confirmarContrasena}</p>}

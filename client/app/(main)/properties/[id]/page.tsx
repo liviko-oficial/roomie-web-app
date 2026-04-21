@@ -1,3 +1,10 @@
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Detalle de propiedad",
+  description: "Conoce los detalles, fotos y ubicación de esta propiedad disponible en Happy Roomie.",
+};
+
 import PropertyDetail from '@/modules/home/sections/PropertyDetail';
 import BaseLayaout from './BaseLayout';
 import { propertySummary } from "@/modules/home/mappers/propertySummary";

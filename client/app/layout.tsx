@@ -9,9 +9,12 @@ const font_main = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: "Liviko",
+  title: {
+    default: "Happy Roomie — Encuentra tu lugar ideal",
+    template: "%s | Happy Roomie",
+  },
   description:
-    "Page created to be a solution for rommies that live whithin the tec area, by tec for tec",
+    "Marketplace de renta media estancia para estudiantes. Encuentra cuartos, departamentos y casas cerca de tu campus.",
 };
 
 export default function RootLayout({

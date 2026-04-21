@@ -22,12 +22,10 @@ const Navbar = () => {
       <div className="max-w-7xl mx-auto flex items-center justify-between px-4 py-1">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-0.5">
-          <Image
-            src="/liviko-logo.png"
-            alt="Liviko Logo"
-            width={120}
-            height={120}
-            className="object-contain aspect-video"
+          <img
+            src="/happy-roomie-lateral-navy.svg"
+            alt="Happy Roomie Logo"
+            className="h-10 w-auto"
           />
         </Link>
 

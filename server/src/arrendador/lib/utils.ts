@@ -30,7 +30,7 @@ export async function compare_hash(password: string, hash: string): Promise<bool
  * @returns Token JWT firmado
  */
 export function generateToken(arrendadorId: string, email: string): string {
-  const secret = process.env.JWT_SECRET || "your-secret-key";
+  const secret = process.env.JWT_SECRET!;
   return jwt.sign(
       { arrendadorId, email, role: "arrendador" }, // Payload del token
       secret,
@@ -45,6 +45,6 @@ export function generateToken(arrendadorId: string, email: string): string {
  * @throws Error si el token no es válido o está expirado
  */
 export function verifyToken(token: string): { arrendadorId: string; email: string; role: string } {
-  const secret = process.env.JWT_SECRET || "your-secret-key";
+  const secret = process.env.JWT_SECRET!;
   return jwt.verify(token, secret) as { arrendadorId: string; email: string; role: string };
 }

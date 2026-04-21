@@ -4,6 +4,7 @@
 'use client';
 import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
+import OfferWidget from '@/modules/home/components/OfferWidget';
 
 interface Property {
   title: string;
@@ -29,7 +30,7 @@ interface Property {
 }
 
 interface BaseLayoutProps {
-  property?: Property;
+  property?: Property & { id?: string };
   CaracteristicaExtra?: React.ReactNode;
   SeccionesExtra?: React.ReactNode;
 }
@@ -40,7 +41,8 @@ export default function BaseLayout({
   SeccionesExtra
 }: BaseLayoutProps) {
   const router = useRouter();
-  
+  const [currentImage, setCurrentImage] = useState(0);
+
   // Validar que property existe
   if (!property) {
     return (
@@ -49,7 +51,7 @@ export default function BaseLayout({
       </div>
     );
   }
-  
+
   const {
     title = 'Sin título',
     type = 'Departamento',
@@ -68,8 +70,6 @@ export default function BaseLayout({
     securityType,
     comuneAreas = []
   } = property;
-
-  const [currentImage, setCurrentImage] = useState(0);
 
   // Si no hay imágenes adicionales, usar la imagen principal
   const allImages = images ? [image, ...images] : [image];
@@ -332,15 +332,8 @@ export default function BaseLayout({
           </div>
         </div>
 
-        {/* Botones de acción */}
-        <div className="mt-8 flex flex-col sm:flex-row gap-4">
-          <button className="flex-1 px-6 py-3 bg-[#FDD76C] text-[#042A5C] rounded-md font-bold hover:bg-yellow-400 transition duration-300">
-            Contactar al propietario
-          </button>
-          <button className="flex-1 px-6 py-3 border-2 border-[#FDD76C] text-[#042A5C] rounded-md font-bold hover:bg-yellow-100 transition duration-300">
-            Agendar visita
-          </button>
-        </div>
+        {/* Sistema de oferta */}
+        <OfferWidget propertyId={property.id || ''} listedPrice={price} />
       </div>
     </div>
   );

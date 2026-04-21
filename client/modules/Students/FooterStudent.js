@@ -9,7 +9,7 @@ const Footer = () => {
         <div className="flex flex-col items-start text-left">
           <div className="flex flex-col items-center mb-3">
             {/* Logo principal */}
-            <img src="/Happy_Roomie_logo.svg" alt="Happy Roomie Logo" className="h-12" />
+            <img src="/happy-roomie-full-white.svg" alt="Happy Roomie Logo" className="h-10 w-auto" />
             {/* Logo con título */}
           </div>
           {/* Descripción de la plataforma */}
@@ -23,15 +23,17 @@ const Footer = () => {
         <div className="text-left">
           <h3 className="text-lg font-bold text-white mb-4">Enlaces rápidos</h3>
           <ul className="space-y-2">
-            {/* Cada enlace con hover en amarillo */}
             <li>
-              <a href="#" className="text-white hover:text-[#ffd662]">Inicio</a>
+              <a href="/students" className="text-white hover:text-[#ffd662]">Inicio</a>
             </li>
             <li>
-              <a href="#" className="text-white hover:text-[#ffd662]">Beneficios</a>
+              <a href="/properties" className="text-white hover:text-[#ffd662]">Buscar propiedades</a>
             </li>
             <li>
-              <a href="#" className="text-white hover:text-[#ffd662]">Registro</a>
+              <a href="/terminos" className="text-white hover:text-[#ffd662]">Términos</a>
+            </li>
+            <li>
+              <a href="/privacidad" className="text-white hover:text-[#ffd662]">Privacidad</a>
             </li>
           </ul>
         </div>

@@ -147,23 +147,122 @@ export class PetitionController {
         }
     }
 
-    static async enviarOferta(req: Request, res: Response) {
-        /*
-         * Función para que, como arrendador o Estudiante, pueda enviar una oferta o contraoferta
-         * Pd: Sólo pueden realizar un mázimo de 2 contraofertas por ID
-         * */
+    /**
+     * PUT /api/propiedades/peticiones/:petitionId/contraoferta
+     * Student sends a counter-offer after rejection (max 2 total offers)
+     */
+    static async contraoferta(req: Request, res: Response) {
+        try {
+            const { petitionId } = req.params;
+            const { montoOfrecidoMXN } = req.body;
+
+            if (!montoOfrecidoMXN || typeof montoOfrecidoMXN !== "number" || montoOfrecidoMXN <= 0) {
+                return res.status(400).json({ success: false, message: "Monto inválido" });
+            }
+
+            const petition = await PeticionDB.findById(petitionId);
+            if (!petition) {
+                return res.status(404).json({ success: false, message: "Solicitud no encontrada" });
+            }
+
+            if (petition.contexto.estatus !== "Rechazada") {
+                return res.status(400).json({
+                    success: false,
+                    message: "Solo puedes hacer contraoferta cuando la solicitud fue rechazada"
+                });
+            }
+
+            const currentOffers = petition.oferta?.numeroOfertas || 0;
+            if (currentOffers >= 2) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Ya alcanzaste el máximo de 2 ofertas"
+                });
+            }
+
+            const historial = petition.oferta?.historialOfertas || [];
+            historial.push(montoOfrecidoMXN);
+
+            await PeticionDB.findByIdAndUpdate(petitionId, {
+                "contexto.estatus": "En proceso",
+                "contexto.motivo": null,
+                "oferta.montoOfrecidoMXN": montoOfrecidoMXN,
+                "oferta.numeroOfertas": currentOffers + 1,
+                "oferta.historialOfertas": historial,
+                updatedAt: new Date()
+            });
+
+            return res.status(200).json({
+                success: true,
+                message: "Contraoferta enviada",
+                data: { petitionId, montoOfrecidoMXN, numeroOfertas: currentOffers + 1 }
+            });
+        } catch (error) {
+            console.error("Error al enviar contraoferta:", error);
+            return res.status(500).json({ success: false, message: "Error interno del servidor" });
+        }
     }
 
-    static async aceptarOferta(req: Request, res: Response) {
-        /*
-         *Función para que, como arrendador o estudiante, pueda aceptar una oferta o
-         contraoferta
-        */
-    }
+    /**
+     * GET /api/propiedades/peticiones/usuario/:userId
+     * List all petitions for a student, with property + landlord data populated
+     */
+    static async listByStudent(req: Request, res: Response) {
+        try {
+            const { userId } = req.params;
+            const page = parseInt(req.query.page as string) || 1;
+            const limit = Math.min(parseInt(req.query.limit as string) || 20, 100);
 
-    static async rechazarOferta(req: Request, res: Response) {
-        /*
-         * Función para que, como arrendador o estudiante, pueda rechazar una oferta o 
-         * contraoferta*/
+            const peticiones = await PeticionDB.find({ "contexto.usuarioId": userId })
+                .sort({ createdAt: -1 })
+                .skip((page - 1) * limit)
+                .limit(limit)
+                .lean();
+
+            const total = await PeticionDB.countDocuments({ "contexto.usuarioId": userId });
+
+            // Populate property + landlord data for each petition
+            const populated = await Promise.all(
+                peticiones.map(async (pet: any) => {
+                    const property = await PropiedadRentaDB.findById(pet.propertyId)
+                        .select("titulo tipoPropiedad ubicacion informacionFinanciera imagenes propietarioId")
+                        .lean() as any;
+
+                    let landlord = null;
+                    if (property?.propietarioId) {
+                        landlord = await ArrendadorDB.findById(property.propietarioId)
+                            .select("email profile.fullName profile.phone profile.profilePicture")
+                            .lean() as any;
+                    }
+
+                    return {
+                        ...pet,
+                        propertyData: property ? {
+                            titulo: property.titulo,
+                            tipoPropiedad: property.tipoPropiedad,
+                            direccion: property.ubicacion?.direccion || property.ubicacion?.calle || "",
+                            campus: property.ubicacion?.campus,
+                            precioMensual: property.informacionFinanciera?.precioMensual,
+                            imagen: property.imagenes?.fachada?.[0] || property.imagenes?.interior?.[0] || "",
+                        } : null,
+                        landlordData: landlord ? {
+                            nombre: landlord.profile?.fullName || landlord.email,
+                            email: landlord.email,
+                            telefono: landlord.profile?.phone,
+                            foto: landlord.profile?.profilePicture,
+                        } : null,
+                    };
+                })
+            );
+
+            return res.status(200).json({
+                success: true,
+                data: populated,
+                pagination: { page, limit, total, totalPages: Math.ceil(total / limit) }
+            });
+        } catch (error: any) {
+            console.error("Error al listar peticiones del estudiante:", error);
+            return res.status(500).json({ success: false, message: "Error al listar peticiones" });
+        }
     }
 }

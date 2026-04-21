@@ -11,9 +11,9 @@ const Icon = ({ children }: { children: React.ReactNode }) => (
 );
 
 const ChoiceGrid = ({ options, value, onChange, cols = 2 }: {
-  options: { value: any; label: string; hint?: string; icon?: React.ReactNode }[];
-  value: any;
-  onChange: (v: any) => void;
+  options: { value: string; label: string; hint?: string; icon?: React.ReactNode }[];
+  value: string;
+  onChange: (v: string) => void;
   cols?: number;
 }) => {
   const gridCols = cols === 2 ? "sm:grid-cols-2" : "sm:grid-cols-3";
@@ -122,6 +122,7 @@ const PhotoUpload = ({ label, description, multiple, value, onChange, maxPreview
   description?: string;
   multiple?: boolean;
   value: File | File[] | null;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onChange: (files: any) => void;
   maxPreview?: number;
   maxFiles?: number;
@@ -256,10 +257,12 @@ export default function RegistrarPropiedad() {
     propertyType: "",
     dentroDe: "",
     numRoomsToRent: 0,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     rooms: [] as any[],
     campus: "",
     numRooms: 0,
     registerBedroomDetails: null as boolean | null,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     bedrooms: [] as any[],
     title: "",
     addressGeneral: "",

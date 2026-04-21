@@ -184,6 +184,9 @@ const ArrendadorMongoSchema = new Schema<Arrendador>({
   updatedAt: { type: Date, default: Date.now },
 });
 
+// Indexes para queries frecuentes
+ArrendadorMongoSchema.index({ isActive: 1 });
+
 /* ----------------------------------------------
     MongoDB Models (Mongoose)
 ------------------------------------------------ */

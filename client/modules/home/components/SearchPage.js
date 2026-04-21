@@ -1,7 +1,7 @@
 "use client";
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import PropertyCard from './PropertyCard';
-import PropertyComparator from './PropertyComparator'; // Importar el comparador
+import PropertyComparator from './PropertyComparator';
 import { propertySummary } from '../mappers/propertySummary';
 import { propertyService } from '@/lib/api/propertyService';
 import SearchFilters from './SearchFilters';
@@ -9,99 +9,65 @@ import SearchMap from './SearchMap';
 import Link from "next/link";
 import { usePropertyFilters } from "@/modules/global_components/context_files/PropertyFilterContext";
 
+const ITEMS_PER_PAGE = 12;
+
 const SearchPage = ({ onNavigate, initialFilters }) => {
   const { filters: activeFilters, updateFilter, resetFilters } = usePropertyFilters();
-  const [allProperties, setAllProperties] = useState([]);
-  const [filteredProperties, setFilteredProperties] = useState([]);
+  const [properties, setProperties] = useState([]);
   const [showMap, setShowMap] = useState(false);
-  const [propertiesToCompare, setPropertiesToCompare] = useState([]); // Estado para propiedades a comparar
+  const [propertiesToCompare, setPropertiesToCompare] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [page, setPage] = useState(1);
+  const [pagination, setPagination] = useState({ totalPaginas: 1, totalPropiedades: 0, tieneSiguiente: false, tieneAnterior: false });
+  const debounceRef = useRef(null);
 
-  useEffect(() => {
-    propertyService
-      .getAll()
-      .then((res) => {
-        const mapped = (res.data || []).map(propertySummary).filter(Boolean);
-        setAllProperties(mapped);
-        setFilteredProperties(mapped);
-      })
-      .catch(() => {});
+  const buildServerParams = useCallback((filtersToApply, currentPage) => {
+    const params = { page: currentPage, limit: ITEMS_PER_PAGE };
+
+    if (filtersToApply.propertyType) params.tipoPropiedad = JSON.stringify([filtersToApply.propertyType]);
+    if (filtersToApply.gender) params.generoPreferido = JSON.stringify([filtersToApply.gender]);
+    if (filtersToApply.furnished) params.amueblado = filtersToApply.furnished === "Sí";
+    if (filtersToApply.petFriendly) params.mascotasPermitidas = true;
+    if (filtersToApply.numberOfBathrooms) {
+      const val = filtersToApply.numberOfBathrooms === "3+" ? 3 : parseInt(filtersToApply.numberOfBathrooms);
+      params.numeroBanos = val;
+    }
+    if (filtersToApply.budgetFilterActive && filtersToApply.maxBudget) params.precioMaximo = filtersToApply.maxBudget;
+
+    return params;
   }, []);
 
-  const applyFilters = (filtersToApply) => {
-    let results = [...allProperties];
+  const fetchProperties = useCallback(async (filtersToApply, currentPage) => {
+    setLoading(true);
+    try {
+      const params = buildServerParams(filtersToApply, currentPage);
+      const res = await propertyService.getAll(params);
+      const mapped = (res.data || []).map(propertySummary).filter(Boolean);
+      setProperties(mapped);
+      if (res.paginacion) setPagination(res.paginacion);
+    } catch {
+      setProperties([]);
+    } finally {
+      setLoading(false);
+    }
+  }, [buildServerParams]);
 
-    if (filtersToApply.propertyType) {
-      results = results.filter(property => property.type === filtersToApply.propertyType);
-    }
-    if (filtersToApply.gender) {
-      results = results.filter(property => property.features.includes(filtersToApply.gender));
-    }
-    if (filtersToApply.furnished) {
-      const isFurnished = filtersToApply.furnished === "Sí";
-      results = results.filter(property => isFurnished ? property.features.includes("Amueblada") : !property.features.includes("Amueblada"));
-    }
-    if (filtersToApply.bathroomType) {
-      const isPrivateBathroom = filtersToApply.bathroomType === "Propio";
-      results = results.filter(property => property.type === "Cuarto" && (isPrivateBathroom ? property.features.includes("Baño privado") : property.features.includes("Baño compartido")));
-    }
-    if (filtersToApply.numberOfBathrooms) {
-      results = results.filter(property => {
-        if (property.type === "Casa" || property.type === "Departamento") {
-          if (filtersToApply.numberOfBathrooms === "3+") {
-            return property.bathrooms >= 3;
-          }
-          return property.bathrooms === parseInt(filtersToApply.numberOfBathrooms);
-        }
-        return true;
-      });
-    }
-    if (filtersToApply.services) {
-      const hasServices = filtersToApply.services === "Con servicios";
-      results = results.filter(property => hasServices ? property.features.includes("Servicios incluidos") : !property.features.includes("Servicios incluidos"));
-    }
-    if (filtersToApply.budgetFilterActive) {
-      results = results.filter(property => property.price <= filtersToApply.maxBudget);
-    }
-    if (filtersToApply.amenities.length > 0) {
-      results = results.filter(property => filtersToApply.amenities.every(amenity => property.features.includes(amenity)));
-    }
-    if (filtersToApply.petFriendly) {
-      results = results.filter(property => property.petFriendly);
-    }
-    // Filtrar por estacionamiento
-    if (filtersToApply.parking) {
-      if (filtersToApply.propertyType === "Cuarto") {
-        const hasParking = filtersToApply.parking === "Sí";
-        results = results.filter(property => hasParking ? property.parkingSpaces > 0 : property.parkingSpaces === 0);
-      } else if (filtersToApply.propertyType === "Casa" || filtersToApply.propertyType === "Departamento") {
-        // Si se seleccionó un número específico de lugares
-        if (filtersToApply.numberOfParkingSpaces) {
-          if (filtersToApply.numberOfParkingSpaces === "3+") {
-            results = results.filter(property => property.parkingSpaces >= 3);
-          } else {
-            results = results.filter(property => property.parkingSpaces === parseInt(filtersToApply.numberOfParkingSpaces));
-          }
-        } else { // Si solo se seleccionó "Sí" sin especificar número
-          results = results.filter(property => property.parkingSpaces > 0);
-        }
-      }
-    }
-    if (filtersToApply.includedServices && filtersToApply.includedServices.length > 0) {
-      results = results.filter(property =>
-        property.includedServices &&
-        filtersToApply.includedServices.every(servicio => property.includedServices.includes(servicio))
-      );
-    }
-    if (filtersToApply.securityType) {
-      results = results.filter(property => property.securityType === filtersToApply.securityType);
-    }
-
-    setFilteredProperties(results);
-  };
-
+  // Fetch cuando cambian filtros (con debounce 300ms)
   useEffect(() => {
-    applyFilters(activeFilters);
-  }, [activeFilters, allProperties]);
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      setPage(1);
+      fetchProperties(activeFilters, 1);
+    }, 300);
+    return () => clearTimeout(debounceRef.current);
+  }, [activeFilters, fetchProperties]);
+
+  // Fetch cuando cambia la pagina (sin debounce)
+  const goToPage = (newPage) => {
+    setPage(newPage);
+    fetchProperties(activeFilters, newPage);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   const toggleMapView = () => {
     setShowMap(!showMap);
@@ -146,8 +112,8 @@ const SearchPage = ({ onNavigate, initialFilters }) => {
           <div className="md:w-3/4">
             <div className="mb-4 flex justify-between items-center">
               <div>
-                <h3 className="text-xl font-bold text-black">{filteredProperties.length} resultados</h3>
-                <p className="text-gray-600 text-sm">Mostrando las mejores opciones para ti</p>
+                <h3 className="text-xl font-bold text-black">{pagination.totalPropiedades} resultados</h3>
+                <p className="text-gray-600 text-sm">Página {page} de {pagination.totalPaginas}</p>
               </div>
               <div className="flex space-x-4">
                 {propertiesToCompare.length > 0 && (
@@ -185,7 +151,7 @@ const SearchPage = ({ onNavigate, initialFilters }) => {
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 <div className="lg:col-span-1 overflow-y-auto max-h-[calc(100vh-200px)]">
                   <div className="grid grid-cols-1 gap-6">
-                    {filteredProperties.map(property => (
+                    {properties.map(property => (
                       <PropertyCard
                         key={property.id}
                         property={property}
@@ -197,13 +163,13 @@ const SearchPage = ({ onNavigate, initialFilters }) => {
                   </div>
                 </div>
                 <div className="lg:col-span-2 sticky top-48">
-                  <SearchMap properties={filteredProperties} />
+                  <SearchMap properties={properties} />
                 </div>
               </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
-                {filteredProperties.length > 0 ? (
-                  filteredProperties.map(property => (
+                {properties.length > 0 ? (
+                  properties.map(property => (
                     <PropertyCard
                       key={property.id}
                       property={property}
@@ -221,6 +187,35 @@ const SearchPage = ({ onNavigate, initialFilters }) => {
                     <p className="mt-2 text-gray-600">Intenta ajustar tus filtros para ver más resultados.</p>
                   </div>
                 )}
+              </div>
+            )}
+
+            {/* Paginacion */}
+            {pagination.totalPaginas > 1 && (
+              <div className="flex justify-center items-center gap-4 mt-8 pb-8">
+                <button
+                  onClick={() => goToPage(page - 1)}
+                  disabled={!pagination.tieneAnterior || loading}
+                  className="px-4 py-2 rounded-md bg-gray-200 text-black font-medium disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-300 transition"
+                >
+                  Anterior
+                </button>
+                <span className="text-sm text-gray-700">
+                  {page} / {pagination.totalPaginas}
+                </span>
+                <button
+                  onClick={() => goToPage(page + 1)}
+                  disabled={!pagination.tieneSiguiente || loading}
+                  className="px-4 py-2 rounded-md bg-[#FFDC30] text-black font-medium disabled:opacity-40 disabled:cursor-not-allowed hover:bg-yellow-400 transition"
+                >
+                  Siguiente
+                </button>
+              </div>
+            )}
+
+            {loading && (
+              <div className="flex justify-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-black"></div>
               </div>
             )}
           </div>

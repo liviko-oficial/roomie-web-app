@@ -5,6 +5,7 @@ import {
   UpdatePropertySchema
 } from "../validation/arrendador.validation";
 import { PeticionDB } from "@/rentalProperty";
+import { PropiedadRentaDB } from "@/rentalProperty/models/rentalProperty.schema";
 
 export class PropertyController {
   /**
@@ -366,43 +367,44 @@ export class PropertyController {
         return res.status(404).json({ success: false, message: "Arrendador no encontrado" });
       }
 
-      // TODO (PRODUCCIÓN): Validar que token pertenece al arrendador
-      // if (req.user?.id !== arrendadorId) {
-      //   logUnauthorizedAccess(req.user?.id, arrendadorId);
-      //   return res.status(403).json({ success: false });
-      // }
+      // Filter petitions by landlord's properties
+      const propiedadesDelArrendador = await PropiedadRentaDB.find({ propietarioId: arrendadorId }).select("_id titulo tipoPropiedad ubicacion informacionFinanciera imagenes").lean();
+      const propertyIds = propiedadesDelArrendador.map((p: any) => p._id);
+      const propertyMap = new Map(propiedadesDelArrendador.map((p: any) => [p._id.toString(), p]));
 
-      // TODO (PRODUCCIÓN): Filtrar solo peticiones de propiedades del arrendador
-      // const propiedadesDelArrendador = await PropiedadRentaDB.find({ propietarioId: arrendadorId }).select('_id');
-      // const propertyIds = propiedadesDelArrendador.map(p => p._id);
-      const propertyFilter = propertyId ? { propertyId } : {};
+      const filter: any = { propertyId: { $in: propertyIds } };
+      if (propertyId) filter.propertyId = propertyId;
 
-      // TODO (PRODUCCIÓN): En producción DEBE incluir validación de ownership
-      // const peticiones = await PeticionDB.find({
-      //   ...propertyFilter,
-      //   propertyId: { $in: propertyIds }  // Solo sus propiedades
-      // })
-      const peticiones = await PeticionDB.find({ ...propertyFilter })
+      const peticiones = await PeticionDB.find(filter)
         .sort({ createdAt: -1 })
         .skip((page - 1) * limit)
         .limit(limit)
         .lean();
 
-      // TODO (PRODUCCIÓN): Contar total para paginación adecuada
-      const total = await PeticionDB.countDocuments(propertyFilter);
+      const total = await PeticionDB.countDocuments(filter);
+
+      // Attach property data to each petition
+      const populated = peticiones.map((pet: any) => {
+        const prop = propertyMap.get(pet.propertyId?.toString());
+        return {
+          ...pet,
+          propertyData: prop ? {
+            titulo: (prop as any).titulo,
+            tipoPropiedad: (prop as any).tipoPropiedad,
+            direccion: (prop as any).ubicacion?.direccion || (prop as any).ubicacion?.calle || "",
+            campus: (prop as any).ubicacion?.campus,
+            precioMensual: (prop as any).informacionFinanciera?.precioMensual,
+            imagen: (prop as any).imagenes?.fachada?.[0] || (prop as any).imagenes?.interior?.[0] || "",
+          } : null,
+        };
+      });
 
       return res.status(200).json({
         success: true,
-        data: peticiones,
-        pagination: {
-          page,
-          limit,
-          total,
-          totalPages: Math.ceil(total / limit)
-        }
+        data: populated,
+        pagination: { page, limit, total, totalPages: Math.ceil(total / limit) }
       });
     } catch (error: any) {
-      // TODO (PRODUCCIÓN): Loguear errores completos para auditoría
       return res.status(500).json({
         success: false,
         message: "Error al listar peticiones",

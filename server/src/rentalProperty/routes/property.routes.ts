@@ -4,6 +4,7 @@ import { PropertyUpdateController } from "../controllers/property.update.control
 import { PropertyDeleteController } from "../controllers/property.delete.controller";
 import { authenticateArrendador, checkOwnership } from "../../arrendador/middleware/auth.middleware";
 import { verificarPropiedadPropiedad } from "../middleware/property.middleware";
+import { asyncHandler } from "../../lib/asyncHandler";
 
 /**
  * Rutas para gestión de propiedades de renta
@@ -23,7 +24,7 @@ const router = Router();
  */
 router.get(
   "/",
-  PropertyController.getAllProperties
+  asyncHandler(PropertyController.getAllProperties)
 );
 
 /**
@@ -34,7 +35,7 @@ router.get(
  */
 router.get(
   "/:propertyId",
-  PropertyController.getPropertyById
+  asyncHandler(PropertyController.getPropertyById)
 );
 
 /**
@@ -45,7 +46,7 @@ router.get(
  */
 router.get(
   "/arrendador/:arrendadorId",
-  PropertyController.getPropertiesByArrendador
+  asyncHandler(PropertyController.getPropertiesByArrendador)
 );
 
 /* ----------------------------------------------
@@ -61,7 +62,7 @@ router.get(
 router.post(
   "/",
   authenticateArrendador,
-  PropertyController.createProperty
+  asyncHandler(PropertyController.createProperty)
 );
 
 /**
@@ -72,7 +73,7 @@ router.post(
 router.put(
   "/:propertyId",
   authenticateArrendador,
-  PropertyUpdateController.updateProperty
+  asyncHandler(PropertyUpdateController.updateProperty)
 );
 
 /**
@@ -83,7 +84,7 @@ router.put(
 router.patch(
   "/:propertyId/estado",
   authenticateArrendador,
-  PropertyUpdateController.cambiarEstadoPropiedad
+  asyncHandler(PropertyUpdateController.cambiarEstadoPropiedad)
 );
 
 /**
@@ -94,7 +95,7 @@ router.patch(
 router.patch(
   "/:propertyId/disponibilidad",
   authenticateArrendador,
-  PropertyUpdateController.actualizarDisponibilidad
+  asyncHandler(PropertyUpdateController.actualizarDisponibilidad)
 );
 
 /**
@@ -105,7 +106,7 @@ router.patch(
 router.patch(
   "/:propertyId/imagenes",
   authenticateArrendador,
-  PropertyUpdateController.actualizarImagenes
+  asyncHandler(PropertyUpdateController.actualizarImagenes)
 );
 
 /**
@@ -116,7 +117,7 @@ router.patch(
 router.delete(
   "/:propertyId",
   authenticateArrendador,
-  PropertyDeleteController.eliminarPropiedad
+  asyncHandler(PropertyDeleteController.eliminarPropiedad)
 );
 
 /**
@@ -128,7 +129,7 @@ router.delete(
 router.delete(
   "/:propertyId/permanente",
   authenticateArrendador,
-  PropertyDeleteController.eliminarPermanentemente
+  asyncHandler(PropertyDeleteController.eliminarPermanentemente)
 );
 
 /**
@@ -139,7 +140,7 @@ router.delete(
 router.patch(
   "/:propertyId/restaurar",
   authenticateArrendador,
-  PropertyDeleteController.restaurarPropiedad
+  asyncHandler(PropertyDeleteController.restaurarPropiedad)
 );
 
 export default router;

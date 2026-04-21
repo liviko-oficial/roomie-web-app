@@ -399,6 +399,14 @@ PropiedadRentaMongoSchema.pre('save', function(next) {
   next();
 });
 
+// Indexes para queries frecuentes a escala
+PropiedadRentaMongoSchema.index({ estado: 1, "disponibilidad.disponible": 1 });
+PropiedadRentaMongoSchema.index({ "ubicacion.campus": 1, estado: 1 });
+PropiedadRentaMongoSchema.index({ "informacionFinanciera.precioMensual": 1 });
+PropiedadRentaMongoSchema.index({ propietarioId: 1, estado: 1 });
+PropiedadRentaMongoSchema.index({ fechaCreacion: -1 });
+PropiedadRentaMongoSchema.index({ tipoPropiedad: 1, estado: 1 });
+
 /* ----------------------------------------------
     MongoDB Models (Mongoose)
 ------------------------------------------------ */

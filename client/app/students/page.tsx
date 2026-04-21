@@ -1,3 +1,10 @@
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: "Estudiantes",
+  description: "Encuentra tu cuarto ideal cerca del Tec de Monterrey. Plataforma exclusiva para estudiantes.",
+};
+
 import ExclusiveTec from '@/modules/Students/ExclusiveTec';
 import Footer from '@/modules/Students/FooterStudent';
 import HeroStudent from '@/modules/Students/HeroStudent';

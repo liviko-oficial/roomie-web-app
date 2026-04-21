@@ -1,3 +1,10 @@
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Inicio",
+  description: "Happy Roomie — la plataforma para encontrar tu cuarto ideal cerca del Tec de Monterrey.",
+};
+
 import Hero from "@/modules/home/sections/Hero";
 import FeaturedProperties from "@/modules/home/sections/FeaturedProperties";
 import HowItWorks from "@/modules/home/sections/HowItWorks";

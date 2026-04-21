@@ -73,7 +73,7 @@ const NavbarStudent = ({ currentPage, onNavigate }) => {
               href="/"// Clic redirige al Home
             >
               {/* Logo gráfico */}
-              <img className="h-16 w-auto" src="/liviko-logo.png" alt="Happy Roomie Logo" />
+              <img className="h-10 w-auto" src="/happy-roomie-lateral-navy.svg" alt="Happy Roomie Logo" />
               {/* Texto/título en forma de imagen */}
             </Link>
           </div>
