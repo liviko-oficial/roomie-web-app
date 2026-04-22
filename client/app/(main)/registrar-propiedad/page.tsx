@@ -43,7 +43,7 @@ const ChoiceGrid = ({ options, value, onChange, cols = 2 }: {
   );
 };
 
-const YesNo = ({ value, onChange, yesLabel = "Si", noLabel = "No" }: {
+const YesNo = ({ value, onChange, yesLabel = "Sí", noLabel = "No" }: {
   value: boolean | null;
   onChange: (v: boolean) => void;
   yesLabel?: string;
@@ -202,7 +202,7 @@ const PhotoUpload = ({ label, description, multiple, value, onChange, maxPreview
                 <path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14" />
               </svg>
             </span>
-            <span className="text-sm font-medium text-brand-dark">Arrastra fotos aqui o haz clic</span>
+            <span className="text-sm font-medium text-brand-dark">Arrastra fotos aquí o haz clic</span>
             <span className="text-xs text-gray-500 mt-0.5">JPG, PNG</span>
           </>
         ) : (
@@ -300,26 +300,26 @@ export default function RegistrarPropiedad() {
   const SECURITY_EDIFICIO = "Edificio con seguridad 24/7";
   const SECURITY_NA = "No aplica";
 
-  const FURNITURE_OPTIONS = ["Escritorio", "Cama", "Silla", "Espejo de cuerpo completo", "Armario", "Lampara de escritorio"];
+  const FURNITURE_OPTIONS = ["Escritorio", "Cama", "Silla", "Espejo de cuerpo completo", "Armario", "Lámpara de escritorio"];
   const BED_TYPE_OPTIONS = ["Individual", "Matrimonial", "Queen", "King", "Litera"];
-  const CAMPUS_OPTIONS = ["Guadalajara", "Queretaro", "Santa Fe"];
+  const CAMPUS_OPTIONS = ["Guadalajara", "Querétaro", "Santa Fe"];
   const INCLUDED_SERVICES = ["Luz", "Agua", "Gas", "Internet", "Limpieza", "Mantenimiento", "Agua potable", "Todos los servicios"];
-  const ESPACIOS_COMUNES = ["Sala", "Comedor", "Cocina", "Terraza", "Patio", "Area de lavado", "Garage", "Bodega"];
-  const AMENIDADES_CASA = ["Secadora", "Lavadora", "Estacionamiento techado", "Hamaca", "Alberca", "Asador", "Jardin", "Roof-Top"];
-  const AMENIDADES_CASA_CLUB = ["Gym", "Pista para correr", "Actividades deportivas", "Alberca", "Asadores", "Areas verdes"];
+  const ESPACIOS_COMUNES = ["Sala", "Comedor", "Cocina", "Terraza", "Patio", "Área de lavado", "Garage", "Bodega"];
+  const AMENIDADES_CASA = ["Secadora", "Lavadora", "Estacionamiento techado", "Hamaca", "Alberca", "Asador", "Jardín", "Roof-Top"];
+  const AMENIDADES_CASA_CLUB = ["Gym", "Pista para correr", "Actividades deportivas", "Alberca", "Asadores", "Áreas verdes"];
   const MASCOTAS_OPTIONS = ["Perros", "Gatos", "Reptiles", "Roedores"];
   const ESTADOS_MEXICO = [
     "Aguascalientes", "Baja California", "Baja California Sur", "Campeche", "Chiapas", "Chihuahua",
-    "Ciudad de Mexico", "Coahuila", "Colima", "Durango", "Estado de Mexico", "Guanajuato", "Guerrero",
-    "Hidalgo", "Jalisco", "Michoacan", "Morelos", "Nayarit", "Nuevo Leon", "Oaxaca", "Puebla",
-    "Queretaro", "Quintana Roo", "San Luis Potosi", "Sinaloa", "Sonora", "Tabasco", "Tamaulipas",
-    "Tlaxcala", "Veracruz", "Yucatan", "Zacatecas"
+    "Ciudad de México", "Coahuila", "Colima", "Durango", "Estado de México", "Guanajuato", "Guerrero",
+    "Hidalgo", "Jalisco", "Michoacán", "Morelos", "Nayarit", "Nuevo León", "Oaxaca", "Puebla",
+    "Querétaro", "Quintana Roo", "San Luis Potosí", "Sinaloa", "Sonora", "Tabasco", "Tamaulipas",
+    "Tlaxcala", "Veracruz", "Yucatán", "Zacatecas"
   ];
 
   const getEspaciosComunesIcon = (opt: string) => {
     const icons: Record<string, string> = {
       "Sala": "🛋️", "Comedor": "🍽️", "Cocina": "🍳",
-      "Terraza": "☀️", "Patio": "🌳", "Area de lavado": "🧺",
+      "Terraza": "☀️", "Patio": "🌳", "Área de lavado": "🧺",
       "Garage": "🚗", "Bodega": "📦"
     };
     return icons[opt] || "";
@@ -329,7 +329,7 @@ export default function RegistrarPropiedad() {
     const icons: Record<string, string> = {
       "Secadora": "🌬️", "Lavadora": "🌀", "Estacionamiento techado": "🅿️",
       "Hamaca": "🛏️", "Alberca": "🏊", "Asador": "🔥",
-      "Jardin": "🌺", "Roof-Top": "🏙️"
+      "Jardín": "🌺", "Roof-Top": "🏙️"
     };
     return icons[opt] || "";
   };
@@ -337,7 +337,7 @@ export default function RegistrarPropiedad() {
   const getAmenidadesCasaClubIcon = (opt: string) => {
     const icons: Record<string, string> = {
       "Gym": "💪", "Pista para correr": "🏃", "Actividades deportivas": "⚽",
-      "Alberca": "🏊", "Asadores": "🔥", "Areas verdes": "🌿"
+      "Alberca": "🏊", "Asadores": "🔥", "Áreas verdes": "🌿"
     };
     return icons[opt] || "";
   };
@@ -354,7 +354,7 @@ export default function RegistrarPropiedad() {
   const getFurnitureIcon = (opt: string): React.ReactNode => {
     const icons: Record<string, string> = {
       "Cama": "🛏️", "Silla": "🪑", "Espejo de cuerpo completo": "🪞",
-      "Armario": "🚪", "Lampara de escritorio": "💡"
+      "Armario": "🚪", "Lámpara de escritorio": "💡"
     };
     return icons[opt] || "";
   };
@@ -412,7 +412,7 @@ export default function RegistrarPropiedad() {
     // Paso 1: Tipo de propiedad
     base.push({
       key: "propertyType",
-      title: "¿Que tipo de propiedad es?",
+      title: "¿Qué tipo de propiedad es?",
       canContinue: !!data.propertyType,
       render: () => (
         <ChoiceGrid
@@ -420,9 +420,9 @@ export default function RegistrarPropiedad() {
           onChange={(v) => setData((d) => ({ ...d, propertyType: v, dentroDe: "", securityType: "" }))}
           cols={2}
           options={[
-            { value: "Casa", label: "Casa", hint: "Completa, la rentare toda.", icon: "🏠" },
-            { value: "Departamento", label: "Departamento", hint: "Completo, lo rentare todo.", icon: "🏢" },
-            { value: "Cuarto", label: "Cuarto", hint: "Rentare por habitacion de casa/ depa.", icon: "🛏️" },
+            { value: "Casa", label: "Casa", hint: "Completa, la rentaré toda.", icon: "🏠" },
+            { value: "Departamento", label: "Departamento", hint: "Completo, lo rentaré todo.", icon: "🏢" },
+            { value: "Cuarto", label: "Cuarto", hint: "Rentaré por habitación de casa/depa.", icon: "🛏️" },
             { value: "Loft", label: "Loft", hint: "Todo en el mismo espacio.", icon: "🏙️" },
           ]}
         />
@@ -452,7 +452,7 @@ export default function RegistrarPropiedad() {
     // Paso 3: Campus
     base.push({
       key: "campus",
-      title: "¿En que campus?",
+      title: "¿En qué campus?",
       canContinue: !!data.campus,
       render: () => (
         <ChoiceGrid
@@ -471,7 +471,7 @@ export default function RegistrarPropiedad() {
     // Paso 4: Titulo y zona
     base.push({
       key: "title",
-      title: "Ponle un titulo",
+      title: "Ponle un título",
       canContinue: data.title.trim().length >= 6 && data.addressGeneral.trim().length >= 3,
       render: () => (
         <div className="space-y-4">
@@ -498,18 +498,18 @@ export default function RegistrarPropiedad() {
     // Paso 5: Direccion
     base.push({
       key: "address",
-      title: "Direccion",
+      title: "Dirección",
       canContinue: data.calle.trim().length >= 3 && data.numero.trim().length >= 1 && data.colonia.trim().length >= 3 && data.ciudad.trim().length >= 3 && data.estado.trim().length >= 3 && data.codigoPostal.trim().length >= 5,
       render: () => (
         <div className="space-y-4">
-          <p className="text-sm text-gray-500 italic">(La direccion exacta no se mostrara hasta que lo autorice)</p>
+          <p className="text-sm text-gray-500 italic">(La dirección exacta no se mostrará hasta que lo autorice)</p>
           <div>
             <label className="block text-sm font-medium text-brand-dark mb-1">Calle</label>
             <input className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-accent" placeholder="Nombre de la calle" value={data.calle} onChange={(e) => setData((d) => ({ ...d, calle: e.target.value }))} />
           </div>
           <div>
-            <label className="block text-sm font-medium text-brand-dark mb-1">Numero</label>
-            <input className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-accent" placeholder="Numero de casa/departamento" value={data.numero} onChange={(e) => setData((d) => ({ ...d, numero: e.target.value }))} />
+            <label className="block text-sm font-medium text-brand-dark mb-1">Número</label>
+            <input className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-accent" placeholder="Número de casa/departamento" value={data.numero} onChange={(e) => setData((d) => ({ ...d, numero: e.target.value }))} />
           </div>
           <div>
             <label className="block text-sm font-medium text-brand-dark mb-1">Colonia</label>
@@ -529,8 +529,8 @@ export default function RegistrarPropiedad() {
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium text-brand-dark mb-1">Codigo Postal</label>
-            <input className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-accent" placeholder="Codigo postal" maxLength={5} value={data.codigoPostal} onChange={(e) => setData((d) => ({ ...d, codigoPostal: e.target.value.replace(/\D/g, "").slice(0, 5) }))} />
+            <label className="block text-sm font-medium text-brand-dark mb-1">Código Postal</label>
+            <input className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-accent" placeholder="Código postal" maxLength={5} value={data.codigoPostal} onChange={(e) => setData((d) => ({ ...d, codigoPostal: e.target.value.replace(/\D/g, "").slice(0, 5) }))} />
           </div>
         </div>
       ),
@@ -583,7 +583,7 @@ export default function RegistrarPropiedad() {
     if (data.propertyType === "Cuarto") {
       base.push({
         key: "numRoomsToRent",
-        title: "¿Cuantas habitaciones deseas registrar?",
+        title: "¿Cuántas habitaciones deseas registrar?",
         canContinue: data.numRoomsToRent >= 1,
         render: () => (
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
@@ -634,7 +634,7 @@ export default function RegistrarPropiedad() {
           />
           {data.servicesIncluded === true && (
             <div className="mt-4">
-              <label className="block text-sm font-medium text-brand-dark mb-3">¿Que servicios incluye?</label>
+              <label className="block text-sm font-medium text-brand-dark mb-3">¿Qué servicios incluye?</label>
               <CheckboxList
                 options={INCLUDED_SERVICES.filter((s) => s !== "Todos los servicios")}
                 values={data.includedServices}
@@ -657,7 +657,7 @@ export default function RegistrarPropiedad() {
     // Paso 9: Genero compatible
     base.push({
       key: "genderCompatible",
-      title: "Genero compatible",
+      title: "Género compatible",
       canContinue: !!data.genderCompatible,
       render: () => (
         <ChoiceGrid
@@ -686,7 +686,7 @@ export default function RegistrarPropiedad() {
           />
           {data.petFriendly === true && (
             <div className="mt-4">
-              <label className="block text-sm font-medium text-brand-dark mb-3">¿Cuales?</label>
+              <label className="block text-sm font-medium text-brand-dark mb-3">¿Cuáles?</label>
               <CheckboxList
                 options={MASCOTAS_OPTIONS}
                 values={data.mascotasPermitidas}
@@ -710,7 +710,7 @@ export default function RegistrarPropiedad() {
     if (data.propertyType === "Casa" || data.propertyType === "Departamento") {
       base.push({
         key: "numRooms",
-        title: "¿Cuantas habitaciones tiene? 🛏️",
+        title: "¿Cuántas habitaciones tiene? 🛏️",
         canContinue: data.numRooms >= 1,
         render: () => (
           <div className="flex items-center justify-center gap-3">
@@ -726,12 +726,12 @@ export default function RegistrarPropiedad() {
     if (data.propertyType === "Casa" || data.propertyType === "Departamento" || data.propertyType === "Loft") {
       base.push({
         key: "bathrooms",
-        title: "Banos",
+        title: "Baños",
         canContinue: data.banosCompletos >= 1,
         render: () => (
           <div className="space-y-6">
             <div>
-              <label className="block text-sm font-medium text-brand-dark mb-3">Banos completos 🚿</label>
+              <label className="block text-sm font-medium text-brand-dark mb-3">Baños completos 🚿</label>
               <div className="flex items-center justify-center gap-3">
                 <button type="button" className="w-10 h-10 rounded-full border border-gray-200 text-xl" onClick={() => setData((d) => ({ ...d, banosCompletos: Math.max(1, d.banosCompletos - 1) }))}>−</button>
                 <div className="text-xl font-bold text-brand-dark">{data.banosCompletos}</div>
@@ -739,7 +739,7 @@ export default function RegistrarPropiedad() {
               </div>
             </div>
             <div>
-              <label className="block text-sm font-medium text-brand-dark mb-3">Banos medios 🚽</label>
+              <label className="block text-sm font-medium text-brand-dark mb-3">Baños medios 🚽</label>
               <div className="flex items-center justify-center gap-3">
                 <button type="button" className="w-10 h-10 rounded-full border border-gray-200 text-xl" onClick={() => setData((d) => ({ ...d, banosMedios: Math.max(0, d.banosMedios - 1) }))}>−</button>
                 <div className="text-xl font-bold text-brand-dark">{data.banosMedios}</div>
@@ -767,7 +767,7 @@ export default function RegistrarPropiedad() {
       // Paso 14: Espacios comunes
       base.push({
         key: "espaciosComunes",
-        title: data.propertyType === "Casa" ? "¿Que espacios comunes tiene la casa?" : "¿Que espacios comunes tiene el departamento?",
+        title: data.propertyType === "Casa" ? "¿Qué espacios comunes tiene la casa?" : "¿Qué espacios comunes tiene el departamento?",
         canContinue: true,
         render: () => (
           <div className="space-y-4">
@@ -780,7 +780,7 @@ export default function RegistrarPropiedad() {
             <input
               type="text"
               className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-accent"
-              placeholder="Otro espacio comun"
+              placeholder="Otro espacio común"
               value={data.espaciosComunesOtro}
               onChange={(e) => setData((d) => ({ ...d, espaciosComunesOtro: e.target.value }))}
             />
@@ -844,7 +844,7 @@ export default function RegistrarPropiedad() {
             />
           </div>
           <PhotoUpload
-            label="Fotos de areas comunes (opcional)"
+            label="Fotos de áreas comunes (opcional)"
             multiple
             value={data.fotosAreasComunes}
             onChange={(files) => setData((d) => ({ ...d, fotosAreasComunes: files }))}
@@ -892,7 +892,7 @@ export default function RegistrarPropiedad() {
     // Paso 19: Descripcion
     base.push({
       key: "description",
-      title: "Descripcion corta",
+      title: "Descripción corta",
       canContinue: data.description.trim().length >= 10,
       render: () => (
         <textarea
@@ -910,7 +910,7 @@ export default function RegistrarPropiedad() {
       data.rooms.forEach((room, index) => {
         base.push({
           key: `room-${index}`,
-          title: `Habitacion ${index + 1} de ${data.rooms.length}`,
+          title: `Habitación ${index + 1} de ${data.rooms.length}`,
           canContinue: room.hasFurniture !== null && room.bathroomType !== "" && room.bedroomType !== "" && room.price >= 1000,
           render: () => (
             <div className="space-y-6">
@@ -935,7 +935,7 @@ export default function RegistrarPropiedad() {
                 </div>
               </div>
               <PhotoUpload
-                label="Fotos de la habitacion"
+                label="Fotos de la habitación"
                 multiple
                 maxFiles={3}
                 value={room.roomPhoto || []}
@@ -972,7 +972,7 @@ export default function RegistrarPropiedad() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-brand-dark mb-3">Tipo de bano</label>
+                <label className="block text-sm font-medium text-brand-dark mb-3">Tipo de baño</label>
                 <ChoiceGrid
                   value={room.bathroomType}
                   onChange={(v) => {
@@ -996,7 +996,7 @@ export default function RegistrarPropiedad() {
     if ((data.propertyType === "Casa" || data.propertyType === "Departamento") && data.numRooms > 0) {
       base.push({
         key: "registerBedroomDetails",
-        title: "¿Quieres registrar informacion especifica de cada habitacion?",
+        title: "¿Quieres registrar información específica de cada habitación?",
         canContinue: data.registerBedroomDetails !== null,
         render: () => (
           <YesNo
@@ -1025,11 +1025,11 @@ export default function RegistrarPropiedad() {
       if (data.registerBedroomDetails === true) {
         base.push({
           key: "fotosHabitaciones",
-          title: "Fotos de habitaciones y banos",
+          title: "Fotos de habitaciones y baños",
           canContinue: true,
           render: () => (
             <PhotoUpload
-              description="Sube fotos de las habitaciones y banos"
+              description="Sube fotos de las habitaciones y baños"
               multiple
               value={data.fotosHabitaciones}
               onChange={(files) => setData((d) => ({ ...d, fotosHabitaciones: files }))}
@@ -1051,7 +1051,7 @@ export default function RegistrarPropiedad() {
         <div className="flex items-center justify-between gap-4 mb-6">
           <div>
             <div className="text-2xl font-bold text-brand-dark">Registrar mi propiedad</div>
-            <div className="text-sm text-gray-600">Responde paso a paso. Rapido y sencillo.</div>
+            <div className="text-sm text-gray-600">Responde paso a paso. Rápido y sencillo.</div>
           </div>
           <button
             type="button"

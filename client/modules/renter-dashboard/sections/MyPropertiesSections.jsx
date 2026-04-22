@@ -1,25 +1,56 @@
 "use client";
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import OwnerPropertyCard from "../components/OwnerPropertyCard";
 import DeletePropertyModal from "../components/DeletePropertyModal";
 import MyPropertiesHeader from "./MyPropertiesHeader";
-import { myProperties as initial } from "../mock/properties";
 import { CATEGORY_ORDER, groupByCategory, sortProperties } from "../utils/categorize";
+import { arrendadorService } from "@/lib/api/arrendadorService";
+
+const mapApiProperty = (p) => ({
+  id: p._id || p.id,
+  title: p.titulo || "Sin título",
+  type: p.tipoPropiedad || "Casa",
+  price: p.informacionFinanciera?.precioMensual || 0,
+  location: p.resumen || [p.direccion?.colonia, p.direccion?.ciudad].filter(Boolean).join(", ") || "Sin ubicación",
+  image: p.imagenes?.principal || "https://placehold.co/800x600/1a365d/f6e05e?text=Propiedad",
+  features: [
+    p.caracteristicas?.amueblado && "Amueblada",
+    p.servicios?.serviciosIncluidos && "Servicios incluidos",
+  ].filter(Boolean),
+  rating: p.calificacion || 0,
+  isVerified: p.disponibilidad?.disponible ?? true,
+  petFriendly: p.caracteristicas?.mascotasPermitidas || false,
+  bathrooms: p.caracteristicas?.numeroBanos || 1,
+  createdAt: p.fechaCreacion || p.createdAt || new Date().toISOString(),
+});
 
 const MyPropertiesSections = () => {
   const router = useRouter();
-  const [properties, setProperties] = useState(initial);
+  const [properties, setProperties] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [sortBy, setSortBy] = useState("date_desc");
   const [toDelete, setToDelete] = useState(null);
+
+  useEffect(() => {
+    const arrendadorId = localStorage.getItem("arrendadorId");
+    if (!arrendadorId) { setLoading(false); return; }
+    arrendadorService.getMyProperties(arrendadorId)
+      .then((res) => {
+        const list = res.data?.propiedades || res.data || [];
+        setProperties(Array.isArray(list) ? list.map(mapApiProperty) : []);
+      })
+      .catch((err) => console.error("Error cargando propiedades:", err))
+      .finally(() => setLoading(false));
+  }, []);
 
   const grouped = useMemo(
     () => groupByCategory(sortProperties(properties, sortBy)),
     [properties, sortBy]
   );
 
-  const handleViewDetails = (p) => console.log("Ver detalles:", p);
-  const handleEdit = (p) => console.log("Editar:", p);
+  const handleViewDetails = (p) => router.push(`/properties/${p.id}`);
+  const handleEdit = (p) => router.push(`/registrar-propiedad?edit=${p.id}`);
   const handleRegister = () => router.push("/registrar-propiedad");
 
   const confirmDelete = () => {
@@ -32,7 +63,12 @@ const MyPropertiesSections = () => {
       <MyPropertiesHeader total={properties.length} sortBy={sortBy} onSortChange={setSortBy} onRegister={handleRegister} />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        {properties.length === 0 ? (
+        {loading ? (
+          <div className="text-center py-16">
+            <div className="w-8 h-8 border-4 border-brand-accent border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+            <p className="text-gray-600">Cargando propiedades...</p>
+          </div>
+        ) : properties.length === 0 ? (
           <div className="text-center py-16">
             <h3 className="text-xl font-bold text-brand-dark mb-2">No tienes propiedades registradas</h3>
             <p className="text-gray-600 mb-6">Comienza registrando tu primera propiedad</p>

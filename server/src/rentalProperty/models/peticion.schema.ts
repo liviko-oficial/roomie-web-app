@@ -98,5 +98,9 @@ const PeticionMongoSchema = new Schema<Peticion>({
   updatedAt: { type: Date, default: Date.now }
 });
 
+PeticionMongoSchema.index({ "contexto.usuarioId": 1, createdAt: -1 });
+PeticionMongoSchema.index({ "contexto.propertyId": 1, "contexto.estatus": 1 });
+PeticionMongoSchema.index({ propertyId: 1 });
+
 export const PeticionDB = model<Peticion>("Peticion", PeticionMongoSchema, "Peticiones");
 

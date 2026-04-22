@@ -19,9 +19,10 @@ export const arrendadorService = {
       email,
       password,
     });
-    if (response.data.token) {
-      localStorage.setItem('jwtToken', response.data.token);
-      localStorage.setItem('arrendadorId', response.data.arrendador.id);
+    const { data } = response.data;
+    if (data?.token) {
+      localStorage.setItem('jwtToken', data.token);
+      localStorage.setItem('arrendadorId', data.id);
       localStorage.setItem('userType', 'arrendador');
     }
     return response.data;

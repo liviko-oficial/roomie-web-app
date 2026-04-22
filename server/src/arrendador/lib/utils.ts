@@ -1,5 +1,5 @@
-import * as bcrypt from "bcrypt";
-import * as jwt from "jsonwebtoken";
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 
 /**
  * Genera un hash seguro para una contraseña usando bcrypt

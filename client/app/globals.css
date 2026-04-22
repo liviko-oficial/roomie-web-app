@@ -1,6 +1,12 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+@layer base {
+  button, [role="button"], a {
+    cursor: pointer;
+  }
+}
+
 .dark {
   --background: hsl(0, 0%, 5%);
   --text: hsl(0, 0%, 95%);

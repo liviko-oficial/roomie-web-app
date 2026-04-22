@@ -16,9 +16,8 @@ export class PetitionController {
     static async aceptarSolicitud(req: Request, res: Response) {
         
         try{
-            // Get petition ID and landlord ID from request parameters
             const { petitionId } = req.params;
-            const { landlordId } = req.body;
+            const landlordId = req.arrendador!.id;
 
             // Find the petition by ID and verify its existence
             const petition = await PeticionDB.findById(petitionId);
@@ -94,9 +93,9 @@ export class PetitionController {
      */
     static async rechazarSolicitud(req: Request, res: Response) {
         try {
-            // Get petition ID, landlord ID and reason from request parameters
             const { petitionId } = req.params;
-            const { landlordId, motivo } = req.body;
+            const { motivo } = req.body;
+            const landlordId = req.arrendador!.id;
 
             // Find the petition by ID and verify its existence
             const petition = await PeticionDB.findById(petitionId);
@@ -160,42 +159,44 @@ export class PetitionController {
                 return res.status(400).json({ success: false, message: "Monto inválido" });
             }
 
-            const petition = await PeticionDB.findById(petitionId);
-            if (!petition) {
-                return res.status(404).json({ success: false, message: "Solicitud no encontrada" });
+            // Atomic update: only succeeds if status is "Rechazada" AND offers < 2
+            const updated = await PeticionDB.findOneAndUpdate(
+                {
+                    _id: petitionId,
+                    "contexto.estatus": "Rechazada",
+                    $or: [
+                        { "oferta.numeroOfertas": { $exists: false } },
+                        { "oferta.numeroOfertas": { $lt: 2 } }
+                    ]
+                },
+                {
+                    $set: {
+                        "contexto.estatus": "En proceso",
+                        "contexto.motivo": null,
+                        "oferta.montoOfrecidoMXN": montoOfrecidoMXN,
+                        updatedAt: new Date()
+                    },
+                    $inc: { "oferta.numeroOfertas": 1 },
+                    $push: { "oferta.historialOfertas": montoOfrecidoMXN }
+                },
+                { new: true }
+            );
+
+            if (!updated) {
+                const petition = await PeticionDB.findById(petitionId);
+                if (!petition) {
+                    return res.status(404).json({ success: false, message: "Solicitud no encontrada" });
+                }
+                if (petition.contexto.estatus !== "Rechazada") {
+                    return res.status(400).json({ success: false, message: "Solo puedes hacer contraoferta cuando la solicitud fue rechazada" });
+                }
+                return res.status(400).json({ success: false, message: "Ya alcanzaste el máximo de 2 ofertas" });
             }
-
-            if (petition.contexto.estatus !== "Rechazada") {
-                return res.status(400).json({
-                    success: false,
-                    message: "Solo puedes hacer contraoferta cuando la solicitud fue rechazada"
-                });
-            }
-
-            const currentOffers = petition.oferta?.numeroOfertas || 0;
-            if (currentOffers >= 2) {
-                return res.status(400).json({
-                    success: false,
-                    message: "Ya alcanzaste el máximo de 2 ofertas"
-                });
-            }
-
-            const historial = petition.oferta?.historialOfertas || [];
-            historial.push(montoOfrecidoMXN);
-
-            await PeticionDB.findByIdAndUpdate(petitionId, {
-                "contexto.estatus": "En proceso",
-                "contexto.motivo": null,
-                "oferta.montoOfrecidoMXN": montoOfrecidoMXN,
-                "oferta.numeroOfertas": currentOffers + 1,
-                "oferta.historialOfertas": historial,
-                updatedAt: new Date()
-            });
 
             return res.status(200).json({
                 success: true,
                 message: "Contraoferta enviada",
-                data: { petitionId, montoOfrecidoMXN, numeroOfertas: currentOffers + 1 }
+                data: { petitionId, montoOfrecidoMXN, numeroOfertas: updated.oferta?.numeroOfertas }
             });
         } catch (error) {
             console.error("Error al enviar contraoferta:", error);
@@ -210,57 +211,67 @@ export class PetitionController {
     static async listByStudent(req: Request, res: Response) {
         try {
             const { userId } = req.params;
+
+            // Validate student can only see their own petitions
+            if (req.student && req.student.id !== userId) {
+                return res.status(403).json({ success: false, message: "No autorizado" });
+            }
+
             const page = parseInt(req.query.page as string) || 1;
             const limit = Math.min(parseInt(req.query.limit as string) || 20, 100);
 
-            const peticiones = await PeticionDB.find({ "contexto.usuarioId": userId })
-                .sort({ createdAt: -1 })
-                .skip((page - 1) * limit)
-                .limit(limit)
+            const [peticiones, total] = await Promise.all([
+                PeticionDB.find({ "contexto.usuarioId": userId })
+                    .sort({ createdAt: -1 })
+                    .skip((page - 1) * limit)
+                    .limit(limit)
+                    .lean(),
+                PeticionDB.countDocuments({ "contexto.usuarioId": userId })
+            ]);
+
+            // Batch fetch properties (2 queries instead of N+1)
+            const propertyIds = [...new Set(peticiones.map((p: any) => p.propertyId?.toString()).filter(Boolean))];
+            const properties = await PropiedadRentaDB.find({ _id: { $in: propertyIds } })
+                .select("titulo tipoPropiedad ubicacion informacionFinanciera imagenes propietarioId")
                 .lean();
+            const propMap = new Map(properties.map((p: any) => [p._id.toString(), p]));
 
-            const total = await PeticionDB.countDocuments({ "contexto.usuarioId": userId });
+            // Batch fetch landlords
+            const landlordIds = [...new Set(properties.map((p: any) => p.propietarioId?.toString()).filter(Boolean))];
+            const landlords = await ArrendadorDB.find({ _id: { $in: landlordIds } })
+                .select("email profile.fullName profile.phone profile.profilePicture")
+                .lean();
+            const landlordMap = new Map(landlords.map((l: any) => [l._id.toString(), l]));
 
-            // Populate property + landlord data for each petition
-            const populated = await Promise.all(
-                peticiones.map(async (pet: any) => {
-                    const property = await PropiedadRentaDB.findById(pet.propertyId)
-                        .select("titulo tipoPropiedad ubicacion informacionFinanciera imagenes propietarioId")
-                        .lean() as any;
+            const populated = peticiones.map((pet: any) => {
+                const property = propMap.get(pet.propertyId?.toString()) as any;
+                const landlord = property ? landlordMap.get(property.propietarioId?.toString()) as any : null;
 
-                    let landlord = null;
-                    if (property?.propietarioId) {
-                        landlord = await ArrendadorDB.findById(property.propietarioId)
-                            .select("email profile.fullName profile.phone profile.profilePicture")
-                            .lean() as any;
-                    }
-
-                    return {
-                        ...pet,
-                        propertyData: property ? {
-                            titulo: property.titulo,
-                            tipoPropiedad: property.tipoPropiedad,
-                            direccion: property.ubicacion?.direccion || property.ubicacion?.calle || "",
-                            campus: property.ubicacion?.campus,
-                            precioMensual: property.informacionFinanciera?.precioMensual,
-                            imagen: property.imagenes?.fachada?.[0] || property.imagenes?.interior?.[0] || "",
-                        } : null,
-                        landlordData: landlord ? {
-                            nombre: landlord.profile?.fullName || landlord.email,
-                            email: landlord.email,
-                            telefono: landlord.profile?.phone,
-                            foto: landlord.profile?.profilePicture,
-                        } : null,
-                    };
-                })
-            );
+                return {
+                    ...pet,
+                    propertyData: property ? {
+                        titulo: property.titulo,
+                        tipoPropiedad: property.tipoPropiedad,
+                        direccion: property.ubicacion?.direccion || property.ubicacion?.calle || "",
+                        campus: property.ubicacion?.campus,
+                        precioMensual: property.informacionFinanciera?.precioMensual,
+                        imagen: property.imagenes?.fachada?.[0] || property.imagenes?.interior?.[0] || "",
+                    } : null,
+                    landlordData: landlord ? {
+                        nombre: landlord.profile?.fullName || landlord.email,
+                        email: landlord.email,
+                        telefono: landlord.profile?.phone,
+                        foto: landlord.profile?.profilePicture,
+                    } : null,
+                };
+            });
 
             return res.status(200).json({
                 success: true,
                 data: populated,
                 pagination: { page, limit, total, totalPages: Math.ceil(total / limit) }
             });
-        } catch (error: any) {
+        } catch (error) {
             console.error("Error al listar peticiones del estudiante:", error);
             return res.status(500).json({ success: false, message: "Error al listar peticiones" });
         }

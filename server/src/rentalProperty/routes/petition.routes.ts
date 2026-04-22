@@ -1,19 +1,16 @@
 import { Router } from "express";
 import { PetitionController } from "../controllers/petition.controller";
 import { authenticateArrendador } from "../../arrendador/middleware/auth.middleware";
+import { authenticateStudent } from "../../user/middleware/auth.middleware";
 
 const router = Router();
 
-// Student: list my petitions (populated with property + landlord data)
-router.get("/usuario/:userId", PetitionController.listByStudent);
+// Student routes (require student auth)
+router.get("/usuario/:userId", authenticateStudent, PetitionController.listByStudent);
+router.put("/:petitionId/contraoferta", authenticateStudent, PetitionController.contraoferta);
 
-// Student: send counter-offer
-router.put("/:petitionId/contraoferta", PetitionController.contraoferta);
-
-// Landlord: accept petition
+// Landlord routes (require landlord auth)
 router.put("/:petitionId/aceptar", authenticateArrendador, PetitionController.aceptarSolicitud);
-
-// Landlord: reject petition
 router.put("/:petitionId/rechazar", authenticateArrendador, PetitionController.rechazarSolicitud);
 
 export default router;

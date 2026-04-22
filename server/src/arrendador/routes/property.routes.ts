@@ -37,15 +37,16 @@ router.patch("/:arrendadorId/propiedad/:propertyId/estado", checkOwnership("arre
 
 /* ----------------------------------------------
    Rutas para manejo de peticiones por arrendador
-   - TODO: autenticación, checkOwnership
 ------------------------------------------------ */
 router.get(
   "/:arrendadorId/peticiones",
+  checkOwnership("arrendadorId"),
   PropertyController.listPeticiones
 );
 
 router.get(
   "/:arrendadorId/peticiones/:peticionId",
+  checkOwnership("arrendadorId"),
   PropertyController.getPeticion
 );
 

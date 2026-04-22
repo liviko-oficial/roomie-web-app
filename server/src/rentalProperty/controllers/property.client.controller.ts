@@ -499,23 +499,8 @@ export class PropertyClientController {
   static async createPeticion(req: Request, res: Response) {
     try {
       const { propertyId } = req.params;
-      const { userId, oferta } = req.body as {
-        userId: string;
-        oferta?: PeticionOferta;
-      };
-
-      if (!userId) {
-        return res.status(400).json({
-          success: false,
-          message: "El ID del usuario es requerido"
-        });
-      }
-
-      // TODO (PRODUCCIÓN): Validar formato de MongoDB ObjectId
-      // TODO (PRODUCCIÓN): Validar que userId pertenece al usuario autenticado
-      // if (req.user?.id !== userId) {
-      //   return res.status(403).json({ success: false, message: "No autorizado" });
-      // }
+      const { oferta } = req.body as { oferta?: PeticionOferta };
+      const userId = req.student!.id;
 
       const propiedad = await PropiedadRentaDB.findById(propertyId);
       if (!propiedad) {
@@ -528,17 +513,16 @@ export class PropertyClientController {
       let usuarioVisible: PeticionUsuarioVisible;
       try {
         usuarioVisible = await extractVisibleUserData(userId);
-      } catch (error: any) {
-        return res.status(404).json({
-          success: false,
-          message: error.message || "Error al extraer datos del usuario"
-        });
+      } catch (error: unknown) {
+        const msg = error instanceof Error ? error.message : "Error al extraer datos del usuario";
+        return res.status(404).json({ success: false, message: msg });
       }
 
       const peticion = await PeticionDB.create({
         propertyId,
         usuarioVisible,
         contexto: {
+          usuarioId: userId,
           propertyId,
           fechaSolicitud: new Date(),
           estatus: "En proceso"
@@ -547,12 +531,11 @@ export class PropertyClientController {
       });
 
       return res.status(201).json({ success: true, data: peticion });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error al crear petición:", error);
       return res.status(500).json({
         success: false,
-        message: "Error al crear la petición",
-        error: error.message
+        message: "Error al crear la petición"
       });
     }
   }

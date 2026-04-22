@@ -1,4 +1,3 @@
-import { SUPPORT_EMAILS } from "@/user/lib/const.ts";
 import { z } from "zod";
 
 /* ----------------------------------------------
@@ -7,15 +6,7 @@ import { z } from "zod";
    - Se utiliza durante el proceso de registro
 ------------------------------------------------ */
 export const ArrendadorAuthSubmissionSchema = z.object({
-    // Validación del correo electrónico
-    email: z
-        .string()
-        .email()
-        .refine((email) => {
-            // Solo se aceptan correos cuyo dominio esté incluido en SUPORT_EMAILS
-            const domain = email.split("@")[1];
-            return SUPPORT_EMAILS.includes(domain);
-        }, "Correo no soportado"), // 🔹 Mensaje de error traducido a español
+    email: z.string().email("Correo inválido"),
 
     // Validación de la contraseña
     password: z

@@ -4,6 +4,11 @@ import { ArrendadorDB } from "../../arrendador/models/arrendador.schema";
 import { PropiedadCreacionSchema, PropiedadFiltrosSchema } from "../models/propiedadAuth.schema";
 import { MENSAJES_ERROR, LIMITES, ESTADOS_PROPIEDAD } from "../lib/constants";
 
+function safeJsonParse(value: string | undefined): unknown {
+  if (!value) return undefined;
+  try { return JSON.parse(value); } catch { return undefined; }
+}
+
 /**
  * Controlador de propiedades
  * Maneja las operaciones CREATE y READ para propiedades de renta
@@ -110,9 +115,9 @@ export class PropertyController {
     try {
       // Validar parámetros de filtro usando el schema
       const validacionFiltros = PropiedadFiltrosSchema.safeParse({
-        tipoPropiedad: req.query.tipoPropiedad ? JSON.parse(req.query.tipoPropiedad as string) : undefined,
-        tipoRenta: req.query.tipoRenta ? JSON.parse(req.query.tipoRenta as string) : undefined,
-        generoPreferido: req.query.generoPreferido ? JSON.parse(req.query.generoPreferido as string) : undefined,
+        tipoPropiedad: safeJsonParse(req.query.tipoPropiedad as string),
+        tipoRenta: safeJsonParse(req.query.tipoRenta as string),
+        generoPreferido: safeJsonParse(req.query.generoPreferido as string),
         precioMinimo: req.query.precioMinimo ? parseFloat(req.query.precioMinimo as string) : undefined,
         precioMaximo: req.query.precioMaximo ? parseFloat(req.query.precioMaximo as string) : undefined,
         campus: req.query.campus as string,

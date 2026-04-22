@@ -38,21 +38,28 @@ const Navbar = () => {
                 Inicio
               </NavLink>
             </li>
-            <li>
-              <NavLink href="/properties">Buscar propiedades</NavLink>
-            </li>
-            <li className="relative group">
-              <NavLink href="/dashboard">Mi Dashboard</NavLink>
-              {userType === "arrendador" && (
-                <div className="absolute left-0 top-full pt-1 hidden group-hover:block z-50">
-                  <div className="bg-white border border-gray-200 rounded-md shadow-lg min-w-[180px]">
-                    <Link href="/dashboard/mis-propiedades" className="block px-4 py-2.5 text-sm font-medium text-brand-dark hover:bg-brand-accent/20 rounded-md transition">
-                      Mis propiedades
-                    </Link>
-                  </div>
-                </div>
-              )}
-            </li>
+            {userType === "arrendador" ? (
+              <>
+                <li>
+                  <NavLink href="/dashboard">Mi Dashboard</NavLink>
+                </li>
+                <li>
+                  <NavLink href="/dashboard/mis-propiedades">Mis propiedades</NavLink>
+                </li>
+                <li>
+                  <NavLink href="/registrar-propiedad">Registrar propiedad</NavLink>
+                </li>
+              </>
+            ) : (
+              <>
+                <li>
+                  <NavLink href="/properties">Buscar propiedades</NavLink>
+                </li>
+                <li>
+                  <NavLink href="/dashboard">Mi Dashboard</NavLink>
+                </li>
+              </>
+            )}
           </ul>
 
           {userType ? (
@@ -119,16 +126,27 @@ const Navbar = () => {
                 Inicio
               </NavLink>
             </li>
-            <li>
-              <NavLink href="/propiedades">Buscar propiedades</NavLink>
-            </li>
-            <li>
-              <NavLink href="/dashboard">Mi Dashboard</NavLink>
-            </li>
-            {userType === "arrendador" && (
-              <li>
-                <NavLink href="/dashboard/mis-propiedades">Mis propiedades</NavLink>
-              </li>
+            {userType === "arrendador" ? (
+              <>
+                <li>
+                  <NavLink href="/dashboard">Mi Dashboard</NavLink>
+                </li>
+                <li>
+                  <NavLink href="/dashboard/mis-propiedades">Mis propiedades</NavLink>
+                </li>
+                <li>
+                  <NavLink href="/registrar-propiedad">Registrar propiedad</NavLink>
+                </li>
+              </>
+            ) : (
+              <>
+                <li>
+                  <NavLink href="/properties">Buscar propiedades</NavLink>
+                </li>
+                <li>
+                  <NavLink href="/dashboard">Mi Dashboard</NavLink>
+                </li>
+              </>
             )}
           </ul>
 

@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { PropertyClientController } from "../controllers/property.client.controller";
+import { authenticateStudent } from "../../user/middleware/auth.middleware";
 
 /**
  * Rutas públicas para búsqueda de propiedades (clientes/estudiantes)
@@ -99,10 +100,10 @@ router.get(
   PropertyClientController.getSimilarProperties
 );
 
-// Crear petición de renta para una propiedad
-// TODO: Improve and document
+// Crear petición de renta para una propiedad (requiere auth de estudiante)
 router.post(
   "/:propertyId/solicitar",
+  authenticateStudent,
   PropertyClientController.createPeticion
 );
 
