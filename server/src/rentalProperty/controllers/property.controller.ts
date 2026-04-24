@@ -35,12 +35,49 @@ export class PropertyController {
       }
 
       // Parsear arrays enviados como JSON strings vía FormData
-      const bodyNormalizado = { ...req.body };
+      const bodyNormalizado: Record<string, unknown> = { ...req.body };
       if (typeof bodyNormalizado.banos === "string") {
-        bodyNormalizado.banos = safeJsonParse(bodyNormalizado.banos) ?? [];
+        bodyNormalizado.banos = safeJsonParse(bodyNormalizado.banos as string) ?? [];
       }
       if (typeof bodyNormalizado.habitaciones === "string") {
-        bodyNormalizado.habitaciones = safeJsonParse(bodyNormalizado.habitaciones) ?? [];
+        bodyNormalizado.habitaciones = safeJsonParse(bodyNormalizado.habitaciones as string) ?? [];
+      }
+      if (typeof bodyNormalizado.imagenes === "string") {
+        bodyNormalizado.imagenes = safeJsonParse(bodyNormalizado.imagenes as string) ?? [];
+      }
+
+      // Distribuir archivos subidos por Cloudinary en los arrays correspondientes
+      const files = (req.files as Express.Multer.File[] | undefined) || [];
+      if (files.length > 0) {
+        type UploadedFile = Express.Multer.File & { path: string };
+        const banos = Array.isArray(bodyNormalizado.banos) ? [...bodyNormalizado.banos as Array<Record<string, unknown>>] : [];
+        const habitaciones = Array.isArray(bodyNormalizado.habitaciones) ? [...bodyNormalizado.habitaciones as Array<Record<string, unknown>>] : [];
+        const imagenesPropiedad: string[] = Array.isArray(bodyNormalizado.imagenes) ? [...bodyNormalizado.imagenes as string[]] : [];
+
+        for (const f of files as UploadedFile[]) {
+          const url = f.path;
+          const m = /^banoPhotos_(\d+)$/.exec(f.fieldname);
+          const n = /^habPhotos_(\d+)$/.exec(f.fieldname);
+          if (m) {
+            const idx = parseInt(m[1], 10);
+            if (banos[idx]) {
+              const existing = (banos[idx].imagenes as string[] | undefined) ?? [];
+              banos[idx] = { ...banos[idx], imagenes: [...existing, url] };
+            }
+          } else if (n) {
+            const idx = parseInt(n[1], 10);
+            if (habitaciones[idx]) {
+              const existing = (habitaciones[idx].imagenes as string[] | undefined) ?? [];
+              habitaciones[idx] = { ...habitaciones[idx], imagenes: [...existing, url] };
+            }
+          } else if (f.fieldname === "imagenes" || f.fieldname === "propertyPhotos") {
+            imagenesPropiedad.push(url);
+          }
+        }
+
+        bodyNormalizado.banos = banos;
+        bodyNormalizado.habitaciones = habitaciones;
+        bodyNormalizado.imagenes = imagenesPropiedad;
       }
 
       // Validar datos de entrada con Zod

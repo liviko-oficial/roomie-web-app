@@ -4,6 +4,7 @@ import { PropertyUpdateController } from "../controllers/property.update.control
 import { PropertyDeleteController } from "../controllers/property.delete.controller";
 import { authenticateArrendador, checkOwnership } from "../../arrendador/middleware/auth.middleware";
 import { verificarPropiedadPropiedad } from "../middleware/property.middleware";
+import { uploadPropiedadAssets } from "../middleware/upload.middleware";
 import { asyncHandler } from "../../lib/asyncHandler";
 
 /**
@@ -62,6 +63,7 @@ router.get(
 router.post(
   "/",
   authenticateArrendador,
+  uploadPropiedadAssets,
   asyncHandler(PropertyController.createProperty)
 );
 
