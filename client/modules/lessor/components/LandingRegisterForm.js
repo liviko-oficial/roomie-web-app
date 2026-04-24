@@ -68,15 +68,16 @@ const LandingRegisterForm = ({ onLoginClick, onRegisterSuccess }) => {
 
           <div className="md:w-1/2 w-full bg-white p-6 md:p-16 flex flex-col">
             <h3 className="text-2xl md:text-3xl font-bold mb-2">Regístrate como arrendador</h3>
-            <p className="text-base md:text-gray-600 mb-8">
+            <p className="text-base md:text-gray-600 mb-4">
               Únete a la comunidad de arrendadores que confían en Happy Roomie para maximizar sus ingresos con total
               seguridad.
             </p>
+            <p className="text-sm text-gray-500 mb-4"><span className="text-red-500">*</span> Campo obligatorio</p>
 
             <form onSubmit={handleRegister} className="space-y-4 md:space-y-6 flex-grow">
               <div>
                 <label htmlFor="fullName" className="block text-sm font-medium mb-2">
-                  Nombre Completo
+                  Nombre Completo <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
@@ -90,7 +91,7 @@ const LandingRegisterForm = ({ onLoginClick, onRegisterSuccess }) => {
               </div>
               <div>
                 <label htmlFor="phone" className="block text-sm font-medium mb-2">
-                  Teléfono
+                  Teléfono <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="tel"
@@ -104,7 +105,7 @@ const LandingRegisterForm = ({ onLoginClick, onRegisterSuccess }) => {
               </div>
               <div>
                 <label htmlFor="email" className="block text-sm font-medium mb-2">
-                  Correo Electrónico
+                  Correo Electrónico <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="email"

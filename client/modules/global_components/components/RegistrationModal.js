@@ -31,6 +31,7 @@ const RegistrationModal = ({ isOpen, onClose, onOptionSelect }) => {
           
           <Link
             href={"/lessor"}
+            onClick={onClose}
             className="p-6 border-2 border-gray-200 rounded-lg hover:border-[#ffd662] hover:bg-yellow-50 transition-all duration-300 group"
           >
             <div className="text-center">

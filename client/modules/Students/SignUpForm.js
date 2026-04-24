@@ -167,40 +167,41 @@ const SignUpForm = () => {
         {/* Lado derecho: formulario de registro */}
         <div className="flex-1 p-6 lg:p-8 flex flex-col justify-center order-2 lg:order-none">
           <div className="w-full lg:max-w-sm lg:mx-auto">
-            <h2 className="text-xl font-bold text-[#042a5c] mb-6">Crea tu cuenta</h2>
+            <h2 className="text-xl font-bold text-[#042a5c] mb-2">Crea tu cuenta</h2>
+            <p className="text-sm text-gray-500 mb-4"><span className="text-red-500">*</span> Campo obligatorio</p>
 
             <form onSubmit={handleSubmit} className="space-y-4">
               {/* Input nombre completo */}
               <div>
-                <label className="block text-sm font-medium text-[#042a5c] mb-1">Nombre completo</label>
+                <label className="block text-sm font-medium text-[#042a5c] mb-1">Nombre completo <span className="text-red-500">*</span></label>
                 <input type="text" name="nombreCompleto" value={formData.nombreCompleto} onChange={handleInputChange} placeholder="Tu nombre completo" className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#fdd76c] focus:border-transparent ${errors.nombreCompleto ? "border-red-500" : "border-gray-300"}`} required />
                 {errors.nombreCompleto && <p className="text-red-500 text-sm mt-1">{errors.nombreCompleto}</p>}
               </div>
 
               {/* Input matrícula */}
               <div>
-                <label className="block text-sm font-medium text-[#042a5c] mb-1">Matrícula</label>
+                <label className="block text-sm font-medium text-[#042a5c] mb-1">Matrícula <span className="text-red-500">*</span></label>
                 <input type="text" name="matricula" value={formData.matricula} onChange={handleInputChange} placeholder="A00000000" className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#fdd76c] focus:border-transparent ${errors.matricula ? "border-red-500" : "border-gray-300"}`} required />
                 {errors.matricula && <p className="text-red-500 text-sm mt-1">{errors.matricula}</p>}
               </div>
 
               {/* Input teléfono */}
               <div>
-                <label className="block text-sm font-medium text-[#042a5c] mb-1">Teléfono</label>
+                <label className="block text-sm font-medium text-[#042a5c] mb-1">Teléfono <span className="text-red-500">*</span></label>
                 <input type="tel" name="telefono" value={formData.telefono} onChange={handleInputChange} placeholder="10 dígitos" className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#fdd76c] focus:border-transparent ${errors.telefono ? "border-red-500" : "border-gray-300"}`} required />
                 {errors.telefono && <p className="text-red-500 text-sm mt-1">{errors.telefono}</p>}
               </div>
 
               {/* Input correo académico */}
               <div>
-                <label className="block text-sm font-medium text-[#042a5c] mb-1">Correo académico</label>
+                <label className="block text-sm font-medium text-[#042a5c] mb-1">Correo académico <span className="text-red-500">*</span></label>
                 <input type="email" name="correoAcademico" value={formData.correoAcademico} onChange={handleInputChange} placeholder="correo@tec.mx" className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#fdd76c] focus:border-transparent ${errors.correoAcademico ? "border-red-500" : "border-gray-300"}`} required />
                 {errors.correoAcademico && <p className="text-red-500 text-sm mt-1">{errors.correoAcademico}</p>}
               </div>
 
               {/* Input contraseña con botón mostrar/ocultar */}
               <div>
-                <label className="block text-sm font-medium text-[#042a5c] mb-1">Contraseña</label>
+                <label className="block text-sm font-medium text-[#042a5c] mb-1">Contraseña <span className="text-red-500">*</span></label>
                 <div className="relative">
                   <input type={showPassword ? "text" : "password"} name="contrasena" value={formData.contrasena} onChange={handleInputChange} className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#fdd76c] focus:border-transparent pr-10 ${errors.contrasena ? "border-red-500" : "border-gray-300"}`} required />
                   <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-[#042a5c]" aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}>

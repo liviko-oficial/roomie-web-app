@@ -33,11 +33,13 @@ const Navbar = () => {
         <div className="hidden md:flex items-center gap-8">
           {/* Nav Links */}
           <ul className="flex gap-2 items-center">
-            <li>
-              <NavLink href="/" active>
-                Inicio
-              </NavLink>
-            </li>
+            {!userType && (
+              <li>
+                <NavLink href="/">
+                  Inicio
+                </NavLink>
+              </li>
+            )}
             {userType === "arrendador" ? (
               <>
                 <li>
@@ -63,12 +65,17 @@ const Navbar = () => {
           </ul>
 
           {userType ? (
-            <button
-              onClick={logout}
-              className="border-2 border-red-400 text-red-600 px-4 py-2 rounded-md font-bold hover:bg-red-50 transition"
-            >
-              Cerrar sesión
-            </button>
+            <div className="flex items-center gap-3">
+              <Link href="/perfil" className="text-brand-dark px-4 py-2 rounded-md font-bold hover:bg-gray-100 transition">
+                Mi Perfil
+              </Link>
+              <button
+                onClick={logout}
+                className="text-sm text-gray-500 hover:text-red-500 transition"
+              >
+                Cerrar sesión
+              </button>
+            </div>
           ) : (
             <div className="flex items-center gap-3">
               <button
@@ -121,11 +128,13 @@ const Navbar = () => {
       >
         <div className="px-4 py-4 space-y-4">
           <ul className="space-y-3">
-            <li>
-              <NavLink href="/" active>
-                Inicio
-              </NavLink>
-            </li>
+            {!userType && (
+              <li>
+                <NavLink href="/">
+                  Inicio
+                </NavLink>
+              </li>
+            )}
             {userType === "arrendador" ? (
               <>
                 <li>
@@ -151,12 +160,17 @@ const Navbar = () => {
           </ul>
 
           {userType ? (
-            <button
-              onClick={logout}
-              className="block w-full text-center border-2 border-red-400 text-red-600 px-4 py-2 rounded-md font-bold hover:bg-red-50 transition"
-            >
-              Cerrar sesión
-            </button>
+            <div className="space-y-2">
+              <Link href="/perfil" className="block w-full text-center text-brand-dark px-4 py-2 rounded-md font-bold hover:bg-gray-100 transition">
+                Mi Perfil
+              </Link>
+              <button
+                onClick={logout}
+                className="block w-full text-center text-sm text-gray-500 hover:text-red-500 transition py-1"
+              >
+                Cerrar sesión
+              </button>
+            </div>
           ) : (
             <div className="space-y-2">
               <button

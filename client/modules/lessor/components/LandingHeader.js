@@ -5,10 +5,12 @@ import NavLink from "@/modules/home/components/NavLink";
 import { useState } from "react";
 import { useRegistrationModal } from "@/modules/global_components/context_files/RegistrationModalContext";
 import { useLoginModal } from "@/modules/global_components/context_files/LoginModalContext";
+import { useAuthContext } from "@/modules/global_components/context_files/AuthContext";
 
 const LandingHeader = () => {
   const { openModal: openRegistrationModal } = useRegistrationModal();
   const { openModal: openLoginModal } = useLoginModal();
+  const { userType, logout } = useAuthContext();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const toggleMenu = () => {
@@ -28,31 +30,34 @@ const LandingHeader = () => {
         </Link>
 
         {/* Menu Desktop */}
-        <div className="hidden md:flex items-center gap-8">
-          {/* Nav Links */}
-          <ul className="flex gap-2 items-center">
-            <li>
-              <NavLink href="/" active>
-                Inicio
-              </NavLink>
-            </li>
-            <li>
-              <NavLink href="/propiedades">Buscar propiedades</NavLink>
-            </li>
-            <li>
-              <NavLink href="/contacto">Contacto</NavLink>
-            </li>
-            <li>
+        <div className="hidden md:flex items-center gap-2">
+          {!userType && <NavLink href="/">Inicio</NavLink>}
+          {userType ? (
+            <>
               <NavLink href="/perfil">Mi Perfil</NavLink>
-            </li>
-          </ul>
-
-          <button
-              onClick={openRegistrationModal}
-            className="border-2 border-brand-accent text-brand-dark px-4 py-2 rounded-md font-bold hover:bg-yellow-100 transition"
-          >
-            Registrarse
-          </button>
+              <button
+                onClick={logout}
+                className="text-sm text-gray-500 hover:text-red-500 px-4 py-2 transition"
+              >
+                Cerrar sesión
+              </button>
+            </>
+          ) : (
+            <>
+              <button
+                onClick={openLoginModal}
+                className="text-brand-dark px-4 py-2 rounded-md font-bold hover:bg-gray-100 transition"
+              >
+                Iniciar sesión
+              </button>
+              <button
+                onClick={openRegistrationModal}
+                className="border-2 border-brand-accent text-brand-dark px-4 py-2 rounded-md font-bold hover:bg-yellow-100 transition"
+              >
+                Registrarse
+              </button>
+            </>
+          )}
         </div>
 
         {/* Menu Movil */}
@@ -88,29 +93,38 @@ const LandingHeader = () => {
         }`}
       >
         <div className="px-4 py-4 space-y-4">
-          <ul className="space-y-3">
-            <li>
-              <NavLink href="/" active>
-                Inicio
-              </NavLink>
-            </li>
-            <li>
-              <NavLink href="/propiedades">Buscar propiedades</NavLink>
-            </li>
-            <li>
-              <NavLink href="/contacto">Contacto</NavLink>
-            </li>
-            <li>
-              <NavLink href="/perfil">Mi Perfil</NavLink>
-            </li>
-          </ul>
+          {!userType && (
+            <NavLink href="/">Inicio</NavLink>
+          )}
 
-          <button
-              onClick={openRegistrationModal}
-            className="block w-full text-center border-2 border-brand-accent text-brand-dark px-4 py-2 rounded-md font-bold hover:bg-yellow-100 transition"
-          >
-            Registrarse
-          </button>
+          {userType ? (
+            <div className="space-y-2">
+              <Link href="/perfil" className="block w-full text-center text-brand-dark px-4 py-2 rounded-md font-bold hover:bg-gray-100 transition">
+                Mi Perfil
+              </Link>
+              <button
+                onClick={logout}
+                className="block w-full text-center text-sm text-gray-500 hover:text-red-500 transition py-1"
+              >
+                Cerrar sesión
+              </button>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              <button
+                onClick={openLoginModal}
+                className="block w-full text-center text-brand-dark px-4 py-2 rounded-md font-bold hover:bg-gray-100 transition"
+              >
+                Iniciar sesión
+              </button>
+              <button
+                onClick={openRegistrationModal}
+                className="block w-full text-center border-2 border-brand-accent text-brand-dark px-4 py-2 rounded-md font-bold hover:bg-yellow-100 transition"
+              >
+                Registrarse
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </nav>

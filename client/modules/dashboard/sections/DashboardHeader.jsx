@@ -5,7 +5,7 @@ import { ClipboardList } from "lucide-react";
 // Header del dashboard con titulo y contadores de solicitudes
 const DashboardHeader = ({ counts }) => {
   return (
-    <div className="bg-brand-accent pt-32 pb-8 md:pt-40 md:pb-12">
+    <div className="bg-brand-accent pt-8 pb-8 md:pt-10 md:pb-10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
