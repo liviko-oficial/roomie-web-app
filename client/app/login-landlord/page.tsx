@@ -154,12 +154,9 @@ export default function LoginArrendador() {
               </div>
 
               <div className="text-sm">
-                <Link
-                  href="/recuperar-contrasena"
-                  className="font-medium text-brand-accent hover:text-brand-dark transition-colors"
-                >
+                <span className="text-gray-400 cursor-not-allowed">
                   ¿Olvidaste tu contraseña?
-                </Link>
+                </span>
               </div>
             </div>
 
@@ -188,7 +185,7 @@ export default function LoginArrendador() {
 
             <div className="mt-6">
               <Link
-                href="/registro-arrendador"
+                href="/lessor"
                 className="w-full flex justify-center py-2 px-4 border border-brand-dark text-sm font-medium rounded-md text-brand-dark bg-white hover:bg-gray-50 transition-colors"
               >
                 Crear cuenta de Arrendador

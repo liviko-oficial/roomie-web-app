@@ -44,7 +44,7 @@ const FeaturedProperties = () => {
         </div>
 
         <div className="mt-12 text-center">
-          <Link href="/propiedades">
+          <Link href="/properties">
             <button className="px-6 py-3 bg-brand-accent text-brand-dark rounded-md font-bold hover:bg-yellow-400 transition duration-300">
               Ver todas las propiedades
             </button>
