@@ -3,6 +3,7 @@
 import { useState, useMemo } from "react";
 import { registerProperty } from "@/lib/api/propertyRegister.service";
 import { useRouter } from "next/navigation";
+import AuthGuard from "@/modules/global_components/components/AuthGuard";
 
 const Icon = ({ children }: { children: React.ReactNode }) => (
   <span className="w-10 h-10 rounded-full bg-yellow-50 border border-brand-accent flex items-center justify-center">
@@ -249,7 +250,15 @@ const PhotoUpload = ({ label, description, multiple, value, onChange, maxPreview
   );
 };
 
-export default function RegistrarPropiedad() {
+export default function RegistrarPropiedadPage() {
+  return (
+    <AuthGuard allowedRoles={["arrendador"]}>
+      <RegistrarPropiedad />
+    </AuthGuard>
+  );
+}
+
+function RegistrarPropiedad() {
   const router = useRouter();
   const [step, setStep] = useState(0);
   const [loading, setLoading] = useState(false);

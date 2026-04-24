@@ -1,7 +1,18 @@
 import axios, { AxiosInstance, AxiosError, InternalAxiosRequestConfig } from 'axios';
 
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+function resolveApiBaseUrl(): string {
+  const fromEnv = process.env.NEXT_PUBLIC_API_URL;
+  if (fromEnv) return fromEnv;
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error(
+      'NEXT_PUBLIC_API_URL no esta configurado en el build de produccion. ' +
+      'Setealo en la plataforma de hosting antes de desplegar.'
+    );
+  }
+  return 'http://localhost:3001';
+}
+
+const API_BASE_URL = resolveApiBaseUrl();
 
 export const apiClient: AxiosInstance = axios.create({
   baseURL: API_BASE_URL,
