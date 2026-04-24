@@ -34,8 +34,17 @@ export class PropertyController {
         });
       }
 
+      // Parsear arrays enviados como JSON strings vía FormData
+      const bodyNormalizado = { ...req.body };
+      if (typeof bodyNormalizado.banos === "string") {
+        bodyNormalizado.banos = safeJsonParse(bodyNormalizado.banos) ?? [];
+      }
+      if (typeof bodyNormalizado.habitaciones === "string") {
+        bodyNormalizado.habitaciones = safeJsonParse(bodyNormalizado.habitaciones) ?? [];
+      }
+
       // Validar datos de entrada con Zod
-      const validacionResultado = PropiedadCreacionSchema.safeParse(req.body);
+      const validacionResultado = PropiedadCreacionSchema.safeParse(bodyNormalizado);
 
       if (!validacionResultado.success) {
         return res.status(400).json({
@@ -60,9 +69,18 @@ export class PropertyController {
         });
       }
 
+      // Derivar numeroBanos del catálogo de baños (retrocompat con filtros existentes)
+      const caracteristicasDerivadas = {
+        ...datosPropiedad.caracteristicas,
+        numeroBanos: datosPropiedad.banos?.length ?? datosPropiedad.caracteristicas.numeroBanos,
+        numeroRecamaras:
+          datosPropiedad.habitaciones?.length || datosPropiedad.caracteristicas.numeroRecamaras,
+      };
+
       // Crear nueva propiedad con los datos validados
       const nuevaPropiedad = new PropiedadRentaDB({
         ...datosPropiedad,
+        caracteristicas: caracteristicasDerivadas,
         propietarioId: arrendadorId,
         estado: ESTADOS_PROPIEDAD.ACTIVA,
         fechaCreacion: new Date(),

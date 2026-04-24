@@ -102,6 +102,26 @@ export const InformacionFinancieraSchema = z.object({
   }).default({}),
 });
 
+// Catálogo de baños de la propiedad
+export const BanoSchema = z.object({
+  indice: z.number().int().nonnegative(),
+  alias: z.string().max(50).default(""),
+  imagenes: z.array(z.string()).default([]),
+});
+
+// Habitación individual vinculada a un baño del catálogo
+export const HabitacionSchema = z.object({
+  indice: z.number().int().nonnegative(),
+  precio: z.number().int().positive().optional(),
+  hasFurniture: z.boolean().nullable().optional(),
+  furniture: z.array(z.string()).default([]),
+  bedType: z.string().default(""),
+  bedroomType: z.string().default(""),
+  sharedWithCount: z.number().int().min(2).max(6).optional(),
+  banoIndice: z.number().int().nonnegative(),
+  imagenes: z.array(z.string()).default([]),
+});
+
 // Disponibilidad y contrato
 export const DisponibilidadSchema = z.object({
   fechaDisponible: z.date().default(() => new Date()),
@@ -160,6 +180,10 @@ export const PropiedadRentaSchema = z.object({
   informacionFinanciera: InformacionFinancieraSchema,
   disponibilidad: DisponibilidadSchema,
 
+  // Catálogo de baños y habitaciones individuales (opcional, para propiedades que registran cada habitación)
+  banos: z.array(BanoSchema).default([]),
+  habitaciones: z.array(HabitacionSchema).default([]),
+
   // Multimedia
   imagenes: z.object({
     principal: z.string().url("La imagen principal debe ser una URL válida"),
@@ -206,6 +230,8 @@ export type Politicas = z.infer<typeof PoliticasSchema>;
 export type Ubicacion = z.infer<typeof UbicacionSchema>;
 export type InformacionFinanciera = z.infer<typeof InformacionFinancieraSchema>;
 export type Disponibilidad = z.infer<typeof DisponibilidadSchema>;
+export type Bano = z.infer<typeof BanoSchema>;
+export type Habitacion = z.infer<typeof HabitacionSchema>;
 export type PropiedadRenta = z.infer<typeof PropiedadRentaSchema>;
 
 /* ----------------------------------------------
@@ -312,6 +338,26 @@ const InformacionFinancieraMongoSchema = new Schema<InformacionFinanciera>({
   },
 });
 
+// Subdocumento: baño del catálogo
+const BanoMongoSchema = new Schema<Bano>({
+  indice: { type: Number, required: true, min: 0 },
+  alias: { type: String, default: "", maxlength: 50 },
+  imagenes: [{ type: String }],
+}, { _id: false });
+
+// Subdocumento: habitación individual vinculada a un baño
+const HabitacionMongoSchema = new Schema<Habitacion>({
+  indice: { type: Number, required: true, min: 0 },
+  precio: { type: Number, min: 1 },
+  hasFurniture: { type: Boolean, default: null },
+  furniture: [{ type: String }],
+  bedType: { type: String, default: "" },
+  bedroomType: { type: String, default: "" },
+  sharedWithCount: { type: Number, min: 2, max: 6 },
+  banoIndice: { type: Number, required: true, min: 0 },
+  imagenes: [{ type: String }],
+}, { _id: false });
+
 // Subdocumento: disponibilidad
 const DisponibilidadMongoSchema = new Schema<Disponibilidad>({
   fechaDisponible: { type: Date, default: Date.now },
@@ -358,6 +404,10 @@ const PropiedadRentaMongoSchema = new Schema<PropiedadRenta>({
   ubicacion: { type: UbicacionMongoSchema, required: true },
   informacionFinanciera: { type: InformacionFinancieraMongoSchema, required: true },
   disponibilidad: { type: DisponibilidadMongoSchema, required: true },
+
+  // Catálogo de baños y habitaciones individuales
+  banos: { type: [BanoMongoSchema], default: [] },
+  habitaciones: { type: [HabitacionMongoSchema], default: [] },
 
   // Multimedia
   imagenes: {

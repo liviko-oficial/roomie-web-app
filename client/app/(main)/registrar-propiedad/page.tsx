@@ -103,7 +103,7 @@ const CheckboxList = ({ options, values, onToggle, getIcon }: {
 );
 
 const ProgressBar = ({ current, total }: { current: number; total: number }) => {
-  const pct = total <= 1 ? 100 : Math.round(((current + 1) / total) * 100);
+  const pct = total <= 1 ? 100 : Math.round((current / (total - 1)) * 100);
   return (
     <div className="w-full">
       <div className="flex justify-between text-xs text-gray-600 mb-2">
@@ -294,6 +294,7 @@ export default function RegistrarPropiedad() {
     fotosHabitaciones: [] as File[],
     fotosAreasComunes: [] as File[],
     fotoCasaClub: null as File | null,
+    banos: [{ alias: "", photos: [] as File[] }] as { alias: string; photos: File[] }[],
   });
 
   const SECURITY_CONDOMINIO = "Condominio privado con seguridad 24/7";
@@ -396,6 +397,30 @@ export default function RegistrarPropiedad() {
       data.fotosHabitaciones.forEach((file) => formData.append("fotosHabitaciones", file));
       data.fotosAreasComunes.forEach((file) => formData.append("fotosAreasComunes", file));
       if (data.fotoCasaClub) formData.append("fotoCasaClub", data.fotoCasaClub);
+
+      const banosPayload = data.banos.map((b, i) => ({ indice: i, alias: b.alias }));
+      formData.append("banos", JSON.stringify(banosPayload));
+      data.banos.forEach((b, i) => {
+        b.photos.forEach((f) => formData.append(`banoPhotos_${i}`, f));
+      });
+
+      const habsSource = data.rooms.length ? data.rooms : data.bedrooms;
+      if (habsSource.length > 0) {
+        const habsPayload = habsSource.map((r, i) => ({
+          indice: i,
+          precio: r.price ?? null,
+          hasFurniture: r.hasFurniture,
+          furniture: r.furniture,
+          bedType: r.bedType,
+          bedroomType: r.bedroomType,
+          sharedWithCount: r.sharedWithCount,
+          banoIndice: r.bathroomRef,
+        }));
+        formData.append("habitaciones", JSON.stringify(habsPayload));
+        habsSource.forEach((r, i) => {
+          (r.roomPhoto || []).forEach((f: File) => formData.append(`habPhotos_${i}`, f));
+        });
+      }
 
       await registerProperty(formData);
       router.push("/dashboard/mis-propiedades");
@@ -504,24 +529,24 @@ export default function RegistrarPropiedad() {
         <div className="space-y-4">
           <p className="text-sm text-gray-500 italic">(La dirección exacta no se mostrará hasta que lo autorice)</p>
           <div>
-            <label className="block text-sm font-medium text-brand-dark mb-1">Calle</label>
+            <label className="block text-sm font-medium text-brand-dark mb-1">Calle <span className="text-red-500">*</span></label>
             <input className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-accent" placeholder="Nombre de la calle" value={data.calle} onChange={(e) => setData((d) => ({ ...d, calle: e.target.value }))} />
           </div>
           <div>
-            <label className="block text-sm font-medium text-brand-dark mb-1">Número</label>
+            <label className="block text-sm font-medium text-brand-dark mb-1">Número <span className="text-red-500">*</span></label>
             <input className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-accent" placeholder="Número de casa/departamento" value={data.numero} onChange={(e) => setData((d) => ({ ...d, numero: e.target.value }))} />
           </div>
           <div>
-            <label className="block text-sm font-medium text-brand-dark mb-1">Colonia</label>
+            <label className="block text-sm font-medium text-brand-dark mb-1">Colonia <span className="text-red-500">*</span></label>
             <input className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-accent" placeholder="Colonia" value={data.colonia} onChange={(e) => setData((d) => ({ ...d, colonia: e.target.value }))} />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-sm font-medium text-brand-dark mb-1">Ciudad</label>
+              <label className="block text-sm font-medium text-brand-dark mb-1">Ciudad <span className="text-red-500">*</span></label>
               <input className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-accent" placeholder="Ciudad" value={data.ciudad} onChange={(e) => setData((d) => ({ ...d, ciudad: e.target.value }))} />
             </div>
             <div>
-              <label className="block text-sm font-medium text-brand-dark mb-1">Estado</label>
+              <label className="block text-sm font-medium text-brand-dark mb-1">Estado <span className="text-red-500">*</span></label>
               <select className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-accent bg-white" value={data.estado} onChange={(e) => setData((d) => ({ ...d, estado: e.target.value }))}>
                 <option value="">Selecciona estado</option>
                 {ESTADOS_MEXICO.map((est) => <option key={est} value={est}>{est}</option>)}
@@ -529,7 +554,7 @@ export default function RegistrarPropiedad() {
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium text-brand-dark mb-1">Código Postal</label>
+            <label className="block text-sm font-medium text-brand-dark mb-1">Código Postal <span className="text-red-500">*</span></label>
             <input className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-accent" placeholder="Código postal" maxLength={5} value={data.codigoPostal} onChange={(e) => setData((d) => ({ ...d, codigoPostal: e.target.value.replace(/\D/g, "").slice(0, 5) }))} />
           </div>
         </div>
@@ -600,8 +625,7 @@ export default function RegistrarPropiedad() {
                       furnitureOtroInput: "",
                       bedType: "",
                       roomPhoto: [] as File[],
-                      bathroomPhoto: [] as File[],
-                      bathroomType: "",
+                      bathroomRef: -1,
                       bedroomType: "",
                       sharedWithCount: 2,
                       price: 5000,
@@ -634,7 +658,7 @@ export default function RegistrarPropiedad() {
           />
           {data.servicesIncluded === true && (
             <div className="mt-4">
-              <label className="block text-sm font-medium text-brand-dark mb-3">¿Qué servicios incluye?</label>
+              <label className="block text-sm font-medium text-brand-dark mb-3">¿Qué servicios incluye? <span className="text-red-500">*</span></label>
               <CheckboxList
                 options={INCLUDED_SERVICES.filter((s) => s !== "Todos los servicios")}
                 values={data.includedServices}
@@ -686,7 +710,7 @@ export default function RegistrarPropiedad() {
           />
           {data.petFriendly === true && (
             <div className="mt-4">
-              <label className="block text-sm font-medium text-brand-dark mb-3">¿Cuáles?</label>
+              <label className="block text-sm font-medium text-brand-dark mb-3">¿Cuáles? <span className="text-red-500">*</span></label>
               <CheckboxList
                 options={MASCOTAS_OPTIONS}
                 values={data.mascotasPermitidas}
@@ -731,11 +755,22 @@ export default function RegistrarPropiedad() {
         render: () => (
           <div className="space-y-6">
             <div>
-              <label className="block text-sm font-medium text-brand-dark mb-3">Baños completos 🚿</label>
+              <label className="block text-sm font-medium text-brand-dark mb-3">Baños completos 🚿 <span className="text-red-500">*</span></label>
               <div className="flex items-center justify-center gap-3">
-                <button type="button" className="w-10 h-10 rounded-full border border-gray-200 text-xl" onClick={() => setData((d) => ({ ...d, banosCompletos: Math.max(1, d.banosCompletos - 1) }))}>−</button>
+                <button type="button" className="w-10 h-10 rounded-full border border-gray-200 text-xl" onClick={() => setData((d) => {
+                  const next = Math.max(1, d.banosCompletos - 1);
+                  const banos = d.banos.slice(0, next);
+                  const rooms = d.rooms.map((r) => ({ ...r, bathroomRef: r.bathroomRef >= next ? -1 : r.bathroomRef }));
+                  const bedrooms = d.bedrooms.map((r) => ({ ...r, bathroomRef: r.bathroomRef >= next ? -1 : r.bathroomRef }));
+                  return { ...d, banosCompletos: next, banos, rooms, bedrooms };
+                })}>−</button>
                 <div className="text-xl font-bold text-brand-dark">{data.banosCompletos}</div>
-                <button type="button" className="w-10 h-10 rounded-full border border-gray-200 text-xl" onClick={() => setData((d) => ({ ...d, banosCompletos: Math.min(10, d.banosCompletos + 1) }))}>+</button>
+                <button type="button" className="w-10 h-10 rounded-full border border-gray-200 text-xl" onClick={() => setData((d) => {
+                  const next = Math.min(10, d.banosCompletos + 1);
+                  const banos = [...d.banos];
+                  while (banos.length < next) banos.push({ alias: "", photos: [] });
+                  return { ...d, banosCompletos: next, banos };
+                })}>+</button>
               </div>
             </div>
             <div>
@@ -905,89 +940,214 @@ export default function RegistrarPropiedad() {
       ),
     });
 
-    // Paso 20: Habitaciones individuales (Cuarto)
+    // Paso 19.5: Catálogo de baños (previo a asignar habitaciones ↔ baños)
+    const showBanosCatalogo =
+      data.propertyType === "Cuarto" ||
+      ((data.propertyType === "Casa" || data.propertyType === "Departamento") && data.registerBedroomDetails === true);
+    if (showBanosCatalogo) {
+      base.push({
+        key: "banosCatalogo",
+        title: "Define los baños de la propiedad",
+        subtitle: "Más adelante asignarás cuál usa cada habitación. Si dos habitaciones eligen el mismo, se marcará como compartido.",
+        canContinue: data.banos.length >= 1,
+        render: () => (
+          <div className="space-y-6">
+            {data.propertyType === "Cuarto" && (
+              <div>
+                <label className="block text-sm font-medium text-brand-dark mb-3">¿Cuántos baños hay en total? <span className="text-red-500">*</span></label>
+                <div className="flex items-center justify-center gap-3">
+                  <button type="button" className="w-10 h-10 rounded-full border border-gray-200 hover:border-gray-300 text-xl" onClick={() => setData((d) => {
+                    const next = Math.max(1, d.banos.length - 1);
+                    const banos = d.banos.slice(0, next);
+                    const rooms = d.rooms.map((r) => ({ ...r, bathroomRef: r.bathroomRef >= next ? -1 : r.bathroomRef }));
+                    return { ...d, banos, rooms, banosCompletos: next };
+                  })}>−</button>
+                  <div className="text-2xl font-bold text-brand-dark min-w-[40px] text-center">{data.banos.length}</div>
+                  <button type="button" className="w-10 h-10 rounded-full border border-gray-200 hover:border-gray-300 text-xl" onClick={() => setData((d) => {
+                    const next = Math.min(10, d.banos.length + 1);
+                    const banos = [...d.banos];
+                    while (banos.length < next) banos.push({ alias: "", photos: [] });
+                    return { ...d, banos, banosCompletos: next };
+                  })}>+</button>
+                </div>
+              </div>
+            )}
+            <div className="space-y-4">
+              {data.banos.map((bano, i) => (
+                <div key={i} className="border border-gray-200 rounded-xl p-4 space-y-3">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xl">🚿</span>
+                    <span className="font-semibold text-brand-dark">Baño {i + 1}</span>
+                  </div>
+                  <input
+                    type="text"
+                    className="w-full border border-gray-200 rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-brand-accent text-sm"
+                    placeholder="Alias (opcional): Ej. 'Baño principal', 'Visitas'"
+                    value={bano.alias}
+                    maxLength={50}
+                    onChange={(e) => setData((d) => {
+                      const banos = [...d.banos];
+                      banos[i] = { ...banos[i], alias: e.target.value };
+                      return { ...d, banos };
+                    })}
+                  />
+                  <PhotoUpload
+                    label="Fotos (opcional)"
+                    multiple
+                    maxFiles={3}
+                    value={bano.photos}
+                    onChange={(files) => setData((d) => {
+                      const banos = [...d.banos];
+                      banos[i] = { ...banos[i], photos: files };
+                      return { ...d, banos };
+                    })}
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        ),
+      });
+    }
+
+    // Paso 20: Habitaciones individuales (Cuarto) - ficha completa por habitación
     if (data.propertyType === "Cuarto" && data.rooms.length > 0) {
       data.rooms.forEach((room, index) => {
+        const baseValid =
+          room.price >= 1000 &&
+          room.hasFurniture !== null &&
+          (room.hasFurniture === false || room.furniture.length > 0) &&
+          room.bedType !== "" &&
+          room.bedroomType !== "" &&
+          (room.bedroomType !== "Compartida" || room.sharedWithCount >= 2) &&
+          room.bathroomRef >= 0 && room.bathroomRef < data.banos.length;
         base.push({
           key: `room-${index}`,
           title: `Habitación ${index + 1} de ${data.rooms.length}`,
-          canContinue: room.hasFurniture !== null && room.bathroomType !== "" && room.bedroomType !== "" && room.price >= 1000,
-          render: () => (
-            <div className="space-y-6">
-              <div>
-                <label className="block text-sm font-medium text-brand-dark mb-3">Precio mensual</label>
-                <div className="flex items-center justify-center">
-                  <div className="relative border-2 border-gray-300 rounded-xl px-3 py-3 bg-white" style={{ width: "200px" }}>
-                    <span className="absolute left-3 text-lg font-bold text-brand-dark">$</span>
-                    <input
-                      type="text"
-                      value={room.price > 0 ? room.price.toLocaleString("en-US") : ""}
-                      onChange={(e) => {
-                        const num = parseInt(e.target.value.replace(/[^0-9]/g, ""), 10) || 0;
-                        const newRooms = [...data.rooms];
-                        newRooms[index] = { ...room, price: num };
-                        setData((d) => ({ ...d, rooms: newRooms }));
+          subtitle: "Completa la información de esta habitación y su baño",
+          canContinue: baseValid,
+          render: () => {
+            const update = (patch: Record<string, unknown>) => {
+              const newRooms = [...data.rooms];
+              newRooms[index] = { ...room, ...patch };
+              setData((d) => ({ ...d, rooms: newRooms }));
+            };
+            return (
+              <div className="space-y-6">
+                <div>
+                  <label className="block text-sm font-medium text-brand-dark mb-3">Precio mensual <span className="text-red-500">*</span></label>
+                  <div className="flex items-center justify-center">
+                    <div className="relative border-2 border-gray-300 rounded-xl px-3 py-3 bg-white" style={{ width: "200px" }}>
+                      <span className="absolute left-3 text-lg font-bold text-brand-dark">$</span>
+                      <input
+                        type="text"
+                        value={room.price > 0 ? room.price.toLocaleString("en-US") : ""}
+                        onChange={(e) => {
+                          const num = parseInt(e.target.value.replace(/[^0-9]/g, ""), 10) || 0;
+                          update({ price: num });
+                        }}
+                        className="w-full text-center text-lg font-bold text-brand-dark bg-transparent border-0 outline-none pl-6"
+                        placeholder="5,000"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <PhotoUpload
+                  label="Fotos de la habitación"
+                  multiple
+                  maxFiles={5}
+                  value={room.roomPhoto || []}
+                  onChange={(files) => update({ roomPhoto: files })}
+                />
+
+                <div>
+                  <label className="block text-sm font-medium text-brand-dark mb-3">¿Tiene muebles? <span className="text-red-500">*</span></label>
+                  <YesNo
+                    value={room.hasFurniture}
+                    onChange={(v) => update({ hasFurniture: v, furniture: v ? room.furniture : [] })}
+                  />
+                </div>
+
+                {room.hasFurniture === true && (
+                  <div>
+                    <label className="block text-sm font-medium text-brand-dark mb-3">¿Cuáles? <span className="text-red-500">*</span></label>
+                    <CheckboxList
+                      options={FURNITURE_OPTIONS}
+                      values={room.furniture}
+                      onToggle={(opt) => {
+                        const next = room.furniture.includes(opt)
+                          ? room.furniture.filter((x: string) => x !== opt)
+                          : [...room.furniture, opt];
+                        update({ furniture: next });
                       }}
-                      className="w-full text-center text-lg font-bold text-brand-dark bg-transparent border-0 outline-none pl-6"
-                      placeholder="5,000"
+                      getIcon={getFurnitureIcon as (opt: string) => string}
                     />
+                  </div>
+                )}
+
+                <div>
+                  <label className="block text-sm font-medium text-brand-dark mb-3">Tipo de cama <span className="text-red-500">*</span></label>
+                  <ChoiceGrid
+                    value={room.bedType}
+                    onChange={(v) => update({ bedType: v })}
+                    cols={3}
+                    options={BED_TYPE_OPTIONS.map((t) => ({ value: t, label: t, icon: "🛏️" }))}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-brand-dark mb-3">¿Es para una sola persona o compartida? <span className="text-red-500">*</span></label>
+                  <ChoiceGrid
+                    value={room.bedroomType}
+                    onChange={(v) => update({ bedroomType: v, sharedWithCount: v === "Compartida" ? (room.sharedWithCount || 2) : 2 })}
+                    options={[
+                      { value: "Una sola persona", label: "Una sola persona", icon: "👤" },
+                      { value: "Compartida", label: "Compartida", icon: "👥" },
+                    ]}
+                  />
+                </div>
+
+                {room.bedroomType === "Compartida" && (
+                  <div>
+                    <label className="block text-sm font-medium text-brand-dark mb-3">¿Con cuántas personas se comparte? <span className="text-red-500">*</span></label>
+                    <div className="flex items-center justify-center gap-3">
+                      <button type="button" className="w-10 h-10 rounded-full border border-gray-200 hover:border-gray-300 text-xl" onClick={() => update({ sharedWithCount: Math.max(2, (room.sharedWithCount || 2) - 1) })}>−</button>
+                      <div className="text-2xl font-bold text-brand-dark min-w-[40px] text-center">{room.sharedWithCount || 2}</div>
+                      <button type="button" className="w-10 h-10 rounded-full border border-gray-200 hover:border-gray-300 text-xl" onClick={() => update({ sharedWithCount: Math.min(6, (room.sharedWithCount || 2) + 1) })}>+</button>
+                    </div>
+                  </div>
+                )}
+
+                <div className="pt-4 border-t border-gray-100">
+                  <h3 className="text-base font-semibold text-brand-dark mb-3">Baño de esta habitación</h3>
+                  <div>
+                    <label className="block text-sm font-medium text-brand-dark mb-3">¿Qué baño usa? <span className="text-red-500">*</span></label>
+                    <ChoiceGrid
+                      value={room.bathroomRef >= 0 ? String(room.bathroomRef) : ""}
+                      onChange={(v) => update({ bathroomRef: parseInt(v) })}
+                      cols={data.banos.length >= 3 ? 3 : 2}
+                      options={data.banos.map((b, i) => ({
+                        value: String(i),
+                        label: b.alias ? `Baño ${i + 1}: ${b.alias}` : `Baño ${i + 1}`,
+                        icon: "🚿",
+                      }))}
+                    />
+                    {room.bathroomRef >= 0 && (() => {
+                      const otras = data.rooms
+                        .map((r, i) => ({ r, i }))
+                        .filter(({ r, i }) => i !== index && r.bathroomRef === room.bathroomRef);
+                      if (otras.length === 0) {
+                        return <p className="text-xs text-gray-500 mt-2">🔒 Este baño es de uso privado para esta habitación.</p>;
+                      }
+                      const nombres = otras.map(({ i }) => `Habitación ${i + 1}`).join(", ");
+                      return <p className="text-xs text-amber-600 mt-2">👥 Compartido con {nombres}.</p>;
+                    })()}
                   </div>
                 </div>
               </div>
-              <PhotoUpload
-                label="Fotos de la habitación"
-                multiple
-                maxFiles={3}
-                value={room.roomPhoto || []}
-                onChange={(files) => {
-                  const newRooms = [...data.rooms];
-                  newRooms[index] = { ...room, roomPhoto: files };
-                  setData((d) => ({ ...d, rooms: newRooms }));
-                }}
-              />
-              <div>
-                <label className="block text-sm font-medium text-brand-dark mb-3">¿Tiene muebles?</label>
-                <YesNo
-                  value={room.hasFurniture}
-                  onChange={(v) => {
-                    const newRooms = [...data.rooms];
-                    newRooms[index] = { ...room, hasFurniture: v, furniture: v ? room.furniture : [] };
-                    setData((d) => ({ ...d, rooms: newRooms }));
-                  }}
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-brand-dark mb-3">¿Es para una sola persona o compartida?</label>
-                <ChoiceGrid
-                  value={room.bedroomType}
-                  onChange={(v) => {
-                    const newRooms = [...data.rooms];
-                    newRooms[index] = { ...room, bedroomType: v };
-                    setData((d) => ({ ...d, rooms: newRooms }));
-                  }}
-                  options={[
-                    { value: "Una sola persona", label: "Una sola persona", icon: "👤" },
-                    { value: "Compartida", label: "Compartida", icon: "👥" },
-                  ]}
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-brand-dark mb-3">Tipo de baño</label>
-                <ChoiceGrid
-                  value={room.bathroomType}
-                  onChange={(v) => {
-                    const newRooms = [...data.rooms];
-                    newRooms[index] = { ...room, bathroomType: v };
-                    setData((d) => ({ ...d, rooms: newRooms }));
-                  }}
-                  options={[
-                    { value: "Propio", label: "Propio", icon: "🔒" },
-                    { value: "Compartido", label: "Compartido", icon: "👥" },
-                  ]}
-                />
-              </div>
-            </div>
-          ),
+            );
+          },
         });
       });
     }
@@ -1008,8 +1168,7 @@ export default function RegistrarPropiedad() {
                   furniture: [] as string[],
                   bedType: "",
                   roomPhoto: [] as File[],
-                  bathroomPhoto: [] as File[],
-                  bathroomType: "",
+                  bathroomRef: -1,
                   bedroomType: "",
                   sharedWithCount: 2,
                 }));
@@ -1022,19 +1181,124 @@ export default function RegistrarPropiedad() {
         ),
       });
 
-      if (data.registerBedroomDetails === true) {
-        base.push({
-          key: "fotosHabitaciones",
-          title: "Fotos de habitaciones y baños",
-          canContinue: true,
-          render: () => (
-            <PhotoUpload
-              description="Sube fotos de las habitaciones y baños"
-              multiple
-              value={data.fotosHabitaciones}
-              onChange={(files) => setData((d) => ({ ...d, fotosHabitaciones: files }))}
-            />
-          ),
+      if (data.registerBedroomDetails === true && data.bedrooms.length > 0) {
+        data.bedrooms.forEach((bedroom, index) => {
+          const valid =
+            bedroom.hasFurniture !== null &&
+            (bedroom.hasFurniture === false || bedroom.furniture.length > 0) &&
+            bedroom.bedType !== "" &&
+            bedroom.bedroomType !== "" &&
+            (bedroom.bedroomType !== "Compartida" || bedroom.sharedWithCount >= 2) &&
+            bedroom.bathroomRef >= 0 && bedroom.bathroomRef < data.banos.length;
+          base.push({
+            key: `bedroom-${index}`,
+            title: `Habitación ${index + 1} de ${data.bedrooms.length}`,
+            subtitle: "Completa la información de esta habitación y su baño",
+            canContinue: valid,
+            render: () => {
+              const update = (patch: Record<string, unknown>) => {
+                const newBedrooms = [...data.bedrooms];
+                newBedrooms[index] = { ...bedroom, ...patch };
+                setData((d) => ({ ...d, bedrooms: newBedrooms }));
+              };
+              return (
+                <div className="space-y-6">
+                  <PhotoUpload
+                    label="Fotos de la habitación"
+                    multiple
+                    maxFiles={5}
+                    value={bedroom.roomPhoto || []}
+                    onChange={(files) => update({ roomPhoto: files })}
+                  />
+
+                  <div>
+                    <label className="block text-sm font-medium text-brand-dark mb-3">¿Tiene muebles? <span className="text-red-500">*</span></label>
+                    <YesNo
+                      value={bedroom.hasFurniture}
+                      onChange={(v) => update({ hasFurniture: v, furniture: v ? bedroom.furniture : [] })}
+                    />
+                  </div>
+
+                  {bedroom.hasFurniture === true && (
+                    <div>
+                      <label className="block text-sm font-medium text-brand-dark mb-3">¿Cuáles? <span className="text-red-500">*</span></label>
+                      <CheckboxList
+                        options={FURNITURE_OPTIONS}
+                        values={bedroom.furniture}
+                        onToggle={(opt) => {
+                          const next = bedroom.furniture.includes(opt)
+                            ? bedroom.furniture.filter((x: string) => x !== opt)
+                            : [...bedroom.furniture, opt];
+                          update({ furniture: next });
+                        }}
+                        getIcon={getFurnitureIcon as (opt: string) => string}
+                      />
+                    </div>
+                  )}
+
+                  <div>
+                    <label className="block text-sm font-medium text-brand-dark mb-3">Tipo de cama <span className="text-red-500">*</span></label>
+                    <ChoiceGrid
+                      value={bedroom.bedType}
+                      onChange={(v) => update({ bedType: v })}
+                      cols={3}
+                      options={BED_TYPE_OPTIONS.map((t) => ({ value: t, label: t, icon: "🛏️" }))}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-brand-dark mb-3">¿Es para una sola persona o compartida? <span className="text-red-500">*</span></label>
+                    <ChoiceGrid
+                      value={bedroom.bedroomType}
+                      onChange={(v) => update({ bedroomType: v, sharedWithCount: v === "Compartida" ? (bedroom.sharedWithCount || 2) : 2 })}
+                      options={[
+                        { value: "Una sola persona", label: "Una sola persona", icon: "👤" },
+                        { value: "Compartida", label: "Compartida", icon: "👥" },
+                      ]}
+                    />
+                  </div>
+
+                  {bedroom.bedroomType === "Compartida" && (
+                    <div>
+                      <label className="block text-sm font-medium text-brand-dark mb-3">¿Con cuántas personas se comparte? <span className="text-red-500">*</span></label>
+                      <div className="flex items-center justify-center gap-3">
+                        <button type="button" className="w-10 h-10 rounded-full border border-gray-200 hover:border-gray-300 text-xl" onClick={() => update({ sharedWithCount: Math.max(2, (bedroom.sharedWithCount || 2) - 1) })}>−</button>
+                        <div className="text-2xl font-bold text-brand-dark min-w-[40px] text-center">{bedroom.sharedWithCount || 2}</div>
+                        <button type="button" className="w-10 h-10 rounded-full border border-gray-200 hover:border-gray-300 text-xl" onClick={() => update({ sharedWithCount: Math.min(6, (bedroom.sharedWithCount || 2) + 1) })}>+</button>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="pt-4 border-t border-gray-100">
+                    <h3 className="text-base font-semibold text-brand-dark mb-3">Baño de esta habitación</h3>
+                    <div>
+                      <label className="block text-sm font-medium text-brand-dark mb-3">¿Qué baño usa? <span className="text-red-500">*</span></label>
+                      <ChoiceGrid
+                        value={bedroom.bathroomRef >= 0 ? String(bedroom.bathroomRef) : ""}
+                        onChange={(v) => update({ bathroomRef: parseInt(v) })}
+                        cols={data.banos.length >= 3 ? 3 : 2}
+                        options={data.banos.map((b, i) => ({
+                          value: String(i),
+                          label: b.alias ? `Baño ${i + 1}: ${b.alias}` : `Baño ${i + 1}`,
+                          icon: "🚿",
+                        }))}
+                      />
+                      {bedroom.bathroomRef >= 0 && (() => {
+                        const otras = data.bedrooms
+                          .map((r, i) => ({ r, i }))
+                          .filter(({ r, i }) => i !== index && r.bathroomRef === bedroom.bathroomRef);
+                        if (otras.length === 0) {
+                          return <p className="text-xs text-gray-500 mt-2">🔒 Este baño es de uso privado para esta habitación.</p>;
+                        }
+                        const nombres = otras.map(({ i }) => `Habitación ${i + 1}`).join(", ");
+                        return <p className="text-xs text-amber-600 mt-2">👥 Compartido con {nombres}.</p>;
+                      })()}
+                    </div>
+                  </div>
+                </div>
+              );
+            },
+          });
         });
       }
     }
@@ -1052,6 +1316,7 @@ export default function RegistrarPropiedad() {
           <div>
             <div className="text-2xl font-bold text-brand-dark">Registrar mi propiedad</div>
             <div className="text-sm text-gray-600">Responde paso a paso. Rápido y sencillo.</div>
+            <p className="text-xs text-gray-400 mt-1">Todos los campos son obligatorios salvo que se indique <span className="italic">(opcional)</span></p>
           </div>
           <button
             type="button"

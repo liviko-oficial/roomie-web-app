@@ -222,6 +222,26 @@ export const PropiedadCreacionSchema = z.object({
       .url("El tour 360 debe ser una URL válida")
       .optional(),
   }),
+
+  // Catálogo de baños (opcional — para propiedades que registran detalle por habitación)
+  banos: z.array(z.object({
+    indice: z.number().int().nonnegative(),
+    alias: z.string().max(50).default(""),
+    imagenes: z.array(z.string()).default([]),
+  })).default([]),
+
+  // Habitaciones individuales con referencia al baño (opcional)
+  habitaciones: z.array(z.object({
+    indice: z.number().int().nonnegative(),
+    precio: z.number().int().positive().optional(),
+    hasFurniture: z.boolean().nullable().optional(),
+    furniture: z.array(z.string()).default([]),
+    bedType: z.string().default(""),
+    bedroomType: z.string().default(""),
+    sharedWithCount: z.number().int().min(2).max(6).optional(),
+    banoIndice: z.number().int().nonnegative(),
+    imagenes: z.array(z.string()).default([]),
+  })).default([]),
 })
 .refine(
   (data) => data.edadMinima <= data.edadMaxima,
