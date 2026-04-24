@@ -1,4 +1,4 @@
-# Liviko Frontend
+# Happy Roomie Frontend
 
 ## Quick start
 
