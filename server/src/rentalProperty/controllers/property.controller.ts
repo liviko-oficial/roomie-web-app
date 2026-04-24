@@ -34,16 +34,28 @@ export class PropertyController {
         });
       }
 
-      // Parsear arrays enviados como JSON strings vía FormData
+      // Parsear campos enviados como JSON strings vía FormData (nested objects + arrays)
       const bodyNormalizado: Record<string, unknown> = { ...req.body };
-      if (typeof bodyNormalizado.banos === "string") {
-        bodyNormalizado.banos = safeJsonParse(bodyNormalizado.banos as string) ?? [];
+      const jsonFields = [
+        "banos", "habitaciones", "imagenes",
+        "direccion", "caracteristicas", "servicios", "politicas",
+        "ubicacion", "informacionFinanciera", "disponibilidad",
+        "reglas", "amenidades", "serviciosDisponibles"
+      ];
+      for (const key of jsonFields) {
+        const v = bodyNormalizado[key];
+        if (typeof v === "string" && (v.startsWith("{") || v.startsWith("["))) {
+          bodyNormalizado[key] = safeJsonParse(v) ?? bodyNormalizado[key];
+        }
       }
-      if (typeof bodyNormalizado.habitaciones === "string") {
-        bodyNormalizado.habitaciones = safeJsonParse(bodyNormalizado.habitaciones as string) ?? [];
-      }
-      if (typeof bodyNormalizado.imagenes === "string") {
-        bodyNormalizado.imagenes = safeJsonParse(bodyNormalizado.imagenes as string) ?? [];
+
+      // Coerce campos numericos que llegan como string via FormData
+      const numericFields = ["capacidadMaxima", "edadMinima", "edadMaxima"];
+      for (const key of numericFields) {
+        if (typeof bodyNormalizado[key] === "string") {
+          const n = Number(bodyNormalizado[key]);
+          if (!Number.isNaN(n)) bodyNormalizado[key] = n;
+        }
       }
 
       // Distribuir archivos subidos por Cloudinary en los arrays correspondientes
@@ -52,7 +64,7 @@ export class PropertyController {
         type UploadedFile = Express.Multer.File & { path: string };
         const banos = Array.isArray(bodyNormalizado.banos) ? [...bodyNormalizado.banos as Array<Record<string, unknown>>] : [];
         const habitaciones = Array.isArray(bodyNormalizado.habitaciones) ? [...bodyNormalizado.habitaciones as Array<Record<string, unknown>>] : [];
-        const imagenesPropiedad: string[] = Array.isArray(bodyNormalizado.imagenes) ? [...bodyNormalizado.imagenes as string[]] : [];
+        const propertyPhotoUrls: string[] = [];
 
         for (const f of files as UploadedFile[]) {
           const url = f.path;
@@ -70,14 +82,21 @@ export class PropertyController {
               const existing = (habitaciones[idx].imagenes as string[] | undefined) ?? [];
               habitaciones[idx] = { ...habitaciones[idx], imagenes: [...existing, url] };
             }
-          } else if (f.fieldname === "imagenes" || f.fieldname === "propertyPhotos") {
-            imagenesPropiedad.push(url);
+          } else if (f.fieldname === "imagenes" || f.fieldname === "propertyPhotos" || f.fieldname === "photos") {
+            propertyPhotoUrls.push(url);
           }
         }
 
         bodyNormalizado.banos = banos;
         bodyNormalizado.habitaciones = habitaciones;
-        bodyNormalizado.imagenes = imagenesPropiedad;
+
+        if (propertyPhotoUrls.length > 0) {
+          const existing = (bodyNormalizado.imagenes as { principal?: string; galeria?: string[] } | undefined) || {};
+          bodyNormalizado.imagenes = {
+            principal: existing.principal || propertyPhotoUrls[0],
+            galeria: [...(existing.galeria ?? []), ...propertyPhotoUrls.slice(existing.principal ? 0 : 1)],
+          };
+        }
       }
 
       // Validar datos de entrada con Zod

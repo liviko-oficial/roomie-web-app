@@ -185,7 +185,7 @@ export const PropiedadCreacionSchema = z.object({
 
   // Disponibilidad
   disponibilidad: z.object({
-    fechaDisponible: z.date()
+    fechaDisponible: z.coerce.date()
       .min(new Date(), "La fecha disponible no puede ser en el pasado")
       .default(() => new Date()),
     duracionMinimaContrato: z.number()
