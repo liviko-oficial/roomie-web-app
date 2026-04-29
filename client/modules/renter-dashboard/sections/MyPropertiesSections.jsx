@@ -29,20 +29,27 @@ const MyPropertiesSections = () => {
   const router = useRouter();
   const [properties, setProperties] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [reloadKey, setReloadKey] = useState(0);
   const [sortBy, setSortBy] = useState("date_desc");
   const [toDelete, setToDelete] = useState(null);
 
   useEffect(() => {
     const arrendadorId = localStorage.getItem("arrendadorId");
     if (!arrendadorId) { setLoading(false); return; }
+    setLoading(true);
+    setError(null);
     arrendadorService.getMyProperties(arrendadorId)
       .then((res) => {
         const list = res.data?.propiedades || res.data || [];
         setProperties(Array.isArray(list) ? list.map(mapApiProperty) : []);
       })
-      .catch((err) => console.error("Error cargando propiedades:", err))
+      .catch((err) => {
+        console.error("Error cargando propiedades:", err);
+        setError("No pudimos cargar tus propiedades. Verifica tu conexión e intenta de nuevo.");
+      })
       .finally(() => setLoading(false));
-  }, []);
+  }, [reloadKey]);
 
   const grouped = useMemo(
     () => groupByCategory(sortProperties(properties, sortBy)),
@@ -67,6 +74,14 @@ const MyPropertiesSections = () => {
           <div className="text-center py-16">
             <div className="w-8 h-8 border-4 border-brand-accent border-t-transparent rounded-full animate-spin mx-auto mb-3" />
             <p className="text-gray-600">Cargando propiedades...</p>
+          </div>
+        ) : error ? (
+          <div className="text-center py-16">
+            <h3 className="text-xl font-bold text-brand-dark mb-2">Algo salió mal</h3>
+            <p className="text-gray-600 mb-6">{error}</p>
+            <button onClick={() => setReloadKey((k) => k + 1)} className="px-6 py-3 bg-brand-accent text-brand-dark rounded-md font-bold hover:bg-yellow-400 transition shadow-md">
+              Reintentar
+            </button>
           </div>
         ) : properties.length === 0 ? (
           <div className="text-center py-16">
