@@ -49,8 +49,13 @@ apiClient.interceptors.response.use(
 
     if (error.response?.status === 401) {
       if (typeof window !== 'undefined') {
+        const userType = localStorage.getItem('userType');
         localStorage.removeItem('jwtToken');
-        window.location.href = '/login';
+        localStorage.removeItem('userType');
+        localStorage.removeItem('arrendadorId');
+        localStorage.removeItem('userId');
+        const target = userType === 'student' ? '/login-student' : '/login-landlord';
+        window.location.href = target;
       }
     }
     return Promise.reject(error);
