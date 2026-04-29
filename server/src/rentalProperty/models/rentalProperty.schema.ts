@@ -112,7 +112,7 @@ export const BanoSchema = z.object({
 // Habitación individual vinculada a un baño del catálogo
 export const HabitacionSchema = z.object({
   indice: z.number().int().nonnegative(),
-  precio: z.number().int().positive().optional(),
+  precio: z.number().int().positive().nullable().optional(),
   hasFurniture: z.boolean().nullable().optional(),
   furniture: z.array(z.string()).default([]),
   bedType: z.string().default(""),
@@ -124,7 +124,7 @@ export const HabitacionSchema = z.object({
 
 // Disponibilidad y contrato
 export const DisponibilidadSchema = z.object({
-  fechaDisponible: z.date().default(() => new Date()),
+  fechaDisponible: z.coerce.date().default(() => new Date()),
   duracionMinimaContrato: z.number().int().min(1, "La duración mínima debe ser al menos 1 mes").default(6),
   duracionMaximaContrato: z.number().int().min(1, "La duración máxima debe ser al menos 1 mes").default(12),
   renovacionAutomatica: z.boolean().default(false),
