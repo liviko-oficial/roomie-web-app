@@ -233,7 +233,7 @@ export const PropiedadCreacionSchema = z.object({
   // Habitaciones individuales con referencia al baño (opcional)
   habitaciones: z.array(z.object({
     indice: z.number().int().nonnegative(),
-    precio: z.number().int().positive().optional(),
+    precio: z.number().int().positive().nullable().optional(),
     hasFurniture: z.boolean().nullable().optional(),
     furniture: z.array(z.string()).default([]),
     bedType: z.string().default(""),

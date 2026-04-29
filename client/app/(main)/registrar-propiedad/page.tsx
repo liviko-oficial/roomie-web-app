@@ -950,13 +950,9 @@ function RegistrarPropiedad() {
     });
 
     // Paso 19.5: Catálogo de baños (previo a asignar habitaciones ↔ baños)
-    const showBanosCatalogo =
-      data.propertyType === "Cuarto" ||
-      ((data.propertyType === "Casa" || data.propertyType === "Departamento") && data.registerBedroomDetails === true);
-    if (showBanosCatalogo) {
-      base.push({
-        key: "banosCatalogo",
-        title: "Define los baños de la propiedad",
+    const banosCatalogoStep = {
+      key: "banosCatalogo",
+      title: "Define los baños de la propiedad",
         subtitle: "Más adelante asignarás cuál usa cada habitación. Si dos habitaciones eligen el mismo, se marcará como compartido.",
         canContinue: data.banos.length >= 1,
         render: () => (
@@ -1016,11 +1012,11 @@ function RegistrarPropiedad() {
             </div>
           </div>
         ),
-      });
-    }
+      };
 
     // Paso 20: Habitaciones individuales (Cuarto) - ficha completa por habitación
     if (data.propertyType === "Cuarto" && data.rooms.length > 0) {
+      base.push(banosCatalogoStep);
       data.rooms.forEach((room, index) => {
         const baseValid =
           room.price >= 1000 &&
@@ -1191,6 +1187,7 @@ function RegistrarPropiedad() {
       });
 
       if (data.registerBedroomDetails === true && data.bedrooms.length > 0) {
+        base.push(banosCatalogoStep);
         data.bedrooms.forEach((bedroom, index) => {
           const valid =
             bedroom.hasFurniture !== null &&
