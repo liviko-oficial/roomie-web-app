@@ -1,9 +1,10 @@
 "use client";
+import Link from "next/link";
 import { useAuthContext } from "@/modules/global_components/context_files/AuthContext";
 import MyPropertiesSections from "@/modules/renter-dashboard/sections/MyPropertiesSections";
 
 export default function MisPropiedades() {
-  const { userType } = useAuthContext();
+  const { userType } = useAuthContext() as { userType: "student" | "arrendador" | null };
 
   if (!userType) {
     return (
@@ -27,5 +28,16 @@ export default function MisPropiedades() {
     );
   }
 
-  return <MyPropertiesSections />;
+  return (
+    <>
+      <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 pb-1 text-sm text-gray-500" aria-label="Breadcrumb">
+        <Link href="/dashboard" className="hover:text-brand-dark transition">
+          Dashboard
+        </Link>
+        <span className="mx-2 text-gray-300">/</span>
+        <span className="text-brand-dark font-semibold">Mis Propiedades</span>
+      </nav>
+      <MyPropertiesSections />
+    </>
+  );
 }

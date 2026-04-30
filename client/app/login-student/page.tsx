@@ -10,7 +10,11 @@ export default function LoginEstudiante() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [emailTouched, setEmailTouched] = useState(false);
   const router = useRouter();
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const emailInvalid = emailTouched && email.length > 0 && !emailRegex.test(email);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -73,9 +77,15 @@ export default function LoginEstudiante() {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-accent focus:border-brand-accent sm:text-sm"
+                  onBlur={() => setEmailTouched(true)}
+                  className={`appearance-none block w-full px-3 py-2 border rounded-md placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-accent focus:border-brand-accent sm:text-sm ${
+                    emailInvalid ? "border-red-400" : "border-gray-300"
+                  }`}
                   placeholder="tu@tec.mx"
                 />
+                {emailInvalid && (
+                  <p className="mt-1 text-xs text-red-600">Formato de correo inválido</p>
+                )}
               </div>
             </div>
 
