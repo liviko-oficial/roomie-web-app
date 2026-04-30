@@ -1,0 +1,10 @@
+node_modules
+.env
+.env.local
+.env.*.local
+.git
+.gitignore
+*.log
+src/**/test
+src/**/*.test.ts
+README.md
