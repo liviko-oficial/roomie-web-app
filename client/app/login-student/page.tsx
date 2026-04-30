@@ -21,7 +21,7 @@ export default function LoginEstudiante() {
       router.push("/properties");
     } catch (err: unknown) {
       const message = (err as { response?: { data?: { error?: string } } })?.response?.data?.error;
-      setError(message || "Error al iniciar sesion. Verifica tus credenciales.");
+      setError(message || "Error al iniciar sesión. Verifica tus credenciales.");
     } finally {
       setLoading(false);
     }
@@ -38,15 +38,15 @@ export default function LoginEstudiante() {
           />
         </Link>
         <h2 className="mt-6 text-center text-3xl font-bold text-brand-dark">
-          Inicia sesion como Estudiante
+          Inicia sesión como Estudiante
         </h2>
         <p className="mt-2 text-center text-sm text-gray-600">
-          Eres arrendador?{" "}
+          ¿Eres arrendador?{" "}
           <Link
             href="/login-landlord"
             className="font-medium text-brand-accent hover:text-brand-dark transition-colors"
           >
-            Inicia sesion aqui
+            Inicia sesión aquí
           </Link>
         </p>
       </div>
@@ -62,7 +62,7 @@ export default function LoginEstudiante() {
 
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-brand-dark">
-                Correo electronico
+                Correo electrónico
               </label>
               <div className="mt-1">
                 <input
@@ -81,7 +81,7 @@ export default function LoginEstudiante() {
 
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-brand-dark">
-                Contrasena
+                Contraseña
               </label>
               <div className="mt-1 relative">
                 <input
@@ -93,13 +93,13 @@ export default function LoginEstudiante() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="appearance-none block w-full px-3 py-2 pr-10 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-accent focus:border-brand-accent sm:text-sm"
-                  placeholder="Tu contrasena"
+                  placeholder="Tu contraseña"
                 />
                 <button
                   type="button"
                   className="absolute inset-y-0 right-0 pr-3 flex items-center"
                   onClick={() => setShowPassword(!showPassword)}
-                  aria-label={showPassword ? "Ocultar contrasena" : "Mostrar contrasena"}
+                  aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
                 >
                   <svg className="h-5 w-5 text-gray-400 hover:text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     {showPassword ? (
@@ -112,13 +112,19 @@ export default function LoginEstudiante() {
               </div>
             </div>
 
+            <div className="flex items-center justify-end">
+              <span title="Próximamente" className="text-sm text-gray-400 cursor-help">
+                ¿Olvidaste tu contraseña?
+              </span>
+            </div>
+
             <div>
               <button
                 type="submit"
                 disabled={loading}
                 className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-brand-dark bg-brand-accent hover:bg-yellow-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-accent transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
               >
-                {loading ? "Iniciando sesion..." : "Iniciar sesion"}
+                {loading ? "Iniciando sesión..." : "Iniciar sesión"}
               </button>
             </div>
           </form>
@@ -130,7 +136,7 @@ export default function LoginEstudiante() {
               </div>
               <div className="relative flex justify-center text-sm">
                 <span className="px-2 bg-white text-gray-500">
-                  Primera vez en Happy Roomie?
+                  ¿Primera vez en Happy Roomie?
                 </span>
               </div>
             </div>
@@ -148,13 +154,13 @@ export default function LoginEstudiante() {
 
         <div className="mt-8 text-center">
           <p className="text-xs text-gray-600">
-            Al iniciar sesion, aceptas nuestros{" "}
+            Al iniciar sesión, aceptas nuestros{" "}
             <Link href="/terminos" className="text-brand-accent hover:text-brand-dark">
-              Terminos de Servicio
+              Términos de Servicio
             </Link>{" "}
             y{" "}
             <Link href="/privacidad" className="text-brand-accent hover:text-brand-dark">
-              Politica de Privacidad
+              Política de Privacidad
             </Link>
           </p>
         </div>

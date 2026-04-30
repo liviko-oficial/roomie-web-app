@@ -4,12 +4,19 @@ import Link from "next/link";
 import { useRegistrationModal } from "../global_components/context_files/RegistrationModalContext";
 import { useLoginModal } from "../global_components/context_files/LoginModalContext";
 import { useAuthContext } from "../global_components/context_files/AuthContext";
+import ConfirmDialog from "../global_components/components/ConfirmDialog";
 
 const NavbarStudent = () => {
   const { openModal: openRegistrationModal } = useRegistrationModal();
   const { openModal: openLoginModal } = useLoginModal();
   const { userType, logout } = useAuthContext();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [confirmLogout, setConfirmLogout] = useState(false);
+
+  const handleLogoutConfirm = () => {
+    setConfirmLogout(false);
+    logout();
+  };
 
   const scrollTo = (id, offset = 60) => {
     const el = document.getElementById(id);
@@ -47,7 +54,7 @@ const NavbarStudent = () => {
               <Link href="/perfil" className="px-4 py-2 rounded-md font-semibold text-brand-dark hover:bg-gray-100 transition">
                 Mi Perfil
               </Link>
-              <button onClick={logout} className="text-sm text-gray-500 hover:text-red-500 px-4 py-2 transition">
+              <button onClick={() => setConfirmLogout(true)} className="text-sm text-gray-500 hover:text-red-500 px-4 py-2 transition">
                 Cerrar sesión
               </button>
             </>
@@ -104,7 +111,7 @@ const NavbarStudent = () => {
               <Link href="/perfil" className="block w-full text-center text-brand-dark px-4 py-2 rounded-md font-bold hover:bg-gray-100 transition">
                 Mi Perfil
               </Link>
-              <button onClick={logout} className="block w-full text-center text-sm text-gray-500 hover:text-red-500 transition py-1">
+              <button onClick={() => setConfirmLogout(true)} className="block w-full text-center text-sm text-gray-500 hover:text-red-500 transition py-1">
                 Cerrar sesión
               </button>
             </>
@@ -126,6 +133,15 @@ const NavbarStudent = () => {
           )}
         </div>
       </div>
+      <ConfirmDialog
+        open={confirmLogout}
+        title="¿Cerrar sesión?"
+        message="Tendrás que volver a iniciar sesión para acceder a tu cuenta."
+        confirmLabel="Cerrar sesión"
+        variant="danger"
+        onConfirm={handleLogoutConfirm}
+        onCancel={() => setConfirmLogout(false)}
+      />
     </nav>
   );
 };

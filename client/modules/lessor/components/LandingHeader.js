@@ -6,15 +6,22 @@ import { useState } from "react";
 import { useRegistrationModal } from "@/modules/global_components/context_files/RegistrationModalContext";
 import { useLoginModal } from "@/modules/global_components/context_files/LoginModalContext";
 import { useAuthContext } from "@/modules/global_components/context_files/AuthContext";
+import ConfirmDialog from "@/modules/global_components/components/ConfirmDialog";
 
 const LandingHeader = () => {
   const { openModal: openRegistrationModal } = useRegistrationModal();
   const { openModal: openLoginModal } = useLoginModal();
   const { userType, logout } = useAuthContext();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [confirmLogout, setConfirmLogout] = useState(false);
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
+  };
+
+  const handleLogoutConfirm = () => {
+    setConfirmLogout(false);
+    logout();
   };
 
   return (
@@ -36,7 +43,7 @@ const LandingHeader = () => {
             <>
               <NavLink href="/perfil">Mi Perfil</NavLink>
               <button
-                onClick={logout}
+                onClick={() => setConfirmLogout(true)}
                 className="text-sm text-gray-500 hover:text-red-500 px-4 py-2 transition"
               >
                 Cerrar sesión
@@ -103,7 +110,7 @@ const LandingHeader = () => {
                 Mi Perfil
               </Link>
               <button
-                onClick={logout}
+                onClick={() => setConfirmLogout(true)}
                 className="block w-full text-center text-sm text-gray-500 hover:text-red-500 transition py-1"
               >
                 Cerrar sesión
@@ -127,6 +134,15 @@ const LandingHeader = () => {
           )}
         </div>
       </div>
+      <ConfirmDialog
+        open={confirmLogout}
+        title="¿Cerrar sesión?"
+        message="Tendrás que volver a iniciar sesión para acceder a tu cuenta."
+        confirmLabel="Cerrar sesión"
+        variant="danger"
+        onConfirm={handleLogoutConfirm}
+        onCancel={() => setConfirmLogout(false)}
+      />
     </nav>
   );
 };

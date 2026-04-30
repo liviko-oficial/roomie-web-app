@@ -20,7 +20,7 @@ export default function LoginArrendador() {
     setError("");
     try {
       await arrendadorService.login(email, password);
-      router.push("/");
+      router.push("/dashboard");
     } catch (err: unknown) {
       const message = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
       setError(message || "Error al iniciar sesión. Verifica tus credenciales.");
@@ -154,7 +154,10 @@ export default function LoginArrendador() {
               </div>
 
               <div className="text-sm">
-                <span className="text-gray-400 cursor-not-allowed">
+                <span
+                  title="Próximamente"
+                  className="text-gray-400 cursor-help"
+                >
                   ¿Olvidaste tu contraseña?
                 </span>
               </div>

@@ -3,13 +3,23 @@ import { useEffect, useState, useRef } from "react";
 import { useAuthContext } from "@/modules/global_components/context_files/AuthContext";
 import { arrendadorService } from "@/lib/api/arrendadorService";
 import Link from "next/link";
+import ConfirmDialog from "@/modules/global_components/components/ConfirmDialog";
 
 export default function Perfil() {
-  const { userType, logout } = useAuthContext();
+  const { userType, logout } = useAuthContext() as {
+    userType: "student" | "arrendador" | null;
+    logout: () => void;
+  };
   const [profile, setProfile] = useState<Record<string, unknown> | null>(null);
   const [loading, setLoading] = useState(true);
   const [photoUrl, setPhotoUrl] = useState<string | null>(null);
+  const [confirmLogout, setConfirmLogout] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleLogoutConfirm = () => {
+    setConfirmLogout(false);
+    logout();
+  };
 
   useEffect(() => {
     const saved = localStorage.getItem("profilePhoto");
@@ -125,7 +135,7 @@ export default function Perfil() {
               </Link>
             )}
             <button
-              onClick={logout}
+              onClick={() => setConfirmLogout(true)}
               className="px-5 py-2.5 rounded-xl border-2 border-red-400 text-red-600 font-semibold hover:bg-red-50 transition"
             >
               Cerrar sesión
@@ -133,6 +143,15 @@ export default function Perfil() {
           </div>
         </div>
       </div>
+      <ConfirmDialog
+        open={confirmLogout}
+        title="¿Cerrar sesión?"
+        message="Tendrás que volver a iniciar sesión para acceder a tu cuenta."
+        confirmLabel="Cerrar sesión"
+        variant="danger"
+        onConfirm={handleLogoutConfirm}
+        onCancel={() => setConfirmLogout(false)}
+      />
     </div>
   );
 }
