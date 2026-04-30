@@ -7,6 +7,26 @@
   }
 }
 
+@keyframes testimonials-marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+.testimonials-track {
+  animation: testimonials-marquee 50s linear infinite;
+  will-change: transform;
+}
+
+.testimonials-track:hover {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .testimonials-track {
+    animation: none;
+  }
+}
+
 .dark {
   --background: hsl(0, 0%, 5%);
   --text: hsl(0, 0%, 95%);

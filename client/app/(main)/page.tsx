@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 import Hero from "@/modules/home/sections/Hero";
 import FeaturedProperties from "@/modules/home/sections/FeaturedProperties";
 import HowItWorks from "@/modules/home/sections/HowItWorks";
-import Testimonials from "@/modules/home/sections/Testimonials";
+import Testimonials from "@/modules/home/sections/TestimonialsCarousel";
 import CallToAction from "@/modules/home/sections/CallToAction";
 import Footer from "@/modules/home/sections/Footer";
 //import NavBar from "@/modules/home/sections/NavBar";
