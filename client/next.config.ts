@@ -13,6 +13,16 @@ const nextConfig: NextConfig = {
     ],
   },
 
+  async rewrites() {
+    const backend = process.env.BACKEND_PROXY_TARGET || "http://localhost:3001";
+    return [
+      {
+        source: "/api/:path*",
+        destination: `${backend}/api/:path*`,
+      },
+    ];
+  },
+
   async headers() {
     return [
       {

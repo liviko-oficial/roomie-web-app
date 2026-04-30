@@ -12,10 +12,8 @@ import PropertyExtraCharacteristics from "@/modules/home/components/propertyExtr
 import PropertyExtraSection from "@/modules/home/components/propertyExtraComponents/propertyExtraSection"
 
 const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL ||
-  (process.env.NODE_ENV === 'production'
-    ? (() => { throw new Error('NEXT_PUBLIC_API_URL no esta configurado en build de produccion.'); })()
-    : 'http://localhost:3001');
+  process.env.NEXT_PUBLIC_API_URL ??
+  (process.env.NODE_ENV === 'production' ? '' : 'http://localhost:3001');
 
 export default async function PropertyDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
