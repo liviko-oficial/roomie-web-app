@@ -117,13 +117,12 @@ const SearchPage = ({ onNavigate, initialFilters }) => {
               </div>
               <div className="flex space-x-4">
                 {propertiesToCompare.length > 0 && (
-                  <Link
-                    to="/compare"
+                  <button
                     onClick={handleGoToCompare}
                     className="flex items-center px-4 py-2 bg-black text-white rounded-md font-bold hover:bg-gray-800 transition duration-300"
                   >
                     Comparar ({propertiesToCompare.length})
-                  </Link>
+                  </button>
                 )}
                 <button
                   onClick={toggleMapView}
@@ -178,15 +177,23 @@ const SearchPage = ({ onNavigate, initialFilters }) => {
                       isComparing={propertiesToCompare.some(p => p.id === property.id)}
                     />
                   ))
-                ) : (
+                ) : !loading ? (
                   <div className="col-span-2 text-center py-16">
                     <svg className="w-16 h-16 mx-auto text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                     <h3 className="mt-4 text-xl font-bold text-black">No se encontraron propiedades</h3>
-                    <p className="mt-2 text-gray-600">Intenta ajustar tus filtros para ver más resultados.</p>
+                    <p className="mt-2 text-gray-600 max-w-md mx-auto">
+                      Prueba ajustar los filtros o ampliar la búsqueda para ver más resultados.
+                    </p>
+                    <button
+                      onClick={resetFilters}
+                      className="mt-6 px-6 py-3 bg-brand-accent text-brand-dark rounded-md font-bold hover:bg-yellow-400 transition shadow-md"
+                    >
+                      Limpiar filtros
+                    </button>
                   </div>
-                )}
+                ) : null}
               </div>
             )}
 
