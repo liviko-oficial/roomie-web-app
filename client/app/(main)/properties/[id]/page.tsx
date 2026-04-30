@@ -11,16 +11,21 @@ import { propertySummary } from "@/modules/home/mappers/propertySummary";
 import PropertyExtraCharacteristics from "@/modules/home/components/propertyExtraComponents/propertyExtraCharacteristics"
 import PropertyExtraSection from "@/modules/home/components/propertyExtraComponents/propertyExtraSection"
 
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL ??
-  (process.env.NODE_ENV === 'production' ? '' : 'http://localhost:3001');
+function resolveServerBaseUrl(): string {
+  const fromProxy = process.env.BACKEND_PROXY_TARGET;
+  if (fromProxy) return fromProxy;
+  const fromPublic = process.env.NEXT_PUBLIC_API_URL;
+  if (fromPublic) return fromPublic;
+  return 'http://localhost:3001';
+}
 
 export default async function PropertyDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+  const apiBase = resolveServerBaseUrl();
 
   let raw = null;
   try {
-    const res = await fetch(`${API_BASE_URL}/api/propiedades-renta/${id}`, { cache: 'no-store' });
+    const res = await fetch(`${apiBase}/api/propiedades-renta/${id}`, { cache: 'no-store' });
     if (res.ok) {
       const json = await res.json();
       raw = json.data ?? null;
