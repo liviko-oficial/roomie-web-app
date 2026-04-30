@@ -34,9 +34,25 @@ export const arrendadorService = {
     return response.data;
   },
 
-  // Actualizar perfil
-  updateProfile: async (id: string, userData: Record<string, unknown>) => {
+  // Actualizar perfil (campos del subdocumento profile)
+  updateProfile: async (id: string, profileData: Record<string, unknown>) => {
+    const response = await apiClient.put(`/api/arrendadores/${id}/perfil`, profileData);
+    return response.data;
+  },
+
+  // Actualizar datos generales del arrendador (nombre, telefono, etc.)
+  updateArrendador: async (id: string, userData: Record<string, unknown>) => {
     const response = await apiClient.put(`/api/arrendadores/${id}`, userData);
+    return response.data;
+  },
+
+  // Subir foto de perfil (multipart -> Cloudinary)
+  uploadProfilePhoto: async (id: string, file: File) => {
+    const fd = new FormData();
+    fd.append("photo", file);
+    const response = await apiClient.post(`/api/arrendadores/${id}/foto-perfil`, fd, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
     return response.data;
   },
 

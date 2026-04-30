@@ -301,6 +301,58 @@ export class ArrendadorController {
   }
 
   /**
+   * Subir foto de perfil
+   * - Recibe multipart con un archivo en campo "photo"
+   * - El middleware uploadProfilePhoto sube a Cloudinary
+   * - Guarda la URL en profile.profilePicture
+   */
+  static async uploadProfilePhoto(req: Request, res: Response) {
+    try {
+      const arrendadorId = req.params.id;
+      const file = (req as Request & { file?: Express.Multer.File & { path: string } }).file;
+
+      if (!file) {
+        return res.status(400).json({
+          success: false,
+          message: "No se recibio archivo (campo 'photo')"
+        });
+      }
+
+      const photoUrl = file.path;
+
+      const arrendador = await ArrendadorDB.findByIdAndUpdate(
+        arrendadorId,
+        {
+          $set: {
+            "profile.profilePicture": photoUrl,
+            updatedAt: new Date(),
+          }
+        },
+        { new: true, runValidators: false }
+      );
+
+      if (!arrendador) {
+        return res.status(404).json({
+          success: false,
+          message: "Arrendador no encontrado"
+        });
+      }
+
+      res.json({
+        success: true,
+        message: "Foto de perfil actualizada",
+        data: { profilePicture: photoUrl }
+      });
+    } catch (error: any) {
+      res.status(500).json({
+        success: false,
+        message: "Error al subir foto de perfil",
+        error: error.message
+      });
+    }
+  }
+
+  /**
    * Cambiar contraseña de arrendador
    * - Verifica la contraseña actual
    * - Hashea la nueva contraseña antes de guardarla

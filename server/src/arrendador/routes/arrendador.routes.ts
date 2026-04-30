@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { ArrendadorController } from "../controllers/arrendadorController";
 import { authenticateArrendador, checkOwnership } from "../middleware/auth.middleware";
+import { uploadProfilePhoto } from "../middleware/upload.middleware";
 
 const router = Router();
 
@@ -39,6 +40,9 @@ router.put("/:id", checkOwnership("id"), ArrendadorController.updateArrendador);
 
 // Actualizar perfil detallado (foto, datos personales, etc.)
 router.put("/:id/perfil", checkOwnership("id"), ArrendadorController.updateProfile);
+
+// Subir foto de perfil (multipart -> Cloudinary -> guarda URL)
+router.post("/:id/foto-perfil", checkOwnership("id"), uploadProfilePhoto, ArrendadorController.uploadProfilePhoto);
 
 // Cambiar contraseña del arrendador
 router.put("/:id/cambiar-password", checkOwnership("id"), ArrendadorController.changePassword);
