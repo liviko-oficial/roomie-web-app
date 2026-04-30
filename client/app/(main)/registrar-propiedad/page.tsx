@@ -4,6 +4,7 @@ import { useState, useMemo } from "react";
 import { registerProperty } from "@/lib/api/propertyRegister.service";
 import { useRouter } from "next/navigation";
 import AuthGuard from "@/modules/global_components/components/AuthGuard";
+import { useFormDraft, timeAgo } from "@/modules/registrar-propiedad/hooks/useFormDraft";
 
 const Icon = ({ children }: { children: React.ReactNode }) => (
   <span className="w-10 h-10 rounded-full bg-yellow-50 border border-brand-accent flex items-center justify-center">
@@ -369,6 +370,16 @@ function RegistrarPropiedad() {
     return icons[opt] || "";
   };
 
+  // Auto-save draft en localStorage (excluye Files)
+  const { hasDraft, lastSaved, restoreDraft, clearDraft } = useFormDraft(
+    data,
+    (draft) => {
+      // Hidratar respetando los Files (que no se serializaron)
+      setData((current) => ({ ...current, ...(draft as object) }));
+    },
+    { skipFirstSave: true }
+  );
+
   const handleFinish = async () => {
     try {
       setLoading(true);
@@ -432,6 +443,7 @@ function RegistrarPropiedad() {
       }
 
       await registerProperty(formData);
+      clearDraft();
       router.push("/dashboard/mis-propiedades");
     } catch {
       console.error("Error al registrar propiedad");
@@ -1317,6 +1329,34 @@ function RegistrarPropiedad() {
 
   return (
     <div className="min-h-screen bg-white">
+      {hasDraft && (
+        <div className="bg-yellow-50 border-b border-yellow-200">
+          <div className="max-w-3xl mx-auto px-4 py-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div>
+              <p className="text-sm font-semibold text-yellow-900">
+                Tienes un borrador guardado {timeAgo(lastSaved)}
+              </p>
+              <p className="text-xs text-yellow-800">¿Quieres continuarlo o empezar desde cero?</p>
+            </div>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={restoreDraft}
+                className="px-4 py-2 text-sm font-semibold bg-brand-accent text-brand-dark rounded-lg hover:bg-yellow-400 transition"
+              >
+                Continuar
+              </button>
+              <button
+                type="button"
+                onClick={clearDraft}
+                className="px-4 py-2 text-sm font-semibold border border-yellow-300 text-yellow-900 rounded-lg hover:bg-yellow-100 transition"
+              >
+                Empezar de nuevo
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       <div className="max-w-3xl mx-auto px-4 py-8">
         <div className="flex items-center justify-between gap-4 mb-6">
           <div>
@@ -1334,8 +1374,14 @@ function RegistrarPropiedad() {
         </div>
 
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-          <ProgressBar current={step} total={steps.length} />
-
+          <div className="flex items-center justify-between gap-3 mb-2">
+            <ProgressBar current={step} total={steps.length} />
+          </div>
+          {lastSaved && !hasDraft && (
+            <p className="text-xs text-gray-400 -mt-1 mb-2 text-right">
+              Guardado {timeAgo(lastSaved)}
+            </p>
+          )}
           <div className="mt-6">
             <div className="text-xl font-bold text-brand-dark mb-4">{current.title}</div>
             {current.subtitle && (
